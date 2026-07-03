@@ -6,6 +6,27 @@ window.SAMHO_SUPABASE = {
   codeColumn: "ITEM_CODE",
   selectColumns: ["*"],
   noteFields: ["machinePlace", "machinePlant", "machineLine", "machineSection"],
+  repairRecords: {
+    table: "repair_records",
+    insertMap: {
+      brokenAt: "reported_at",
+      repairStartedAt: "",
+      repairFinishedAt: "repaired_at",
+      itemCode: "machine_id",
+      issue: "issue",
+      other: "other_issue",
+      reason: "reason",
+      solve: "solve",
+      mechanic: "technician"
+    }
+  },
+  repairInfo: {
+    table: "repair_info",
+    dateColumn: "reported_at"
+  },
+  summaryReport: {
+    powerBiUrl: "https://app.powerbi.com/view?r=eyJrIjoiNTlhNTQ0MjktYzg2My00ZTNmLTk1YjktNWFmNmFhYmFhYTcxIiwidCI6IjA1OWEyZmU4LTA0NDgtNGIwMi04YTBlLWEyOTAwM2IxZmNlNyIsImMiOjEwfQ%3D%3D"
+  },
   fieldMap: {
     itemCode: "ITEM_CODE",
     machineName: ["NAME_EN", "name_en"],

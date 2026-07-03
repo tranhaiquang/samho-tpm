@@ -242,7 +242,6 @@ button {
 
 .mode-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 16px;
   padding: 7px;
@@ -250,6 +249,13 @@ button {
   border-radius: 5px;
   background: #fff;
   box-shadow: 0 5px 14px rgba(42, 50, 60, 0.06);
+}
+
+.mode-main,
+.mode-sub-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .mode {
@@ -282,11 +288,56 @@ button {
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.45), 0 7px 16px rgba(13, 124, 255, 0.26);
 }
 
+.sub-mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 31px;
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--blue);
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.sub-mode svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.6;
+}
+
+.sub-mode.green {
+  background: #419b72;
+}
+
+.sub-mode.yellow {
+  color: #1f252c;
+  background: #ffc334;
+}
+
+.sub-mode.red {
+  background: var(--red);
+}
+
+.sub-mode:hover {
+  filter: brightness(0.96);
+}
+
 .panel {
   padding: 8px 8px 11px;
   border-radius: 7px;
   background: #fff;
   box-shadow: var(--shadow);
+}
+
+.page-view {
+  display: none;
+}
+
+.page-view.active {
+  display: block;
 }
 
 .panel-title {
@@ -365,7 +416,8 @@ button {
   opacity: 0.72;
 }
 
-.search-status {
+.search-status,
+.save-status {
   grid-column: 2 / -1;
   min-height: 15px;
   margin: -5px 0 0;
@@ -374,15 +426,24 @@ button {
   font-weight: 700;
 }
 
-.search-status[data-type="success"] {
+.save-status {
+  grid-column: 1 / -1;
+  margin: -3px 0 0;
+  text-align: center;
+}
+
+.search-status[data-type="success"],
+.save-status[data-type="success"] {
   color: var(--green);
 }
 
-.search-status[data-type="warning"] {
+.search-status[data-type="warning"],
+.save-status[data-type="warning"] {
   color: #b07600;
 }
 
-.search-status[data-type="error"] {
+.search-status[data-type="error"],
+.save-status[data-type="error"] {
   color: var(--red);
 }
 
@@ -491,6 +552,230 @@ fieldset input {
   border: 0;
 }
 
+.info-page {
+  background: var(--page);
+}
+
+.info-shell {
+  padding: 10px;
+}
+
+.info-panel,
+.repair-card,
+.repair-empty {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(37, 44, 51, 0.05);
+}
+
+.info-panel {
+  padding: 8px;
+}
+
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.info-title svg {
+  width: 22px;
+  height: 22px;
+  color: #081425;
+  stroke-width: 3;
+}
+
+.info-title h1 {
+  margin: 0;
+  color: #07152a;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.info-filter {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) minmax(260px, 1fr);
+  gap: 44px;
+  align-items: end;
+  min-height: 100px;
+  padding: 20px 22px;
+  border: 1px solid #edf0f4;
+  border-radius: 8px;
+}
+
+.info-filter label {
+  display: grid;
+  gap: 8px;
+}
+
+.info-filter label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #101828;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.info-filter label svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+
+.info-filter input {
+  width: min(250px, 100%);
+  height: 32px;
+}
+
+.info-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--blue);
+  font-weight: 800;
+}
+
+.info-search svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 3;
+}
+
+.info-search:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.info-status {
+  grid-column: 1 / -1;
+  min-height: 16px;
+  margin: -26px 0 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.info-status[data-type="success"] {
+  color: var(--green);
+}
+
+.info-status[data-type="warning"] {
+  color: #b07600;
+}
+
+.info-status[data-type="error"] {
+  color: var(--red);
+}
+
+.repair-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.repair-card {
+  padding: 18px 16px 20px;
+}
+
+.repair-card-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: start;
+  gap: 20px;
+}
+
+.repair-card span,
+.repair-card-body span {
+  display: block;
+  color: #526174;
+  font-size: 11px;
+}
+
+.repair-card strong {
+  display: block;
+  margin-top: 7px;
+  color: #18304b;
+  font-size: 12px;
+}
+
+.repair-machine {
+  text-align: center;
+}
+
+.repair-machine strong {
+  margin: 0;
+  color: #203040;
+  font-size: 15px;
+}
+
+.repair-machine span {
+  margin-top: 5px;
+  color: #8a4b43;
+  font-size: 12px;
+}
+
+.repair-status {
+  text-align: right;
+}
+
+.repair-status strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  min-height: 22px;
+  margin-top: 7px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.repair-status strong.pending {
+  border: 1px solid #ffd56b;
+  color: #6a4a00;
+  background: #fff0b8;
+}
+
+.repair-status strong.done {
+  border: 1px solid #9ad8ad;
+  color: #17622d;
+  background: #dff5e5;
+}
+
+.repair-card-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 70px;
+  margin-top: 24px;
+}
+
+.repair-empty {
+  padding: 26px;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.pbi-frame {
+  display: block;
+  width: 100%;
+  height: min(760px, calc(100vh - 190px));
+  min-height: 520px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(37, 44, 51, 0.05);
+}
+
 body.sidebar-collapsed .sidebar {
   width: 58px;
 }
@@ -549,6 +834,17 @@ body.sidebar-collapsed .nav-group a {
     grid-template-columns: minmax(145px, 32%) 1fr;
     gap: 8px;
   }
+
+  .info-filter,
+  .repair-card-head,
+  .repair-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .repair-machine,
+  .repair-status {
+    text-align: left;
+  }
 }
 
 @media (max-width: 680px) {
@@ -560,7 +856,8 @@ body.sidebar-collapsed .nav-group a {
     display: none;
   }
 
-  .mode-tabs,
+  .mode-main,
+  .mode-sub-buttons,
   .time-grid,
   .note-grid {
     grid-template-columns: 1fr;
