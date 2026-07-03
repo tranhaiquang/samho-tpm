@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nhập sửa máy - VietNam SamHo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body class="minimal-page">
+    <main class="minimal-shell">
+      <header class="minimal-header">
+        <div>
+          <span>Maintenance</span>
+          <h1>Nhập sửa máy</h1>
+        </div>
+        <a class="minimal-back" href="repair_submit.html">
+          <i data-lucide="arrow-left"></i>
+          Back
+        </a>
+      </header>
+
+      <section class="minimal-card">
+        <div class="minimal-search">
+          <label>
+            <span>Item code</span>
+            <input id="codeSearch" type="text" placeholder="Nhập code hoặc scan" />
+          </label>
+          <button class="btn success" id="searchButton" type="button">
+            <i data-lucide="search"></i>
+            Search
+          </button>
+          <button class="btn primary scan-button" type="button">
+            <i data-lucide="scan-line"></i>
+            Scan
+          </button>
+          <p class="search-status" id="searchStatus" aria-live="polite"></p>
+        </div>
+
+        <form class="minimal-form" id="repairForm">
+          <section class="minimal-section">
+            <h2>Thông tin máy</h2>
+            <div class="minimal-machine">
+              <label>
+                <span>Item Code</span>
+                <input id="itemCode" type="text" disabled />
+              </label>
+              <label>
+                <span>Machine Name</span>
+                <input id="machineName" type="text" disabled />
+              </label>
+              <label>
+                <span>Specification</span>
+                <input id="specification" type="text" disabled />
+              </label>
+              <label>
+                <span>Made By</span>
+                <input id="madeBy" type="text" disabled />
+              </label>
+              <label>
+                <span>Status</span>
+                <input id="machineStatus" type="text" disabled />
+              </label>
+            </div>
+            <div class="note-grid minimal-note-grid" id="noteGrid"></div>
+          </section>
+
+          <section class="minimal-section">
+            <h2>Thời gian sửa chữa</h2>
+            <div class="minimal-time">
+              <label>
+                <span>Báo hư</span>
+                <input type="date" id="brokenDate" required />
+                <input type="time" id="brokenTime" required />
+              </label>
+              <label>
+                <span>Bắt đầu sửa</span>
+                <input type="date" id="startDate" required />
+                <input type="time" id="startTime" required />
+              </label>
+              <label>
+                <span>Sửa xong</span>
+                <input type="date" id="doneDate" required />
+                <input type="time" id="doneTime" required />
+              </label>
+            </div>
+          </section>
+
+          <section class="minimal-section">
+            <h2>Nội dung sửa chữa</h2>
+            <div class="minimal-details">
+              <label>
+                <span>Issue</span>
+                <select id="issue" required>
+                  <option value="Điện">Điện</option>
+                  <option value="Cơ khí">Cơ khí</option>
+                  <option value="Áp suất">Áp suất</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </label>
+              <label>
+                <span>Other</span>
+                <input id="other" type="text" />
+              </label>
+              <label>
+                <span>Reason</span>
+                <input id="reason" type="text" required />
+              </label>
+              <label>
+                <span>Solve</span>
+                <select id="solve" required>
+                  <option value="SỬA CHỮA">SỬA CHỮA</option>
+                  <option value="THAY THẾ">THAY THẾ</option>
+                  <option value="KIỂM TRA">KIỂM TRA</option>
+                </select>
+              </label>
+              <label>
+                <span>Mechanic</span>
+                <input id="mechanic" type="text" value="lean.huy" required />
+              </label>
+            </div>
+          </section>
+
+          <button class="minimal-save" id="saveButton" type="submit">
+            <i data-lucide="save"></i>
+            SAVE
+          </button>
+          <p class="save-status" id="saveStatus" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

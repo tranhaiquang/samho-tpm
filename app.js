@@ -66,6 +66,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const setDateTimeInputs = (value, dateId, timeId) => {
+    const dateInput = document.getElementById(dateId);
+    const timeInput = document.getElementById(timeId);
+    if (!dateInput || !timeInput || !value) return;
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return;
+
+    dateInput.value = date.toISOString().slice(0, 10);
+    timeInput.value = date.toTimeString().slice(0, 5);
+  };
+
   renderNoteGrid();
 
   const fetchMachineByCode = async (code) => {
@@ -183,12 +195,128 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  const ensureScanModal = () => {
+    let modal = document.getElementById("scanModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.className = "scan-modal";
+    modal.id = "scanModal";
+    modal.innerHTML = `
+      <div class="scan-backdrop" data-close-scan></div>
+      <section class="scan-dialog">
+        <header>
+          <div>
+            <span>Barcode scanner</span>
+            <h2>Scan machine code</h2>
+          </div>
+          <button class="scan-close" type="button" data-close-scan aria-label="Close scanner">
+            <i data-lucide="x"></i>
+          </button>
+        </header>
+        <div class="scan-video-wrap">
+          <video id="scanVideo" autoplay playsinline muted></video>
+          <div class="scan-frame"></div>
+        </div>
+        <p class="scan-status" id="scanStatus">Point the camera at a barcode.</p>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+    modal.querySelectorAll("[data-close-scan]").forEach((button) => {
+      button.addEventListener("click", stopScanner);
+    });
+    if (window.lucide) window.lucide.createIcons();
+    return modal;
+  };
+
+  let scanStream = null;
+  let scanTimer = null;
+  let barcodeDetector = null;
+
+  const stopScanner = () => {
+    const modal = document.getElementById("scanModal");
+    modal?.classList.remove("active");
+
+    if (scanTimer) {
+      window.clearInterval(scanTimer);
+      scanTimer = null;
+    }
+
+    scanStream?.getTracks().forEach((track) => track.stop());
+    scanStream = null;
+  };
+
+  const setScanStatus = (message, type = "idle") => {
+    const status = document.getElementById("scanStatus");
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.type = type;
+  };
+
+  const startScanner = async () => {
+    const codeInput = document.getElementById("codeSearch");
+    const modal = ensureScanModal();
+    const video = modal.querySelector("#scanVideo");
+
+    if (!codeInput) return;
+
+    if (!("BarcodeDetector" in window)) {
+      setSearchStatus("Barcode scanning is not supported by this browser.", "warning");
+      return;
+    }
+
+    try {
+      modal.classList.add("active");
+      setScanStatus("Opening camera...", "loading");
+
+      barcodeDetector =
+        barcodeDetector ||
+        new window.BarcodeDetector({
+          formats: ["code_128", "code_39", "code_93", "codabar", "ean_13", "ean_8", "itf", "qr_code", "upc_a", "upc_e"]
+        });
+
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      video.srcObject = scanStream;
+      await video.play();
+      setScanStatus("Point the camera at a barcode.", "idle");
+
+      scanTimer = window.setInterval(async () => {
+        if (!video.videoWidth) return;
+
+        const codes = await barcodeDetector.detect(video);
+        if (!codes.length) return;
+
+        const value = codes[0].rawValue?.trim();
+        if (!value) return;
+
+        codeInput.value = value.toUpperCase();
+        setSearchStatus(`Scanned ${codeInput.value}.`, "success");
+        stopScanner();
+        runSearch();
+      }, 450);
+    } catch (error) {
+      stopScanner();
+      setSearchStatus(`Camera scan failed: ${error.message}`, "error");
+    }
+  };
+
+  document.querySelectorAll(".scan-button").forEach((button) => {
+    button.addEventListener("click", startScanner);
+  });
+
   const syncOtherInputState = () => {
     const issue = document.getElementById("issue");
     const other = document.getElementById("other");
     if (!issue || !other) return;
 
-    const shouldEnableOther = issue.selectedIndex === 0;
+    const selectedText = issue.options[issue.selectedIndex]?.textContent || "";
+    const selectedValue = issue.value || selectedText;
+    const normalizedIssue = selectedValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const shouldEnableOther = normalizedIssue.includes("khac");
     other.disabled = !shouldEnableOther;
     other.required = shouldEnableOther;
     if (!shouldEnableOther) other.value = "";
@@ -224,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
     requiredFields[0] = ["brokenAt", "Bao hu"];
     requiredFields[1] = ["repairStartedAt", "Bat dau sua"];
     requiredFields[2] = ["repairFinishedAt", "Sua xong"];
-    if (document.getElementById("issue")?.selectedIndex === 0) requiredFields.push(["other", "Other"]);
+    if (document.getElementById("other")?.required) requiredFields.push(["other", "Other"]);
 
     return requiredFields
       .filter(([field]) => !formData[field])
@@ -383,6 +511,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".mode").forEach((button) => {
     button.addEventListener("click", () => {
+      if (button.dataset.mode === "RM") {
+        window.location.href = "new.html";
+        return;
+      }
+
       const isAlreadyActive = button.classList.contains("active");
       const areSubButtonsVisible = !!document.querySelector("#modeSubButtons .sub-mode");
 

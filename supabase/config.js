@@ -22,7 +22,18 @@ window.SAMHO_SUPABASE = {
   },
   repairInfo: {
     table: "repair_info",
-    dateColumn: "reported_at"
+    dateColumn: "reported_at",
+    idColumn: "id",
+    updateMap: {
+      reportedAt: "reported_at",
+      repairStartedAt: "",
+      repairedAt: "repaired_at",
+      issue: "issue",
+      other: "other_issue",
+      reason: "reason",
+      solve: "solve",
+      technician: "technician"
+    }
   },
   summaryReport: {
     powerBiUrl: "https://app.powerbi.com/view?r=eyJrIjoiNTlhNTQ0MjktYzg2My00ZTNmLTk1YjktNWFmNmFhYmFhYTcxIiwidCI6IjA1OWEyZmU4LTA0NDgtNGIwMi04YTBlLWEyOTAwM2IxZmNlNyIsImMiOjEwfQ%3D%3D"
