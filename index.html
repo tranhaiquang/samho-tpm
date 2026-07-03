@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VietNam SamHo - Maintenance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <strong>VietNam SamHo</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar">LH</div>
+        <div>
+          <strong>lean.huy / AD</strong>
+          <button class="logout" type="button">Logout</button>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head" type="button">
+            <i data-lucide="gauge"></i>
+            Atom Cutting
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><span></span>Home Page</a>
+          <a href="#"><span></span>Activity Page</a>
+          <a href="#"><span></span>KanBan e-Board</a>
+          <a href="#"><span></span>Inventory Parts</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button">
+            <i data-lucide="clipboard-check"></i>
+            Maintenance
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a class="current" href="#"><span></span>TPM</a>
+          <a href="#"><span></span>DS Inventory</a>
+          <a href="#"><span></span>DeepWell Inventory</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head" type="button">
+            <i data-lucide="factory" ></i>
+            PLACE
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><span></span>RealTime Production</a>
+        </section>
+      </nav>
+    </aside>
+
+    <div class="shell">
+      <header class="topbar">
+        <button class="icon-button" id="menuToggle" aria-label="Toggle sidebar" type="button">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="crumbs">
+          <strong>Maintenance</strong>
+          <span><a href="#">Home</a> / Maintenance</span>
+        </div>
+        <button class="icon-button" aria-label="Open apps" type="button">
+          <i data-lucide="grid-2x2"></i>
+        </button>
+      </header>
+
+      <main class="content">
+        <div class="mode-tabs" role="tablist" aria-label="Maintenance type">
+          <button class="mode active" data-mode="BM" type="button"><i data-lucide="wrench"></i>BM</button>
+          <button class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check"></i>RM</button>
+          <button class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
+          <button class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
+        </div>
+
+        <section class="panel">
+          <div class="panel-title">
+            <i data-lucide="plus"></i>
+            <h1>Nhập máy hư</h1>
+          </div>
+
+          <div class="action-row">
+            <label class="scan-field">
+              <span class="sr-only">Nhập code hoặc scan</span>
+              <input id="codeSearch" type="text" placeholder="NHẬP CODE HOẶC SCAN" />
+            </label>
+            <button class="btn success" id="searchButton" type="button"><i data-lucide="search"></i>Search</button>
+            <button class="btn primary" type="button"><i data-lucide="scan-line"></i>Scan</button>
+            <button class="btn muted" type="button"><i data-lucide="arrow-left"></i>Back</button>
+            <p class="search-status" id="searchStatus" aria-live="polite"></p>
+          </div>
+
+          <form class="maintenance-form">
+            <div class="machine-grid">
+              <label class="field">
+                <span>Item Code</span>
+                <input id="itemCode" type="text" disabled />
+              </label>
+              <label class="field">
+                <span>Machine Name</span>
+                <input id="machineName" type="text" disabled />
+              </label>
+              <label class="field">
+                <span>Specification</span>
+                <input id="specification" type="text" disabled />
+              </label>
+              <label class="field">
+                <span>Made By</span>
+                <input id="madeBy" type="text" disabled />  
+              </label>
+              <label class="field">
+                <span>Status</span>
+                <input id="machineStatus" type="text" disabled />
+              </label>
+            </div>
+
+            <div class="note-grid" id="noteGrid"></div>
+
+            <div class="time-grid">
+              <fieldset>
+                <legend>Báo hư</legend>
+                <input type="date" id="brokenDate" />
+                <input type="time" id="brokenTime" />
+              </fieldset>
+              <fieldset>
+                <legend>Bắt đầu sửa</legend>
+                <input type="date" id="startDate" />
+                <input type="time" id="startTime" />
+              </fieldset>
+              <fieldset>
+                <legend>Sửa xong</legend>
+                <input type="date" id="doneDate" />
+                <input type="time" id="doneTime" />
+              </fieldset>
+            </div>
+
+            <div class="detail-grid">
+              <label class="field">
+                <span>Vấn Đề / Issue</span>
+                <select>
+                  <option>Khác</option>
+                  <option>Điện</option>
+                  <option>Cơ khí</option>
+                  <option>Áp suất</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Khác / Other</span>
+                <input type="text" />
+              </label>
+              <label class="field">
+                <span>Nguyên nhân / Reason</span>
+                <input type="text" />
+              </label>
+              <label class="field">
+                <span>Cách kh.phục / Solve</span>
+                <select>
+                  <option>SỬA CHỮA</option>
+                  <option>THAY THẾ</option>
+                  <option>KIỂM TRA</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Người sửa chữa / Mechanic</span>
+                <input type="text" value="lean.huy" />
+              </label>
+            </div>
+
+            <button class="save" type="button"><i data-lucide="save"></i>SAVE</button>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
