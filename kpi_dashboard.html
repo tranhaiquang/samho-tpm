@@ -7,11 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
-    <script src="auth.js" defer></script>
-    <script src="kpi_dashboard.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/kpi_dashboard.js" defer></script>
   </head>
   <body class="dashboard-app kpi-page">
     <aside class="sidebar" aria-label="Primary navigation">
@@ -197,28 +198,5 @@
       </main>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        if (window.lucide) window.lucide.createIcons();
-
-        document.querySelector("#menuToggle")?.addEventListener("click", () => {
-          if (window.matchMedia("(max-width: 980px)").matches) {
-            document.body.classList.toggle("sidebar-open");
-            return;
-          }
-          document.body.classList.toggle("sidebar-collapsed");
-        });
-
-        document.querySelectorAll(".nav-head").forEach((button) => {
-          button.addEventListener("click", () => {
-            const group = button.closest(".nav-group");
-            if (!group) return;
-
-            const isCollapsed = group.classList.toggle("collapsed");
-            button.setAttribute("aria-expanded", String(!isCollapsed));
-          });
-        });
-      });
-    </script>
   </body>
 </html>
