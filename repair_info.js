@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const response = await fetch(url, {
       headers: {
         apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`
+        Authorization: `Bearer ${config.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders()
       }
     });
 
@@ -131,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: {
         apikey: config.anonKey,
         Authorization: `Bearer ${config.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders(),
         "Content-Type": "application/json",
         Prefer: "return=minimal"
       },

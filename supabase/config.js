@@ -38,6 +38,20 @@ window.SAMHO_SUPABASE = {
   summaryReport: {
     powerBiUrl: "https://app.powerbi.com/view?r=eyJrIjoiNTlhNTQ0MjktYzg2My00ZTNmLTk1YjktNWFmNmFhYmFhYTcxIiwidCI6IjA1OWEyZmU4LTA0NDgtNGIwMi04YTBlLWEyOTAwM2IxZmNlNyIsImMiOjEwfQ%3D%3D"
   },
+  downtime: {
+    table: "downtime",
+    fieldMap: {
+      itemCode: "item_code",
+      machineName: "name_en",
+      section: "section",
+      plant: "place2",
+      totalDowntime: "total_downtime",
+      month: "month",
+      errorCount: "",
+      mttr: "",
+      mtbf: ""
+    }
+  },
   fieldMap: {
     itemCode: "ITEM_CODE",
     machineName: ["NAME_EN", "name_en"],

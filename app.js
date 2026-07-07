@@ -95,7 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.table}?${params}`, {
         headers: {
           apikey: supabaseConfig.anonKey,
-          Authorization: `Bearer ${supabaseConfig.anonKey}`
+          Authorization: `Bearer ${supabaseConfig.anonKey}`,
+          ...window.SAMHO_AUTH.authHeaders()
         }
       });
 
@@ -123,7 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.table}?${params}`, {
       headers: {
         apikey: supabaseConfig.anonKey,
-        Authorization: `Bearer ${supabaseConfig.anonKey}`
+        Authorization: `Bearer ${supabaseConfig.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders()
       }
     });
 
@@ -145,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: {
         apikey: supabaseConfig.anonKey,
         Authorization: `Bearer ${supabaseConfig.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders(),
         Prefer: "count=exact"
       }
     });
@@ -374,6 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: {
         apikey: supabaseConfig.anonKey,
         Authorization: `Bearer ${supabaseConfig.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders(),
         "Content-Type": "application/json",
         Prefer: "return=minimal"
       },
@@ -512,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".mode").forEach((button) => {
     button.addEventListener("click", () => {
       if (button.dataset.mode === "RM") {
-        window.location.href = "new.html";
+        window.location.href = "repair_submit.html";
         return;
       }
 

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KPI Monitoring Dashboard - VietNam SamHo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="auth.js" defer></script>
+    <script src="kpi_dashboard.js" defer></script>
+  </head>
+  <body class="dashboard-app kpi-page">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <strong>VietNam SamHo</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar">JL</div>
+        <div>
+          <strong>James Lam</strong>
+          <span>Ast. Manager</span>
+          <button class="logout" type="button">Logout</button>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button">
+            <i data-lucide="bar-chart-3"></i>
+            Maintenance
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="repair_submit.html"><span></span>RM</a>
+          <a class="current" href="kpi_dashboard.html"><span></span>KPI Dashboard</a>
+          <a href="#"><span></span>Spare Part Management</a>
+        </section>
+      </nav>
+    </aside>
+
+    <div class="shell">
+      <header class="topbar">
+        <button class="icon-button" id="menuToggle" aria-label="Toggle sidebar" type="button">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="topnav">
+          <div>
+            <span>VietNam SamHo</span>
+            <strong>KPI Monitoring</strong>
+          </div>
+        </div>
+        <span></span>
+      </header>
+
+      <main class="content kpi-content">
+        <section class="kpi-monitor-head">
+          <div>
+            <h1>KPI Monitoring Dashboard</h1>
+            <p id="kpiSubtitle">Real-time downtime analysis</p>
+          </div>
+          <div class="kpi-head-actions">
+            <div class="month-filter">
+              <button class="quarter-pill" id="monthFilterButton" type="button" aria-expanded="false" aria-controls="monthFilterMenu">
+                <i data-lucide="calendar-days"></i>
+                <span id="monthFilterLabel">Loading...</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div class="month-filter-menu" id="monthFilterMenu" hidden>
+                <button type="button" disabled>Loading months...</button>
+              </div>
+            </div>
+            <div class="user-chip">
+              <div class="avatar">JL</div>
+              <div>
+                <strong>James Lam</strong>
+                <span>Ast. Manager</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="kpi-summary-grid" aria-label="KPI summary">
+          <article class="monitor-kpi-card blue">
+            <i data-lucide="clock-3"></i>
+            <div>
+              <span>Total Downtime</span>
+              <strong id="totalDowntime">--</strong>
+              <small>minutes</small>
+            </div>
+            <em class="positive" id="downtimePeriod">Loading</em>
+          </article>
+          <article class="monitor-kpi-card green">
+            <i data-lucide="check"></i>
+            <div>
+              <span>Avg MTTR</span>
+              <strong><span id="avgMttr">--</span> <small>min</small></strong>
+              <small>Mean Time to Repair</small>
+            </div>
+            <em class="positive" id="mttrStatus">Calculated</em>
+          </article>
+          <article class="monitor-kpi-card purple">
+            <i data-lucide="shield-check"></i>
+            <div>
+              <span>Avg MTBF</span>
+              <strong><span id="avgMtbf">--</span> <small>min</small></strong>
+              <small>Mean Time Between Failures</small>
+            </div>
+            <em class="positive" id="mtbfStatus">Calculated</em>
+          </article>
+          <article class="monitor-kpi-card orange">
+            <i data-lucide="triangle-alert"></i>
+            <div>
+              <span>Total Errors</span>
+              <strong id="totalErrors">--</strong>
+              <small>Error Events</small>
+            </div>
+            <em class="negative" id="errorStatus">Loading</em>
+          </article>
+        </section>
+
+        <p class="kpi-data-status" id="kpiDataStatus" aria-live="polite">Loading downtime data...</p>
+
+        <section class="kpi-board-grid">
+          <article class="kpi-panel plant-downtime">
+            <header>
+              <h2>Total Downtime by Plant</h2>
+            </header>
+            <div class="cluster-chart" aria-label="Total downtime by plant">
+              <div class="axis">
+                <span>500k</span>
+                <span>400k</span>
+                <span>300k</span>
+                <span>200k</span>
+                <span>100k</span>
+                <span>0</span>
+              </div>
+              <div class="cluster-bars" id="monthlyDowntimeChart"></div>
+            </div>
+            <footer class="chart-legend" id="monthlyLegend">
+              <span><b class="jan"></b>Jan</span>
+              <span><b class="feb"></b>Feb</span>
+              <span><b class="mar"></b>Mar</span>
+            </footer>
+          </article>
+
+          <article class="kpi-panel ranking-panel">
+            <header>
+              <h2>Top 3 Areas by Downtime</h2>
+            </header>
+            <div class="rank-list" id="sectionRankList"></div>
+          </article>
+
+          <article class="kpi-panel error-type-panel">
+            <header>
+              <h2>Top 3 Downtime Error Counts by Machine Type</h2>
+            </header>
+            <div class="single-bars" id="machineDowntimeBars" aria-label="Machine downtime totals"></div>
+            <footer class="error-footer">
+              <strong id="machineFooterTotal">Total Downtime: --</strong>
+              <span id="machineFooterCount">-- machines</span>
+            </footer>
+          </article>
+
+          <article class="kpi-panel trend-panel">
+            <header>
+              <h2>MTTR &amp; MTBF Trends by Machine</h2>
+            </header>
+            <div class="combo-chart">
+              <div class="combo-bars" id="monthlyTrendBars"></div>
+              <svg class="combo-lines" id="comboLines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+            </div>
+            <footer class="chart-legend">
+              <span><b class="jan"></b>Downtime (min)</span>
+              <span><b class="mar"></b>MTBF (min)</span>
+              <span><b class="feb"></b>MTTR (min)</span>
+            </footer>
+          </article>
+        </section>
+
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide) window.lucide.createIcons();
+
+        document.querySelector("#menuToggle")?.addEventListener("click", () => {
+          if (window.matchMedia("(max-width: 980px)").matches) {
+            document.body.classList.toggle("sidebar-open");
+            return;
+          }
+          document.body.classList.toggle("sidebar-collapsed");
+        });
+      });
+    </script>
+  </body>
+</html>

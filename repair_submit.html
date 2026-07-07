@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="styles.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
+    <script src="auth.js" defer></script>
     <script src="app.js" defer></script>
     <script src="repair_info.js" defer></script>
   </head>
-  <body>
+  <body class="dashboard-app repair-submit-page">
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand">
         <div class="brand-mark">S</div>
@@ -33,35 +34,14 @@
 
       <nav class="nav-list">
         <section class="nav-group active">
-          <button class="nav-head" type="button">
-            <i data-lucide="gauge"></i>
-            Atom Cutting
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <a href="#"><span></span>Home Page</a>
-          <a href="#"><span></span>Activity Page</a>
-          <a href="#"><span></span>KanBan e-Board</a>
-          <a href="#"><span></span>Inventory Parts</a>
-        </section>
-
-        <section class="nav-group active">
           <button class="nav-head selected" type="button">
-            <i data-lucide="clipboard-check"></i>
+            <i data-lucide="bar-chart-3"></i>
             Maintenance
             <i data-lucide="chevron-down"></i>
           </button>
-          <a class="current" href="#"><span></span>TPM</a>
-          <a href="#"><span></span>DS Inventory</a>
-          <a href="#"><span></span>DeepWell Inventory</a>
-        </section>
-
-        <section class="nav-group active">
-          <button class="nav-head" type="button">
-            <i data-lucide="factory"></i>
-            PLACE
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <a href="#"><span></span>RealTime Production</a>
+          <a class="current" href="repair_submit.html"><span></span>RM</a>
+          <a href="kpi_dashboard.html"><span></span>KPI Dashboard</a>
+          <a href="#"><span></span>Spare Part Management</a>
         </section>
       </nav>
     </aside>
@@ -71,20 +51,20 @@
         <button class="icon-button" id="menuToggle" aria-label="Toggle sidebar" type="button">
           <i data-lucide="menu"></i>
         </button>
-        <div class="crumbs">
-          <strong>Maintenance</strong>
-          <span><a href="#">Home</a> / Maintenance</span>
+        <div class="topnav">
+          <div>
+            <span>VietNam SamHo</span>
+            <strong>Maintenance Operations</strong>
+          </div>
         </div>
-        <button class="icon-button" aria-label="Open apps" type="button">
-          <i data-lucide="grid-2x2"></i>
-        </button>
+        <span></span>
       </header>
 
       <main class="content">
         <div class="mode-tabs" aria-label="Maintenance type">
           <div class="mode-main" role="tablist">
             <button class="mode active" data-mode="BM" type="button"><i data-lucide="wrench"></i>BM</button>
-            <button class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check"></i>RM</button>
+            <button class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check" d></i>RM</button>
             <button class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
             <button class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
           </div>

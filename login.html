@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login - VietNam SamHo Maintenance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="auth.js" defer></script>
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-brand-panel">
+        <div class="login-logo">
+          <div class="brand-mark">S</div>
+          <div>
+            <strong>VietNam SamHo</strong>
+            <span>Maintenance Operations</span>
+          </div>
+        </div>
+        <div>
+          <span class="eyebrow">Industrial TPM system</span>
+          <h1>Sign in to monitor, submit, and resolve maintenance work.</h1>
+          <p>Secure access for repair submission, machine status review, and production maintenance analytics.</p>
+        </div>
+        <div class="login-metrics">
+          <div><strong>24</strong><span>Open requests</span></div>
+          <div><strong>96%</strong><span>Machine availability</span></div>
+          <div><strong>38m</strong><span>Avg. response</span></div>
+        </div>
+      </section>
+
+      <section class="login-card">
+        <div class="login-card-head">
+          <span>Welcome back</span>
+          <h2>Login</h2>
+          <p>Use your employee ID and password to continue.</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <label>
+            <span>User ID</span>
+            <input id="loginUserId" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="loginPassword" type="password" autocomplete="current-password" required />
+          </label>
+          <button id="loginButton" type="submit">
+            <i data-lucide="log-in"></i>
+            Sign in
+          </button>
+          <p id="loginStatus" class="login-status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide) window.lucide.createIcons();
+
+        const session = window.SAMHO_AUTH.getSession();
+        if (window.SAMHO_AUTH.isSessionValid(session)) {
+          location.replace(window.SAMHO_AUTH.homePage);
+          return;
+        }
+
+        const form = document.getElementById("loginForm");
+        const button = document.getElementById("loginButton");
+        const status = document.getElementById("loginStatus");
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          button.disabled = true;
+          status.textContent = "Signing in...";
+          status.dataset.type = "loading";
+
+          try {
+            await window.SAMHO_AUTH.login(
+              document.getElementById("loginUserId").value.trim(),
+              document.getElementById("loginPassword").value
+            );
+            status.textContent = "Login successful. Redirecting...";
+            status.dataset.type = "success";
+            location.replace(window.SAMHO_AUTH.homePage);
+          } catch (error) {
+            status.textContent = error.message;
+            status.dataset.type = "error";
+          } finally {
+            button.disabled = false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
