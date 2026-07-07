@@ -21,13 +21,13 @@ window.SAMHO_SUPABASE = {
     }
   },
   repairInfo: {
-    table: "repair_info",
+    table: "repair_records",
     dateColumn: "reported_at",
     idColumn: "id",
     updateMap: {
       reportedAt: "reported_at",
-      repairStartedAt: "",
-      repairedAt: "repaired_at",
+      repairStartedAt: "repaired_at",
+      repairedAt: "repair_completed_at",
       issue: "issue",
       other: "other_issue",
       reason: "reason",
