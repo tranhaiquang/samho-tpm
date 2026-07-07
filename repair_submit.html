@@ -34,14 +34,23 @@
 
       <nav class="nav-list">
         <section class="nav-group active">
-          <button class="nav-head selected" type="button">
-            <i data-lucide="bar-chart-3"></i>
+          <button class="nav-head selected" type="button" aria-expanded="true">
+            <i data-lucide="wrench"></i>
             Maintenance
             <i data-lucide="chevron-down"></i>
           </button>
-          <a class="current" href="repair_submit.html"><span></span>RM</a>
-          <a href="kpi_dashboard.html"><span></span>KPI Dashboard</a>
-          <a href="#"><span></span>Spare Part Management</a>
+          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>RM</a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="package-search"></i>
+            Spare Part Management
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><i data-lucide="factory"></i>Machine</a>
+          <a href="#"><i data-lucide="boxes"></i>Spare part</a>
         </section>
       </nav>
     </aside>
@@ -64,9 +73,9 @@
         <div class="mode-tabs" aria-label="Maintenance type">
           <div class="mode-main" role="tablist">
             <button class="mode active" data-mode="BM" type="button"><i data-lucide="wrench"></i>BM</button>
-            <button class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check" d></i>RM</button>
-            <button class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
-            <button class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
+            <button disabled class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check"></i>RM</button>
+            <button disabled class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
+            <button disabled class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
           </div>
           <div class="mode-sub-buttons" id="modeSubButtons" aria-label="Maintenance actions"></div>
         </div>
@@ -160,7 +169,7 @@
               </label>
               <label class="field">
                 <span>Người sửa chữa / Mechanic</span>
-                <input id="mechanic" type="text" value="lean.huy" required />
+                <input id="mechanic" type="text"  required />
               </label>
             </div>
 

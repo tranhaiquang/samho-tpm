@@ -161,6 +161,18 @@ button {
   stroke-width: 2.6;
 }
 
+.nav-head svg:last-child {
+  transition: transform 160ms ease;
+}
+
+.nav-group.collapsed .nav-head svg:last-child {
+  transform: rotate(-90deg);
+}
+
+.nav-group.collapsed a {
+  display: none;
+}
+
 .nav-group a {
   display: flex;
   align-items: center;
@@ -172,11 +184,12 @@ button {
   font-size: 10px;
 }
 
-.nav-group a span {
+.nav-group a i,
+.nav-group a svg {
   width: 12px;
   height: 12px;
-  border: 2px solid #dbe3eb;
-  border-radius: 50%;
+  flex: 0 0 auto;
+  stroke-width: 2.5;
 }
 
 .nav-group a.current,
@@ -1467,13 +1480,15 @@ body.sidebar-collapsed .nav-group a {
 
 .dashboard-app .nav-group a {
   height: 31px;
-  padding-left: 31px;
+  padding: 0 12px 0 16px;
   color: #667085;
   font-size: 12px;
 }
 
-.dashboard-app .nav-group a span {
-  border-color: #b9c4d3;
+.dashboard-app .nav-group a i,
+.dashboard-app .nav-group a svg {
+  width: 15px;
+  height: 15px;
 }
 
 .dashboard-app .nav-group a.current,
