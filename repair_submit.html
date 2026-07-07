@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VietNam SamHo - Maintenance</title>
+    <title>Vietnam Samho - Maintenance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -16,20 +16,16 @@
     <script src="assets/js/repair_info.js" defer></script>
   </head>
   <body class="dashboard-app repair-submit-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand">
-        <div class="brand-mark">S</div>
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>VietNam SamHo</strong>
           <span>Factory System</span>
-        </div>
-      </div>
-
-      <div class="profile">
-        <div class="avatar">LH</div>
-        <div>
-          <strong>lean.huy / AD</strong>
-          <button class="logout" type="button">Logout</button>
         </div>
       </div>
 
@@ -54,22 +50,16 @@
           <a href="#"><i data-lucide="boxes"></i>Spare part</a>
         </section>
       </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>
+          Logout
+        </button>
+      </div>
     </aside>
 
     <div class="shell">
-      <header class="topbar">
-        <button class="icon-button" id="menuToggle" aria-label="Toggle sidebar" type="button">
-          <i data-lucide="menu"></i>
-        </button>
-        <div class="topnav">
-          <div>
-            <span>VietNam SamHo</span>
-            <strong>Maintenance Operations</strong>
-          </div>
-        </div>
-        <span></span>
-      </header>
-
       <main class="content">
         <div class="mode-tabs" aria-label="Maintenance type">
           <div class="mode-main" role="tablist">

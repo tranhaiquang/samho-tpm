@@ -10,8 +10,8 @@ window.SAMHO_SUPABASE = {
     table: "repair_records",
     insertMap: {
       brokenAt: "reported_at",
-      repairStartedAt: "",
-      repairFinishedAt: "repaired_at",
+      repairStartedAt: "repaired_at",
+      repairFinishedAt: "repair_completed_at",
       itemCode: "machine_id",
       issue: "issue",
       other: "other_issue",

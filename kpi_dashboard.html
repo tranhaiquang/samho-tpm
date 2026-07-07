@@ -15,21 +15,16 @@
     <script src="assets/js/kpi_dashboard.js" defer></script>
   </head>
   <body class="dashboard-app kpi-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand">
-        <div class="brand-mark">S</div>
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>VietNam SamHo</strong>
           <span>Factory System</span>
-        </div>
-      </div>
-
-      <div class="profile">
-        <div class="avatar">JL</div>
-        <div>
-          <strong>James Lam</strong>
-          <span>Ast. Manager</span>
-          <button class="logout" type="button">Logout</button>
         </div>
       </div>
 
@@ -54,22 +49,16 @@
           <a href="#"><i data-lucide="boxes"></i>Spare part</a>
         </section>
       </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>
+          Logout
+        </button>
+      </div>
     </aside>
 
     <div class="shell">
-      <header class="topbar">
-        <button class="icon-button" id="menuToggle" aria-label="Toggle sidebar" type="button">
-          <i data-lucide="menu"></i>
-        </button>
-        <div class="topnav">
-          <div>
-            <span>VietNam SamHo</span>
-            <strong>KPI Monitoring</strong>
-          </div>
-        </div>
-        <span></span>
-      </header>
-
       <main class="content kpi-content">
         <section class="kpi-monitor-head">
           <div>
@@ -87,13 +76,7 @@
                 <button type="button" disabled>Loading months...</button>
               </div>
             </div>
-            <div class="user-chip">
-              <div class="avatar">JL</div>
-              <div>
-                <strong>James Lam</strong>
-                <span>Ast. Manager</span>
-              </div>
-            </div>
+
           </div>
         </section>
 
