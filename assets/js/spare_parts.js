@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!filterForm || !plantSelect || !searchInput || !refreshButton || !addButton || !status || !list) return;
 
+  const pageSize = 10;
   let spareRows = [];
+  let currentPage = 1;
   let activeRecord = null;
 
   const setStatus = (message, type = "idle") => {
@@ -293,8 +295,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("spareBelowSafety").textContent = belowSafety.toLocaleString();
   };
 
-  const renderRows = () => {
-    const rows = getFilteredRows();
+  const renderRows = (page = 1) => {
+    const rows = getFilteredRows().sort((a, b) => {
+      const plantCompare = text(readField(a, "plant"), "Unknown plant").localeCompare(text(readField(b, "plant"), "Unknown plant"));
+      if (plantCompare !== 0) return plantCompare;
+      return text(readField(a, "itemCode"), "").localeCompare(text(readField(b, "itemCode"), ""));
+    });
     renderStats(rows);
     list.innerHTML = "";
 
@@ -303,6 +309,11 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus(`No spare parts found${spareConfig.activeTable ? ` in ${spareConfig.activeTable}` : ""}.`, "warning");
       return;
     }
+
+    const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+    currentPage = Math.min(Math.max(page, 1), totalPages);
+    const pageStart = (currentPage - 1) * pageSize;
+    const pageRows = rows.slice(pageStart, pageStart + pageSize);
 
     const tableWrap = document.createElement("div");
     tableWrap.className = "repair-table-wrap spare-table-wrap";
@@ -325,41 +336,60 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     const tbody = tableWrap.querySelector("tbody");
-    rows
-      .slice()
-      .sort((a, b) => {
-        const plantCompare = text(readField(a, "plant"), "Unknown plant").localeCompare(text(readField(b, "plant"), "Unknown plant"));
-        if (plantCompare !== 0) return plantCompare;
-        return text(readField(a, "itemCode"), "").localeCompare(text(readField(b, "itemCode"), ""));
-      })
-      .forEach((row) => {
-        const safetyStock = toNumber(readField(row, "safetyStock"));
-        const onHand = toNumber(readField(row, "onHand"));
-        const isLow = onHand < safetyStock;
-        const tr = document.createElement("tr");
-        if (isLow) tr.className = "spare-low-stock";
+    pageRows.forEach((row) => {
+      const safetyStock = toNumber(readField(row, "safetyStock"));
+      const onHand = toNumber(readField(row, "onHand"));
+      const isLow = onHand < safetyStock;
+      const tr = document.createElement("tr");
+      if (isLow) tr.className = "spare-low-stock";
 
-        tr.innerHTML = `
-          <td>${text(readField(row, "id"))}</td>
-          <td><strong>${text(readField(row, "itemCode"))}</strong></td>
-          <td>${text(readField(row, "nameVietnamese"))}</td>
-          <td>${safetyStock.toLocaleString()}</td>
-          <td>${onHand.toLocaleString()}</td>
-          <td>${text(readField(row, "location"))}</td>
-          <td><span class="repair-table-status ${isLow ? "pending" : "done"}">${isLow ? "Low stock" : "OK"}</span></td>
-          <td>
-            <button class="repair-edit spare-edit" type="button">
-              <i data-lucide="square-pen"></i>
-              Edit
-            </button>
-          </td>
-        `;
+      tr.innerHTML = `
+        <td>${text(readField(row, "id"))}</td>
+        <td><strong>${text(readField(row, "itemCode"))}</strong></td>
+        <td>${text(readField(row, "nameVietnamese"))}</td>
+        <td>${safetyStock.toLocaleString()}</td>
+        <td>${onHand.toLocaleString()}</td>
+        <td>${text(readField(row, "location"))}</td>
+        <td><span class="repair-table-status ${isLow ? "pending" : "done"}">${isLow ? "Low stock" : "OK"}</span></td>
+        <td>
+          <button class="repair-edit spare-edit" type="button">
+            <i data-lucide="square-pen"></i>
+            Edit
+          </button>
+        </td>
+      `;
 
-        tr.querySelector(".spare-edit")?.addEventListener("click", () => openModal(row));
-        tbody.appendChild(tr);
-      });
+      tr.querySelector(".spare-edit")?.addEventListener("click", () => openModal(row));
+      tbody.appendChild(tr);
+    });
 
     list.appendChild(tableWrap);
+
+    const pagination = document.createElement("div");
+    pagination.className = "repair-pagination";
+    pagination.innerHTML = `
+      <span>Showing ${pageStart + 1}-${Math.min(pageStart + pageSize, rows.length)} of ${rows.length}</span>
+      <div class="repair-pagination-actions">
+        <button type="button" class="repair-page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
+          <i data-lucide="chevron-left"></i>
+          Previous
+        </button>
+        <strong>Page ${currentPage} / ${totalPages}</strong>
+        <button type="button" class="repair-page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
+          Next
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+    `;
+
+    pagination.querySelectorAll(".repair-page-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        renderRows(Number(button.dataset.page));
+        if (window.lucide) window.lucide.createIcons();
+      });
+    });
+
+    list.appendChild(pagination);
     setStatus(`Showing ${rows.length.toLocaleString()} items`, "success");
   };
 
@@ -391,8 +421,8 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     loadSpareParts();
   });
-  plantSelect.addEventListener("change", renderRows);
-  searchInput.addEventListener("input", renderRows);
+  plantSelect.addEventListener("change", () => renderRows(1));
+  searchInput.addEventListener("input", () => renderRows(1));
   addButton.addEventListener("click", () => openModal());
 
   loadSpareParts();

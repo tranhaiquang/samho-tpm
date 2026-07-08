@@ -27,7 +27,7 @@ window.SAMHO_SUPABASE = {
       issue: "issue_nm_vn",
       other: "other_reason",
       reason: "reason_nm_vn",
-      solve: "solve_nm_vn",
+      solve: "solve",
       mechanic: "technician"
     }
   },
@@ -42,7 +42,7 @@ window.SAMHO_SUPABASE = {
       issue: "issue_nm_vn",
       other: "other_reason",
       reason: "reason_nm_vn",
-      solve: "solve_nm_vn",
+      solve: "solve",
       technician: "technician"
     }
   },

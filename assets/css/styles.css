@@ -820,6 +820,11 @@ fieldset input {
   white-space: nowrap;
 }
 
+.repair-table th:last-child,
+.repair-table td:last-child {
+  padding-right: 28px;
+}
+
 .repair-table th {
   color: #526174;
   background: #f7f9fc;
@@ -856,6 +861,49 @@ fieldset input {
   border: 1px solid #9ad8ad;
   color: #17622d;
   background: #dff5e5;
+}
+
+.repair-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 4px 0;
+  color: #526174;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.repair-pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.repair-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #b9d4ff;
+  border-radius: 8px;
+  color: #075dcc;
+  background: #eef5ff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.repair-page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.repair-page-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.6;
 }
 
 .spare-filter select,

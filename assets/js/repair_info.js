@@ -6,6 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("repairList");
   const status = document.getElementById("repairInfoStatus");
   const searchButton = document.getElementById("repairInfoSearch");
+  const pageSize = 10;
+  let currentRecords = [];
+  let currentMachineMap = new Map();
+  let currentPage = 1;
 
   if (!filterForm || !list || !status || !searchButton) return;
 
@@ -35,10 +39,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  const normalizeYear = (value) => {
+    const year = Number(value);
+    if (value.length === 2) return 2000 + year;
+    return year;
+  };
+
+  const parseDateTime = (value) => {
+    if (!value) return null;
+    const text = String(value).trim();
+
+    const supabaseTextDate = text.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (supabaseTextDate) {
+      const [, dd, mm, yy, hh = "0", min = "0"] = supabaseTextDate;
+      return new Date(normalizeYear(yy), Number(mm) - 1, Number(dd), Number(hh), Number(min));
+    }
+
+    const compactDate = text.match(/^(\d{4})(\d{2})(\d{2})$/);
+    if (compactDate) {
+      return new Date(Number(compactDate[1]), Number(compactDate[2]) - 1, Number(compactDate[3]));
+    }
+
+    const parsed = new Date(text);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
   const formatDateTime = (value) => {
-    if (!value) return "";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value).replace("T", " ").slice(0, 16);
+    const date = parseDateTime(value);
+    if (!date) return String(value || "").replace("T", " ").slice(0, 16);
 
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -69,13 +97,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const dateColumn = config.repairInfo.dateColumn;
     const params = new URLSearchParams({
       select: "*",
-      order: `${dateColumn}.desc`,
+      order: `${config.repairInfo.idColumn || "id"}.desc`,
       limit: "1000"
     });
-    params.append(dateColumn, `gte.${fromDate}T00:00:00+07:00`);
-    params.append(dateColumn, `lte.${toDate}T23:59:59+07:00`);
 
-    return fetchJson(`${config.url}/${config.repairInfo.table}?${params}`);
+    const rows = await fetchJson(`${config.url}/${config.repairInfo.table}?${params}`);
+    const fromTime = new Date(`${fromDate}T00:00:00`).getTime();
+    const toTime = new Date(`${toDate}T23:59:59`).getTime();
+
+    return rows
+      .filter((record) => {
+        const date = parseDateTime(getRecordValue(record, [dateColumn]));
+        if (!date) return false;
+        const time = date.getTime();
+        return time >= fromTime && time <= toTime;
+      })
+      .sort((a, b) => {
+        const aTime = parseDateTime(getRecordValue(a, [dateColumn]))?.getTime() || 0;
+        const bTime = parseDateTime(getRecordValue(b, [dateColumn]))?.getTime() || 0;
+        return bTime - aTime;
+      });
   };
 
   const fetchMachines = async (codes) => {
@@ -102,23 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const toDateValue = (value) => {
     if (!value) return "";
-    const compact = String(value).match(/^(\d{4})(\d{2})(\d{2})$/);
-    if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
-
-    const simpleDate = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (simpleDate) return `${simpleDate[1]}-${simpleDate[2]}-${simpleDate[3]}`;
-
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+    const date = parseDateTime(value);
+    return date ? formatDateInput(date) : "";
   };
 
   const toTimeValue = (value) => {
     if (!value) return "";
-    const time = String(value).match(/(?:T|\s)(\d{2}):(\d{2})/);
-    if (time) return `${time[1]}:${time[2]}`;
-
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "" : date.toTimeString().slice(0, 5);
+    const date = parseDateTime(value);
+    return date ? date.toTimeString().slice(0, 5) : "";
   };
 
   const getLocalTimezoneOffset = () => {
@@ -290,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelector("#editIssue").value = record.issue_nm_vn || "";
     modal.querySelector("#editOther").value = record.other_reason || "";
     modal.querySelector("#editReason").value = record.reason_nm_vn || "";
-    modal.querySelector("#editSolve").value = record.solve_nm_vn || "";
+    modal.querySelector("#editSolve").value = getRecordValue(record, ["solve", "solve_nm_en"]) || "";
     modal.querySelector("#editTechnician").value = record.technician || "";
     modal.querySelector("#editReportedDate").value = toDateValue(reportedAt);
     modal.querySelector("#editReportedTime").value = toTimeValue(reportedAt);
@@ -307,13 +339,18 @@ document.addEventListener("DOMContentLoaded", () => {
     openEditModal(event.detail);
   });
 
-  const renderRecords = (records, machineMap) => {
+  const renderRecords = (records, machineMap, page = 1) => {
     list.innerHTML = "";
 
     if (!records.length) {
       list.innerHTML = `<article class="repair-empty">No records found for the selected date range.</article>`;
       return;
     }
+
+    const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
+    currentPage = Math.min(Math.max(page, 1), totalPages);
+    const pageStart = (currentPage - 1) * pageSize;
+    const pageRecords = records.slice(pageStart, pageStart + pageSize);
 
     const tableWrap = document.createElement("div");
     tableWrap.className = "repair-table-wrap";
@@ -332,9 +369,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>Done fixing datetime</th>
             <th>downtime (Min)</th>
             <th>issue</th>
-            <th>other issue</th>
             <th>reason</th>
-            <th>solve</th>
+            <th>Solve</th>
             <th>technician</th>
             <th>Status</th>
             <th>Edit</th>
@@ -346,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tbody = tableWrap.querySelector("tbody");
 
-    records.forEach((record) => {
+    pageRecords.forEach((record) => {
       const itemCode = getRecordValue(record, ["item_code", "ITEM_CODE"]);
       const machine = machineMap.get(itemCode) || record;
       const reportedAt = getRecordValue(record, ["start_datetime"]);
@@ -356,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const section = getRecordValue(record, ["section", "SECTION"]);
       const place = getRecordValue(record, ["place", "PLACE"]);
       const issueValue = getRecordValue(record, ["issue_nm_vn"]);
-      const otherIssue = getRecordValue(record, ["other_reason"]);
+      const solveValue = getRecordValue(record, ["solve", "solve_nm_en"]);
       const isDone = !!repairedAt;
 
       const row = document.createElement("tr");
@@ -373,9 +409,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${formatDateTime(repairedAt) || "-"}</td>
         <td>${record.total_downtime ?? "-"}</td>
         <td>${issueValue || "-"}</td>
-        <td>${otherIssue || "-"}</td>
         <td>${record.reason_nm_vn || "-"}</td>
-        <td>${record.solve_nm_vn || "-"}</td>
+        <td>${solveValue || "-"}</td>
         <td>${record.technician || "-"}</td>
         <td><span class="repair-table-status ${isDone ? "done" : "pending"}">${isDone ? "Hoan thanh" : "Chua xong"}</span></td>
         <td>
@@ -394,6 +429,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     list.appendChild(tableWrap);
+
+    const pagination = document.createElement("div");
+    pagination.className = "repair-pagination";
+    pagination.innerHTML = `
+      <span>Showing ${pageStart + 1}-${Math.min(pageStart + pageSize, records.length)} of ${records.length}</span>
+      <div class="repair-pagination-actions">
+        <button type="button" class="repair-page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
+          <i data-lucide="chevron-left"></i>
+          Previous
+        </button>
+        <strong>Page ${currentPage} / ${totalPages}</strong>
+        <button type="button" class="repair-page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
+          Next
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+    `;
+
+    pagination.querySelectorAll(".repair-page-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextPage = Number(button.dataset.page);
+        renderRecords(currentRecords, currentMachineMap, nextPage);
+        if (window.lucide) window.lucide.createIcons();
+      });
+    });
+
+    list.appendChild(pagination);
   };
 
   const searchRecords = async () => {
@@ -416,7 +478,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const records = await fetchRepairRecords(fromDate, toDate);
       const machines = await fetchMachines(records.map((record) => getRecordValue(record, ["item_code", "ITEM_CODE"])));
-      renderRecords(records, machines);
+      currentRecords = records;
+      currentMachineMap = machines;
+      renderRecords(currentRecords, currentMachineMap, 1);
       setStatus(`Found ${records.length} repair records.`, "success");
     } catch (error) {
       list.innerHTML = "";
