@@ -57,6 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(aValue).localeCompare(String(bValue), undefined, { numeric: true });
   };
 
+  const stockStatus = (safetyStock, onHand) => {
+    const isLow = toNumber(onHand) < toNumber(safetyStock);
+    return {
+      className: isLow ? "pending" : "done",
+      label: isLow ? "Low stock" : "OK"
+    };
+  };
+
   const fetchJson = async (url) => {
     const response = await fetch(url, {
       headers: {
@@ -93,6 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const body = await response.text();
     return body ? JSON.parse(body) : null;
+  };
+
+  const patchSparePart = async (params, payload) => {
+    return requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify(payload)
+    });
   };
 
   const fetchSpareParts = async () => {
@@ -153,7 +169,15 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error("Safety stock and on hand must be whole numbers greater than or equal to 0.");
     }
 
-    const map = activeRecord ? spareConfig.updateMap : spareConfig.insertMap;
+    if (activeRecord) {
+      return Object.fromEntries(
+        Object.keys(values)
+          .map((field) => [getColumnName(activeRecord, field), values[field]])
+          .filter(([column]) => column)
+      );
+    }
+
+    const map = spareConfig.insertMap;
     return Object.fromEntries(
       Object.entries(map || {})
         .filter(([, column]) => column)
@@ -176,12 +200,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const idValue = readField(activeRecord, "id");
         if (!idValue) throw new Error("Missing spare part ID.");
 
-        const params = new URLSearchParams({ [idColumn]: `eq.${idValue}` });
-        await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
-          method: "PATCH",
-          headers: { Prefer: "return=minimal" },
-          body: JSON.stringify(payload)
-        });
+        await patchSparePart(new URLSearchParams({ [idColumn]: `eq.${idValue}` }), payload);
+        const itemCodeColumn = getColumnName(activeRecord, "itemCode");
+        const itemCodeValue = readField(activeRecord, "itemCode");
+        if (itemCodeColumn && itemCodeValue) {
+          await patchSparePart(new URLSearchParams({ [itemCodeColumn]: `eq.${itemCodeValue}` }), payload);
+        }
       } else {
         await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}`, {
           method: "POST",
@@ -241,6 +265,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <input name="onHand" id="spareFormOnHand" type="number" min="0" step="1" required />
           </label>
           <label>
+            <span>Status</span>
+            <output class="repair-table-status" id="spareFormStockStatus">OK</output>
+          </label>
+          <label>
             <span>Location</span>
             <input name="location" id="spareFormLocation" type="text" />
           </label>
@@ -261,9 +289,24 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault();
       saveSparePart();
     });
+    ["#spareFormSafety", "#spareFormOnHand"].forEach((selector) => {
+      modal.querySelector(selector)?.addEventListener("input", () => updateModalStockStatus(modal));
+    });
 
     if (window.lucide) window.lucide.createIcons();
     return modal;
+  };
+
+  const updateModalStockStatus = (modal) => {
+    const status = modal.querySelector("#spareFormStockStatus");
+    if (!status) return;
+
+    const nextStatus = stockStatus(
+      modal.querySelector("#spareFormSafety")?.value,
+      modal.querySelector("#spareFormOnHand")?.value
+    );
+    status.className = `repair-table-status ${nextStatus.className}`;
+    status.textContent = nextStatus.label;
   };
 
   const openModal = (row = null) => {
@@ -280,6 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelector("#spareFormOnHand").value = isEdit ? toNumber(readField(row, "onHand")) : 0;
     modal.querySelector("#spareFormLocation").value = isEdit ? text(readField(row, "location"), "") : "";
     modal.querySelector("#sparePartModalStatus").textContent = "";
+    updateModalStockStatus(modal);
     modal.classList.add("active");
   };
 
@@ -348,9 +392,9 @@ document.addEventListener("DOMContentLoaded", () => {
     pageRows.forEach((row) => {
       const safetyStock = toNumber(readField(row, "safetyStock"));
       const onHand = toNumber(readField(row, "onHand"));
-      const isLow = onHand < safetyStock;
+      const status = stockStatus(safetyStock, onHand);
       const tr = document.createElement("tr");
-      if (isLow) tr.className = "spare-low-stock";
+      if (status.className === "pending") tr.className = "spare-low-stock";
 
       tr.innerHTML = `
         <td>${text(readField(row, "id"))}</td>
@@ -359,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${safetyStock.toLocaleString()}</td>
         <td>${onHand.toLocaleString()}</td>
         <td>${text(readField(row, "location"))}</td>
-        <td><span class="repair-table-status ${isLow ? "pending" : "done"}">${isLow ? "Low stock" : "OK"}</span></td>
+        <td><span class="repair-table-status ${status.className}">${status.label}</span></td>
         <td>
           <button class="repair-edit spare-edit" type="button">
             <i data-lucide="square-pen"></i>
