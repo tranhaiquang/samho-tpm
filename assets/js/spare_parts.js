@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const status = document.getElementById("sparePartsStatus");
   const list = document.getElementById("sparePartsList");
 
-  if (!filterForm || !plantSelect || !searchInput || !refreshButton || !addButton || !status || !list) return;
+  if (!filterForm || !plantSelect || !searchInput || !refreshButton || !status || !list) return;
 
   const pageSize = 10;
   let spareRows = [];
@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   plantSelect.addEventListener("change", () => renderRows(1));
   searchInput.addEventListener("input", () => renderRows(1));
-  addButton.addEventListener("click", () => openModal());
+  addButton?.addEventListener("click", () => openModal());
 
   loadSpareParts();
 });
