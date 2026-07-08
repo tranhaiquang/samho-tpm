@@ -44,6 +44,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return result || fallback;
   };
 
+  const compareIds = (a, b) => {
+    const aValue = readField(a, "id");
+    const bValue = readField(b, "id");
+    const aNumber = Number(aValue);
+    const bNumber = Number(bValue);
+
+    if (Number.isFinite(aNumber) && Number.isFinite(bNumber)) {
+      return aNumber - bNumber;
+    }
+
+    return String(aValue).localeCompare(String(bValue), undefined, { numeric: true });
+  };
+
   const fetchJson = async (url) => {
     const response = await fetch(url, {
       headers: {
@@ -296,11 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const renderRows = (page = 1) => {
-    const rows = getFilteredRows().sort((a, b) => {
-      const plantCompare = text(readField(a, "plant"), "Unknown plant").localeCompare(text(readField(b, "plant"), "Unknown plant"));
-      if (plantCompare !== 0) return plantCompare;
-      return text(readField(a, "itemCode"), "").localeCompare(text(readField(b, "itemCode"), ""));
-    });
+    const rows = getFilteredRows().sort(compareIds);
     renderStats(rows);
     list.innerHTML = "";
 
