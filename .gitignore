@@ -1,0 +1,8 @@
+.env
+.env.*
+*.local.csv
+*_users.csv
+*_auth_results.csv
+supabase_auth_results_*.csv
+supabase_password_update_results_*.csv
+supabase_auth_delete_results_*.csv

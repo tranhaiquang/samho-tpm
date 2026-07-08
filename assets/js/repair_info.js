@@ -319,9 +319,9 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelector("#editRecordEyebrow").textContent = `Repair record ${record.id || ""}`.trim();
     modal.querySelector("#editItemCode").value = itemCode || "";
     modal.querySelector("#editMachineName").value = getMachineValue(machine, "machineName") || "";
-    modal.querySelector("#editIssue").value = record.issue_nm_vn || "";
-    modal.querySelector("#editOther").value = record.other_reason || "";
-    modal.querySelector("#editReason").value = record.reason_nm_vn || "";
+    modal.querySelector("#editIssue").value = getRecordValue(record, ["issue", "issue_nm_vn"]) || "";
+    modal.querySelector("#editOther").value = getRecordValue(record, ["other_issue", "other_reason"]) || "";
+    modal.querySelector("#editReason").value = getRecordValue(record, ["reason", "reason_nm_vn"]) || "";
     modal.querySelector("#editSolve").value = getRecordValue(record, ["solve", "solve_nm_en"]) || "";
     modal.querySelector("#editTechnician").value = record.technician || "";
     modal.querySelector("#editReportedDate").value = toDateValue(reportedAt);
@@ -369,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>Done fixing datetime</th>
             <th>downtime (Min)</th>
             <th>issue</th>
+            <th>Other issue</th>
             <th>reason</th>
             <th>Solve</th>
             <th>technician</th>
@@ -391,7 +392,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const plant = getRecordValue(record, ["plant", "PLANT"]);
       const section = getRecordValue(record, ["section", "SECTION"]);
       const place = getRecordValue(record, ["place", "PLACE"]);
-      const issueValue = getRecordValue(record, ["issue_nm_vn"]);
+      const issueValue = getRecordValue(record, ["issue", "issue_nm_vn"]);
+      const otherIssueValue = getRecordValue(record, ["other_issue", "other_reason"]);
+      const reasonValue = getRecordValue(record, ["reason", "reason_nm_vn"]);
       const solveValue = getRecordValue(record, ["solve", "solve_nm_en"]);
       const isDone = !!repairedAt;
 
@@ -409,7 +412,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${formatDateTime(repairedAt) || "-"}</td>
         <td>${record.total_downtime ?? "-"}</td>
         <td>${issueValue || "-"}</td>
-        <td>${record.reason_nm_vn || "-"}</td>
+        <td>${otherIssueValue || "-"}</td>
+        <td>${reasonValue || "-"}</td>
         <td>${solveValue || "-"}</td>
         <td>${record.technician || "-"}</td>
         <td><span class="repair-table-status ${isDone ? "done" : "pending"}">${isDone ? "Hoan thanh" : "Chua xong"}</span></td>

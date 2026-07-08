@@ -373,6 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const repairFinishedAt = getDateTimeValue("doneDate", "doneTime");
 
     return {
+      id: "",
       brokenAt,
       repairStartedAt: getDateTimeValue("startDate", "startTime"),
       repairFinishedAt,
@@ -393,9 +394,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const validateRepairPayload = (formData) => {
     const requiredFields = [
-      ["reportedAt", "Báo hư"],
-      ["repairStartedAt", "Bắt đầu sửa"],
-      ["repairFinishedAt", "Sửa xong"],
+      ["brokenAt", "Bao hu"],
+      ["repairStartedAt", "Bat dau sua"],
+      ["repairFinishedAt", "Sua xong"],
       ["itemCode", "Item Code"],
       ["issue", "Issue"],
       ["reason", "Reason"],
@@ -403,9 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ["mechanic", "Mechanic"]
     ];
 
-    requiredFields[0] = ["brokenAt", "Bao hu"];
-    requiredFields[1] = ["repairStartedAt", "Bat dau sua"];
-    requiredFields[2] = ["repairFinishedAt", "Sua xong"];
     if (document.getElementById("other")?.required) requiredFields.push(["other", "Other"]);
 
     return requiredFields
@@ -423,6 +421,31 @@ document.addEventListener("DOMContentLoaded", () => {
           return [column, value === "" || value == null ? null : value];
         })
     );
+  };
+
+  const fetchNextRepairRecordId = async () => {
+    const params = new URLSearchParams({
+      select: "id",
+      order: "id.desc",
+      limit: "1"
+    });
+
+    const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.repairRecords.table}?${params}`, {
+      headers: {
+        apikey: supabaseConfig.anonKey,
+        Authorization: `Bearer ${supabaseConfig.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders()
+      }
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Could not get next repair record ID (${response.status}).`);
+    }
+
+    const rows = await response.json();
+    const currentId = Number(rows?.[0]?.id || 0);
+    return currentId + 1;
   };
 
   const submitRepairRecord = async (payload) => {
@@ -490,6 +513,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setSaveStatus(`Item Code ${formData.itemCode} does not exist in machine_info.`, "warning");
         return;
       }
+
+      setSaveStatus("Preparing repair record ID...", "loading");
+      formData.id = await fetchNextRepairRecordId();
 
       setSaveStatus("Saving repair record...", "loading");
       await submitRepairRecord(mapRepairPayload(formData));

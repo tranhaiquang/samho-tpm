@@ -14,6 +14,7 @@ window.SAMHO_SUPABASE = {
   repairRecords: {
     table: "repair_records",
     insertMap: {
+      id: "id",
       brokenAt: "start_datetime",
       repairStartedAt: "fix_datetime",
       repairFinishedAt: "end_datetime",
@@ -24,9 +25,9 @@ window.SAMHO_SUPABASE = {
       machineSection: "section",
       totalDowntime: "total_downtime",
       month: "month",
-      issue: "issue_nm_vn",
-      other: "other_reason",
-      reason: "reason_nm_vn",
+      issue: "issue",
+      other: "other_issue",
+      reason: "reason",
       solve: "solve",
       mechanic: "technician"
     }
@@ -39,9 +40,9 @@ window.SAMHO_SUPABASE = {
       reportedAt: "start_datetime",
       repairStartedAt: "fix_datetime",
       repairedAt: "end_datetime",
-      issue: "issue_nm_vn",
-      other: "other_reason",
-      reason: "reason_nm_vn",
+      issue: "issue",
+      other: "other_issue",
+      reason: "reason",
       solve: "solve",
       technician: "technician"
     }
