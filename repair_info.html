@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thông tin máy hư - Vietnam Samho</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/repair_info.js" defer></script>
+  </head>
+  <body class="dashboard-app repair-info-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
+        <div>
+          <strong>VietNam SamHo</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button" aria-expanded="true">
+            <i data-lucide="wrench"></i>
+            Maintenance
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>RM</a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="package-search"></i>
+            Spare Part Management
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><i data-lucide="factory"></i>Machine</a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
+        </section>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <div class="shell">
+      <main class="content">
+        <div class="mode-tabs" aria-label="Maintenance type">
+          <div class="mode-main" role="tablist">
+            <button class="mode active" data-mode="BM" type="button"><i data-lucide="wrench"></i>BM</button>
+            <button disabled class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check"></i>RM</button>
+            <button disabled class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
+            <button disabled class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
+          </div>
+          <div class="mode-sub-buttons" id="modeSubButtons" aria-label="Maintenance actions"></div>
+        </div>
+
+        <section class="page-view active" id="repairInfoView">
+          <div class="info-panel">
+            <div class="info-title">
+              <i data-lucide="wrench"></i>
+              <h1>Thông tin máy hư</h1>
+            </div>
+
+            <form class="info-filter" id="repairInfoFilter">
+              <label>
+                <span><i data-lucide="calendar-days"></i>Từ</span>
+                <input id="fromDate" type="date" required />
+              </label>
+              <label>
+                <span><i data-lucide="calendar-days"></i>Đến</span>
+                <input id="toDate" type="date" required />
+              </label>
+              <button class="info-search" id="repairInfoSearch" type="submit">
+                <i data-lucide="search"></i>
+                Tìm kiếm
+              </button>
+              <p class="info-status" id="repairInfoStatus" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <section class="repair-list" id="repairList" aria-label="Danh sách máy hư"></section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

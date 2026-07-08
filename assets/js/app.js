@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const supabaseConfig = window.SAMHO_SUPABASE;
+  let searchedItemCode = "";
 
   const setSearchStatus = (message, type = "idle") => {
     const status = document.getElementById("searchStatus");
@@ -36,6 +37,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${date}T${time}:00${getLocalTimezoneOffset()}`;
   };
 
+  const getDowntimeMinutes = (startValue, endValue) => {
+    const start = new Date(startValue);
+    const end = new Date(endValue);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "";
+    return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
+  };
+
+  const getMonthValue = (dateTimeValue) => {
+    if (!dateTimeValue) return "";
+    return dateTimeValue.slice(0, 7);
+  };
+
   const getFieldLabel = (field) => {
     const columns = [].concat(supabaseConfig.fieldMap[field] || []);
     return columns[0] || field;
@@ -46,15 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!noteGrid) return;
 
     noteGrid.innerHTML = "";
-    supabaseConfig.noteFields.forEach((field) => {
-      const input = document.createElement("input");
-      input.id = field;
-      input.type = "text";
-      input.disabled = true;
-      input.placeholder = getFieldLabel(field);
-      input.setAttribute("aria-label", getFieldLabel(field));
-      noteGrid.appendChild(input);
-    });
+    supabaseConfig.noteFields
+      .filter((field) => field !== "machineLine")
+      .forEach((field) => {
+        const input = document.createElement("input");
+        input.id = field;
+        input.type = "text";
+        input.disabled = true;
+        input.setAttribute("aria-label", getFieldLabel(field));
+        noteGrid.appendChild(input);
+      });
   };
 
   const setMachineData = (machine) => {
@@ -64,6 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const matchedColumn = mappedColumns.find((column) => machine?.[column] != null);
       if (input) input.value = matchedColumn ? machine[matchedColumn] : "";
     });
+  };
+
+  const clearSearchedMachine = () => {
+    searchedItemCode = "";
+    setMachineData(null);
   };
 
   const setDateTimeInputs = (value, dateId, timeId) => {
@@ -78,21 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
     timeInput.value = date.toTimeString().slice(0, 5);
   };
 
-  renderNoteGrid();
+  if (document.getElementById("noteGrid")) renderNoteGrid();
 
-  const fetchMachineByCode = async (code) => {
-    if (!supabaseConfig?.anonKey) {
-      throw new Error("Add your Supabase anon key in supabase/config.js before searching.");
-    }
-
-    const requestMachine = async (operator, value) => {
+  const fetchRowByCode = async ({ table, codeColumn, selectColumns }, code) => {
+    const requestRow = async (operator, value) => {
       const params = new URLSearchParams({
-        select: supabaseConfig.selectColumns.join(","),
-        [supabaseConfig.codeColumn]: `${operator}.${value}`,
+        select: (selectColumns || ["*"]).join(","),
+        [codeColumn]: `${operator}.${value}`,
         limit: "1"
       });
 
-      const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.table}?${params}`, {
+      const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
         headers: {
           apikey: supabaseConfig.anonKey,
           Authorization: `Bearer ${supabaseConfig.anonKey}`,
@@ -101,27 +116,47 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Supabase search failed (${response.status}).`);
+        throw new Error(`Supabase search failed for ${table} (${response.status}).`);
       }
 
       return response.json();
     };
 
-    const exactRows = await requestMachine("eq", code);
+    const exactRows = await requestRow("eq", code);
     if (exactRows[0]) return exactRows[0];
 
-    const fuzzyRows = await requestMachine("ilike", `*${code}*`);
+    const fuzzyRows = await requestRow("ilike", `*${code}*`);
     return fuzzyRows[0] || null;
   };
 
+  const fetchMachineByCode = async (code) => {
+    if (!supabaseConfig?.anonKey) {
+      throw new Error("Add your Supabase anon key in supabase/config.js before searching.");
+    }
+
+    const repairRecord = await fetchRowByCode(
+      {
+        table: supabaseConfig.table,
+        codeColumn: supabaseConfig.codeColumn,
+        selectColumns: supabaseConfig.selectColumns
+      },
+      code
+    );
+
+    const machineInfo = await fetchRowByCode(supabaseConfig.machineInfo, code);
+    return repairRecord || machineInfo ? { ...(repairRecord || {}), ...(machineInfo || {}) } : null;
+  };
+
   const machineExistsByCode = async (code) => {
+    const table = supabaseConfig.machineInfo?.table || supabaseConfig.table;
+    const codeColumn = supabaseConfig.machineInfo?.codeColumn || supabaseConfig.codeColumn;
     const params = new URLSearchParams({
-      select: supabaseConfig.codeColumn,
-      [supabaseConfig.codeColumn]: `eq.${code}`,
+      select: codeColumn,
+      [codeColumn]: `eq.${code}`,
       limit: "1"
     });
 
-    const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.table}?${params}`, {
+    const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
       headers: {
         apikey: supabaseConfig.anonKey,
         Authorization: `Bearer ${supabaseConfig.anonKey}`,
@@ -160,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchButton = document.getElementById("searchButton");
     const code = searchInput?.value.trim().toUpperCase();
     if (!code) {
+      searchedItemCode = "";
       setMachineData(null);
       setSearchStatus("Enter or scan a machine code.", "warning");
       return;
@@ -172,10 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const machine = await fetchMachineByCode(code);
       setMachineData(machine);
       if (machine) {
+        searchedItemCode = code;
         setSearchStatus("Machine data loaded.", "success");
         return;
       }
 
+      searchedItemCode = "";
       const visibleCount = await fetchVisibleMachineCount();
       const message =
         visibleCount === "*/0"
@@ -183,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
           : "No machine found for this code.";
       setSearchStatus(message, "warning");
     } catch (error) {
+      searchedItemCode = "";
       setMachineData(null);
       setSearchStatus(error.message, "error");
     } finally {
@@ -197,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
       runSearch();
     }
   });
+  document.getElementById("codeSearch")?.addEventListener("input", clearSearchedMachine);
 
   const ensureScanModal = () => {
     let modal = document.getElementById("scanModal");
@@ -328,17 +368,28 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("issue")?.addEventListener("change", syncOtherInputState);
   syncOtherInputState();
 
-  const buildRepairPayload = () => ({
-    brokenAt: getDateTimeValue("brokenDate", "brokenTime"),
-    repairStartedAt: getDateTimeValue("startDate", "startTime"),
-    repairFinishedAt: getDateTimeValue("doneDate", "doneTime"),
-    itemCode: getValue("itemCode") || getValue("codeSearch").toUpperCase(),
-    issue: getValue("issue"),
-    other: getValue("other"),
-    reason: getValue("reason"),
-    solve: getValue("solve"),
-    mechanic: getValue("mechanic")
-  });
+  const buildRepairPayload = () => {
+    const brokenAt = getDateTimeValue("brokenDate", "brokenTime");
+    const repairFinishedAt = getDateTimeValue("doneDate", "doneTime");
+
+    return {
+      brokenAt,
+      repairStartedAt: getDateTimeValue("startDate", "startTime"),
+      repairFinishedAt,
+      itemCode: getValue("itemCode") || getValue("codeSearch").toUpperCase(),
+      machineName: getValue("machineName"),
+      machinePlace: getValue("machinePlace"),
+      machinePlant: getValue("machinePlant"),
+      machineSection: getValue("machineSection"),
+      totalDowntime: getDowntimeMinutes(brokenAt, repairFinishedAt),
+      month: getMonthValue(brokenAt),
+      issue: getValue("issue"),
+      other: getValue("other"),
+      reason: getValue("reason"),
+      solve: getValue("solve"),
+      mechanic: getValue("mechanic")
+    };
+  };
 
   const validateRepairPayload = (formData) => {
     const requiredFields = [
@@ -367,7 +418,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return Object.fromEntries(
       Object.entries(insertMap)
         .filter(([, column]) => column)
-        .map(([formField, column]) => [column, formData[formField] || null])
+        .map(([formField, column]) => {
+          const value = formData[formField];
+          return [column, value === "" || value == null ? null : value];
+        })
     );
   };
 
@@ -393,11 +447,33 @@ document.addEventListener("DOMContentLoaded", () => {
     return text ? JSON.parse(text) : null;
   };
 
+  const resetRepairInputs = () => {
+    ["issue", "other", "reason", "solve", "mechanic"].forEach((id) => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      if (input.tagName === "SELECT") {
+        input.selectedIndex = 0;
+      } else {
+        input.value = "";
+      }
+    });
+
+    syncOtherInputState();
+  };
+
   document.getElementById("repairForm")?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const saveButton = document.getElementById("saveButton");
     const formData = buildRepairPayload();
+    const currentCode = getValue("codeSearch").toUpperCase();
+
+    if (!searchedItemCode || searchedItemCode !== currentCode) {
+      setSaveStatus("Please search and load the machine code before submitting.", "warning");
+      setSearchStatus("Click Search to load machine data before saving.", "warning");
+      return;
+    }
+
     const missingFields = validateRepairPayload(formData);
 
     if (missingFields.length) {
@@ -418,6 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setSaveStatus("Saving repair record...", "loading");
       await submitRepairRecord(mapRepairPayload(formData));
       setSaveStatus("Repair record saved.", "success");
+      resetRepairInputs();
     } catch (error) {
       setSaveStatus(error.message, "error");
     } finally {
@@ -448,10 +525,17 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   };
 
-  subModeActions.BM[0].view = "repairSubmitView";
-  subModeActions.BM[1].view = "repairInfoView";
-  subModeActions.BM[2].view = "summaryReportView";
-  delete subModeActions.BM[1].url;
+  if (document.getElementById("repairSubmitView")) {
+    subModeActions.BM[0].view = "repairSubmitView";
+  } else {
+    subModeActions.BM[0].url = "repair_submit.html";
+  }
+  subModeActions.BM[1].url = "repair_info.html";
+  if (document.getElementById("summaryReportView")) {
+    subModeActions.BM[2].view = "summaryReportView";
+  } else {
+    subModeActions.BM[2].url = "repair_submit.html";
+  }
 
   const showPageView = (viewId) => {
     document.querySelectorAll(".page-view").forEach((view) => view.classList.remove("active"));

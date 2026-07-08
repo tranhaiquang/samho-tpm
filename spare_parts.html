@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spare Parts - VietNam SamHo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/spare_parts.js" defer></script>
+  </head>
+  <body class="dashboard-app spare-parts-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
+        <div>
+          <strong>VietNam SamHo</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="wrench"></i>
+            Maintenance
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>RM</a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button" aria-expanded="true">
+            <i data-lucide="package-search"></i>
+            Spare Part Management
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><i data-lucide="factory"></i>Machine</a>
+          <a class="current" href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
+        </section>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <div class="shell">
+      <main class="content">
+        <section class="info-panel spare-panel">
+          <div class="info-title">
+            <i data-lucide="boxes"></i>
+            <h1>Spare Parts</h1>
+          </div>
+
+          <form class="info-filter spare-filter" id="sparePartsFilter">
+            <label>
+              <span><i data-lucide="factory"></i>Plant</span>
+              <select id="sparePlantSelect">
+                <option value="">All plants</option>
+              </select>
+            </label>
+            <label>
+              <span><i data-lucide="search"></i>Search</span>
+              <input id="spareSearchInput" type="search" placeholder="Item code or name" />
+            </label>
+            <button class="info-search" id="spareRefreshButton" type="submit">
+              <i data-lucide="refresh-cw"></i>
+              Refresh
+            </button>
+            <button class="info-search spare-add-button" id="spareAddButton" type="button">
+              <i data-lucide="plus"></i>
+              Add
+            </button>
+            <p class="info-status" id="sparePartsStatus" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="spare-summary-grid" aria-label="Spare part summary">
+          <article class="spare-stat">
+            <span>Total Items</span>
+            <strong id="spareTotalItems">--</strong>
+          </article>
+          <article class="spare-stat">
+            <span>Total On Hand</span>
+            <strong id="spareTotalOnHand">--</strong>
+          </article>
+          <article class="spare-stat">
+            <span>Below Safety</span>
+            <strong id="spareBelowSafety">--</strong>
+          </article>
+        </section>
+
+        <section class="repair-list" id="sparePartsList" aria-label="Spare parts by plant"></section>
+      </main>
+    </div>
+  </body>
+</html>

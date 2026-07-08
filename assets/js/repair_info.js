@@ -28,13 +28,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return name ? record[name] : "";
   };
 
-  const formatDateInput = (date) => date.toISOString().slice(0, 10);
+  const formatDateInput = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
-  const formatCompactDate = (value) => {
+  const formatDateTime = (value) => {
     if (!value) return "";
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
-    return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+    if (Number.isNaN(date.getTime())) return String(value).replace("T", " ").slice(0, 16);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   };
 
   const fetchJson = async (url) => {
@@ -59,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams({
       select: "*",
       order: `${dateColumn}.desc`,
-      limit: "50"
+      limit: "1000"
     });
     params.append(dateColumn, `gte.${fromDate}T00:00:00+07:00`);
     params.append(dateColumn, `lte.${toDate}T23:59:59+07:00`);
@@ -71,13 +82,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const uniqueCodes = [...new Set(codes.filter(Boolean))];
     if (!uniqueCodes.length) return new Map();
 
+    const machineInfo = config.machineInfo || { table: config.table, codeColumn: config.codeColumn };
     const inList = uniqueCodes.map((code) => `"${code}"`).join(",");
     const params = new URLSearchParams({
       select: "*",
-      [config.codeColumn]: `in.(${inList})`
+      [machineInfo.codeColumn]: `in.(${inList})`
     });
-    const rows = await fetchJson(`${config.url}/${config.table}?${params}`);
-    return new Map(rows.map((row) => [row[config.codeColumn], row]));
+    const rows = await fetchJson(`${config.url}/${machineInfo.table}?${params}`);
+    return new Map(rows.map((row) => [row[machineInfo.codeColumn], row]));
   };
 
   const emitEdit = ({ record, machine, itemCode, reportedAt, repairStartedAt, repairedAt }) => {
@@ -216,17 +228,17 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="repair-modal-time-grid">
           <label>
-            <span>Ngày báo hư</span>
+            <span>Report datetime</span>
             <input id="editReportedDate" type="date" required />
             <input id="editReportedTime" type="time" required />
           </label>
           <label>
-            <span>Bắt đầu sửa</span>
+            <span>Start fixing datetime</span>
             <input id="editStartedDate" type="date" />
             <input id="editStartedTime" type="time" />
           </label>
           <label>
-            <span>Ngày sửa xong</span>
+            <span>Done fixing datetime</span>
             <input id="editRepairedDate" type="date" />
             <input id="editRepairedTime" type="time" />
           </label>
@@ -275,10 +287,10 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.querySelector("#editRecordEyebrow").textContent = `Repair record ${record.id || ""}`.trim();
     modal.querySelector("#editItemCode").value = itemCode || "";
     modal.querySelector("#editMachineName").value = getMachineValue(machine, "machineName") || "";
-    modal.querySelector("#editIssue").value = record.issue || "";
-    modal.querySelector("#editOther").value = record.other_issue || record.other || "";
-    modal.querySelector("#editReason").value = record.reason || "";
-    modal.querySelector("#editSolve").value = record.solve || "";
+    modal.querySelector("#editIssue").value = record.issue_nm_vn || "";
+    modal.querySelector("#editOther").value = record.other_reason || "";
+    modal.querySelector("#editReason").value = record.reason_nm_vn || "";
+    modal.querySelector("#editSolve").value = record.solve_nm_vn || "";
     modal.querySelector("#editTechnician").value = record.technician || "";
     modal.querySelector("#editReportedDate").value = toDateValue(reportedAt);
     modal.querySelector("#editReportedTime").value = toTimeValue(reportedAt);
@@ -309,18 +321,21 @@ document.addEventListener("DOMContentLoaded", () => {
       <table class="repair-table">
         <thead>
           <tr>
-            <th>Broken ID</th>
-            <th>Item Code</th>
-            <th>Machine Name</th>
-            <th>Place1</th>
-            <th>Place2</th>
-            <th>Place3</th>
-            <th>Issue</th>
-            <th>Reason</th>
-            <th>Solve</th>
-            <th>Ngay hu</th>
-            <th>Ngay sua</th>
-            <th>Mechanic</th>
+            <th>ID</th>
+            <th>item code</th>
+            <th>name</th>
+            <th>Plant</th>
+            <th>section</th>
+            <th>place</th>
+            <th>Report datetime</th>
+            <th>Start fixing datetime</th>
+            <th>Done fixing datetime</th>
+            <th>downtime (Min)</th>
+            <th>issue</th>
+            <th>other issue</th>
+            <th>reason</th>
+            <th>solve</th>
+            <th>technician</th>
             <th>Status</th>
             <th>Edit</th>
           </tr>
@@ -332,15 +347,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = tableWrap.querySelector("tbody");
 
     records.forEach((record) => {
-      const itemCode = getRecordValue(record, ["machine_id", "item_code", "ITEM_CODE"]);
+      const itemCode = getRecordValue(record, ["item_code", "ITEM_CODE"]);
       const machine = machineMap.get(itemCode) || record;
-      const reportedAt = getRecordValue(record, ["reported_at"]);
-      const repairStartedAt = getRecordValue(record, ["repaired_at", "repair_started_at", "started_at", "start_at", "repair_start_at"]);
-      const repairedAt = getRecordValue(record, ["repair_completed_at", "repair_finished_at", "finished_at"]);
-      const issueValue = getRecordValue(record, ["issue"]);
-      const otherIssue = getRecordValue(record, ["other_issue", "other"]);
+      const reportedAt = getRecordValue(record, ["start_datetime"]);
+      const repairStartedAt = getRecordValue(record, ["fix_datetime"]);
+      const repairedAt = getRecordValue(record, ["end_datetime"]);
+      const plant = getRecordValue(record, ["plant", "PLANT"]);
+      const section = getRecordValue(record, ["section", "SECTION"]);
+      const place = getRecordValue(record, ["place", "PLACE"]);
+      const issueValue = getRecordValue(record, ["issue_nm_vn"]);
+      const otherIssue = getRecordValue(record, ["other_reason"]);
       const isDone = !!repairedAt;
-      const issue = issueValue === "Khác" && otherIssue ? otherIssue : issueValue;
 
       const row = document.createElement("tr");
       row.dataset.recordId = record.id || "";
@@ -348,14 +365,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${record.id || "-"}</td>
         <td><strong>${itemCode || "-"}</strong></td>
         <td>${getMachineValue(machine, "machineName") || "-"}</td>
-        <td>${getMachineValue(machine, "machineLine") || "-"}</td>
-        <td>${getMachineValue(machine, "machinePlant") || "-"}</td>
-        <td>${getMachineValue(machine, "machineSection") || "-"}</td>
-        <td>${issue || "-"}</td>
-        <td>${record.reason || "-"}</td>
-        <td>${record.solve || "-"}</td>
-        <td>${formatCompactDate(reportedAt) || "-"}</td>
-        <td>${formatCompactDate(repairedAt) || "-"}</td>
+        <td>${plant || "-"}</td>
+        <td>${section || "-"}</td>
+        <td>${place || "-"}</td>
+        <td>${formatDateTime(reportedAt) || "-"}</td>
+        <td>${formatDateTime(repairStartedAt) || "-"}</td>
+        <td>${formatDateTime(repairedAt) || "-"}</td>
+        <td>${record.total_downtime ?? "-"}</td>
+        <td>${issueValue || "-"}</td>
+        <td>${otherIssue || "-"}</td>
+        <td>${record.reason_nm_vn || "-"}</td>
+        <td>${record.solve_nm_vn || "-"}</td>
         <td>${record.technician || "-"}</td>
         <td><span class="repair-table-status ${isDone ? "done" : "pending"}">${isDone ? "Hoan thanh" : "Chua xong"}</span></td>
         <td>
@@ -395,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const records = await fetchRepairRecords(fromDate, toDate);
-      const machines = await fetchMachines(records.map((record) => getRecordValue(record, ["machine_id", "item_code", "ITEM_CODE"])));
+      const machines = await fetchMachines(records.map((record) => getRecordValue(record, ["item_code", "ITEM_CODE"])));
       renderRecords(records, machines);
       setStatus(`Found ${records.length} repair records.`, "success");
     } catch (error) {
@@ -408,9 +428,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const today = new Date();
-  const prior = new Date(today);
-  prior.setDate(today.getDate() - 30);
-  document.getElementById("fromDate").value = formatDateInput(prior);
+  const yearStart = new Date(today.getFullYear(), 0, 1);
+  document.getElementById("fromDate").value = formatDateInput(yearStart);
   document.getElementById("toDate").value = formatDateInput(today);
 
   filterForm.addEventListener("submit", (event) => {

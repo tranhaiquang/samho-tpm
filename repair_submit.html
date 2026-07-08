@@ -13,7 +13,6 @@
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="assets/js/app.js" defer></script>
-    <script src="assets/js/repair_info.js" defer></script>
   </head>
   <body class="dashboard-app repair-submit-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -47,7 +46,7 @@
             <i data-lucide="chevron-down"></i>
           </button>
           <a href="#"><i data-lucide="factory"></i>Machine</a>
-          <a href="#"><i data-lucide="boxes"></i>Spare part</a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
         </section>
       </nav>
 
@@ -110,9 +109,19 @@
                 <span>Status</span>
                 <input id="machineStatus" type="text" disabled />
               </label>
+              <label class="field">
+                <span>Place</span>
+                <input id="machinePlace" type="text" disabled />
+              </label>
+              <label class="field">
+                <span>Plant</span>
+                <input id="machinePlant" type="text" disabled />
+              </label>
+              <label class="field">
+                <span>Section</span>
+                <input id="machineSection" type="text" disabled />
+              </label>
             </div>
-
-            <div class="note-grid" id="noteGrid"></div>
 
             <div class="time-grid">
               <fieldset>
@@ -155,45 +164,18 @@
                 <select id="solve" required>
                   <option>SỬA CHỮA</option>
                   <option>THAY THẾ</option>
-                  <option>KIỂM TRA</option>
+                  <option>VỆ SINH</option>
                 </select>
               </label>
               <label class="field">
                 <span>Người sửa chữa / Mechanic</span>
-                <input id="mechanic" type="text"  required />
+                <input id="mechanic" type="text" required />
               </label>
             </div>
 
             <button class="save" id="saveButton" type="submit"><i data-lucide="save"></i>SAVE</button>
             <p class="save-status" id="saveStatus" aria-live="polite"></p>
           </form>
-        </section>
-
-        <section class="page-view" id="repairInfoView">
-          <div class="info-panel">
-            <div class="info-title">
-              <i data-lucide="wrench"></i>
-              <h1>Thông tin máy hư</h1>
-            </div>
-
-            <form class="info-filter" id="repairInfoFilter">
-              <label>
-                <span><i data-lucide="calendar-days"></i>Từ</span>
-                <input id="fromDate" type="date" required />
-              </label>
-              <label>
-                <span><i data-lucide="calendar-days"></i>Đến</span>
-                <input id="toDate" type="date" required />
-              </label>
-              <button class="info-search" id="repairInfoSearch" type="submit">
-                <i data-lucide="search"></i>
-                Tìm kiếm
-              </button>
-              <p class="info-status" id="repairInfoStatus" aria-live="polite"></p>
-            </form>
-          </div>
-
-          <section class="repair-list" id="repairList" aria-label="Danh sách máy hư"></section>
         </section>
 
         <section class="page-view" id="summaryReportView">
