@@ -93,7 +93,7 @@ button {
   display: flex;
   align-items: center;
   gap: 9px;
-  min-height: 72px;
+  min-height: 50px;
   padding: 12px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
@@ -946,9 +946,51 @@ fieldset input {
   min-width: 1080px;
 }
 
+.spare-table-wrap {
+  padding: 8px;
+}
+
+.spare-table th,
+.spare-table td {
+  text-align: center;
+}
+
 .spare-table td:nth-child(3) {
   white-space: normal;
   min-width: 260px;
+}
+
+.spare-table .spare-image-cell {
+  width: 164px;
+  min-width: 164px;
+  padding: 10px 14px;
+}
+
+.spare-part-image {
+  display: block;
+  margin: 0 auto;
+  width: 140px;
+  height: 80px;
+  object-fit: cover;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.spare-image-empty {
+  display: inline-flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  min-height: 50px;
+  padding: 6px;
+  border: 1px dashed #c9d3df;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #8a97a8;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .spare-low-stock {

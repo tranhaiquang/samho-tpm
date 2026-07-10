@@ -65,6 +65,50 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
+  const getSparePartImageUrls = (itemCode) => {
+    const bucket = String(spareConfig.imageBucket || "").trim();
+    const code = String(itemCode || "").trim();
+    if (!bucket || !code) return [];
+
+    const storageUrl = config.url.replace(/\/rest\/v1\/?$/, "/storage/v1/object/public");
+    const prefix = String(spareConfig.imagePathPrefix || "").replace(/^\/+|\/+$/g, "");
+    const extensions = spareConfig.imageExtensions?.length ? spareConfig.imageExtensions : ["webp", "png", "jpg", "jpeg"];
+    return extensions.map((extension) => {
+      const fileName = `${code}.${String(extension).replace(/^\./, "")}`;
+      const objectPath = [prefix, fileName].filter(Boolean).map(encodeURIComponent).join("/");
+      return `${storageUrl}/${encodeURIComponent(bucket)}/${objectPath}`;
+    });
+  };
+
+  const createImageCell = (itemCode) => {
+    const cell = document.createElement("td");
+    cell.className = "spare-image-cell";
+    const urls = getSparePartImageUrls(itemCode);
+
+    if (!urls.length) {
+      cell.innerHTML = '<span class="spare-image-empty">No image</span>';
+      return cell;
+    }
+
+    const image = document.createElement("img");
+    image.className = "spare-part-image";
+    image.alt = `Spare part ${text(itemCode, "image")}`;
+    image.loading = "lazy";
+    let imageIndex = 0;
+    image.src = urls[imageIndex];
+    image.addEventListener("error", () => {
+      imageIndex += 1;
+      if (imageIndex < urls.length) {
+        image.src = urls[imageIndex];
+      } else {
+        image.remove();
+        cell.innerHTML = '<span class="spare-image-empty">No image</span>';
+      }
+    });
+    cell.appendChild(image);
+    return cell;
+  };
+
   const fetchJson = async (url) => {
     const response = await fetch(url, {
       headers: {
@@ -376,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <tr>
             <th>ID</th>
             <th>Item Code</th>
+            <th>Image</th>
             <th>Name Vietnamese</th>
             <th>Safety Stock</th>
             <th>On Hand</th>
@@ -395,10 +440,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const status = stockStatus(safetyStock, onHand);
       const tr = document.createElement("tr");
       if (status.className === "pending") tr.className = "spare-low-stock";
+      const itemCode = readField(row, "itemCode");
 
       tr.innerHTML = `
         <td>${text(readField(row, "id"))}</td>
-        <td><strong>${text(readField(row, "itemCode"))}</strong></td>
+        <td><strong>${text(itemCode)}</strong></td>
         <td>${text(readField(row, "nameVietnamese"))}</td>
         <td>${safetyStock.toLocaleString()}</td>
         <td>${onHand.toLocaleString()}</td>
@@ -412,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </td>
       `;
 
+      tr.insertBefore(createImageCell(itemCode), tr.children[2]);
       tr.querySelector(".spare-edit")?.addEventListener("click", () => openModal(row));
       tbody.appendChild(tr);
     });

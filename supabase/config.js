@@ -68,6 +68,9 @@ window.SAMHO_SUPABASE = {
     table: "spare_parts",
     tableCandidates: ["spare_parts", "sparepart", "spare_part", "Sparepart", "Spare part", "Spare parts"],
     pageSize: 1000,
+    imageBucket: "spare_parts_img",
+    imagePathPrefix: "",
+    imageExtensions: ["webp", "png", "jpg", "jpeg"],
     insertMap: {
       plant: "plant",
       itemCode: "item_code",
