@@ -276,6 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let scanStream = null;
   let scanTimer = null;
   let barcodeDetector = null;
+  let zxingReader = null;
+  let zxingControls = null;
 
   const stopScanner = () => {
     const modal = document.getElementById("scanModal");
@@ -286,8 +288,16 @@ document.addEventListener("DOMContentLoaded", () => {
       scanTimer = null;
     }
 
+    zxingControls?.stop();
+    zxingControls = null;
     scanStream?.getTracks().forEach((track) => track.stop());
     scanStream = null;
+
+    const video = modal?.querySelector("#scanVideo");
+    if (video) {
+      video.pause();
+      video.srcObject = null;
+    }
   };
 
   const setScanStatus = (message, type = "idle") => {
@@ -304,14 +314,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!codeInput) return;
 
-    if (!("BarcodeDetector" in window)) {
-      setSearchStatus("Barcode scanning is not supported by this browser.", "warning");
+    const supportsNativeScanner = "BarcodeDetector" in window;
+    const supportsZxingScanner = Boolean(window.ZXingBrowser?.BrowserMultiFormatReader);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setSearchStatus("Camera access requires HTTPS and a supported browser.", "warning");
+      return;
+    }
+    if (!supportsNativeScanner && !supportsZxingScanner) {
+      setSearchStatus("Barcode scanner is loading. Please try again.", "warning");
       return;
     }
 
     try {
       modal.classList.add("active");
       setScanStatus("Opening camera...", "loading");
+
+      const handleDetectedCode = (value) => {
+        if (!value) return;
+        codeInput.value = value.toUpperCase();
+        setSearchStatus(`Scanned ${codeInput.value}.`, "success");
+        stopScanner();
+        runSearch();
+      };
+
+      if (!supportsNativeScanner) {
+        zxingReader = zxingReader || new window.ZXingBrowser.BrowserMultiFormatReader();
+        zxingControls = await zxingReader.decodeFromConstraints(
+          {
+            audio: false,
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            }
+          },
+          video,
+          (result) => handleDetectedCode(result?.getText()?.trim())
+        );
+        setScanStatus("Point the camera at a barcode.", "idle");
+        return;
+      }
 
       barcodeDetector =
         barcodeDetector ||
@@ -320,7 +362,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
       scanStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
         audio: false
       });
       video.srcObject = scanStream;
@@ -333,13 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const codes = await barcodeDetector.detect(video);
         if (!codes.length) return;
 
-        const value = codes[0].rawValue?.trim();
-        if (!value) return;
-
-        codeInput.value = value.toUpperCase();
-        setSearchStatus(`Scanned ${codeInput.value}.`, "success");
-        stopScanner();
-        runSearch();
+        handleDetectedCode(codes[0].rawValue?.trim());
       }, 450);
     } catch (error) {
       stopScanner();
