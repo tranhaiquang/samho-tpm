@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterForm = document.getElementById("sparePartsFilter");
   const plantSelect = document.getElementById("sparePlantSelect");
   const searchInput = document.getElementById("spareSearchInput");
+  const statusSelect = document.getElementById("spareStatusSelect");
   const refreshButton = document.getElementById("spareRefreshButton");
   const addButton = document.getElementById("spareAddButton");
   const status = document.getElementById("sparePartsStatus");
@@ -450,16 +451,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const getFilteredRows = () => {
     const plant = plantSelect.value;
     const keyword = searchInput.value.trim().toLowerCase();
+    const selectedStatus = statusSelect?.value || "";
+    const selectedStatusClass = { low: "pending", ok: "done" }[selectedStatus];
 
     return spareRows.filter((row) => {
       const rowPlant = text(readField(row, "plant"), "Unknown plant");
+      const rowStatus = stockStatus(readField(row, "safetyStock"), readField(row, "onHand")).className;
       const haystack = [
         readField(row, "itemCode"),
         readField(row, "nameVietnamese"),
         readField(row, "location")
       ].join(" ").toLowerCase();
 
-      return (!plant || rowPlant === plant) && (!keyword || haystack.includes(keyword));
+      return (
+        (!plant || rowPlant === plant) &&
+        (!keyword || haystack.includes(keyword)) &&
+        (!selectedStatus || rowStatus === selectedStatusClass)
+      );
     });
   };
 
@@ -607,6 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   plantSelect.addEventListener("change", () => renderRows(1));
   searchInput.addEventListener("input", () => renderRows(1));
+  statusSelect?.addEventListener("change", () => renderRows(1));
   addButton?.addEventListener("click", () => openModal());
 
   loadSpareParts();

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("repairList");
   const status = document.getElementById("repairInfoStatus");
   const searchButton = document.getElementById("repairInfoSearch");
+  const exportButton = document.getElementById("repairInfoExport");
   const pageSize = 10;
   let currentRecords = [];
   let currentMachineMap = new Map();
@@ -16,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const setStatus = (message, type = "idle") => {
     status.textContent = message;
     status.dataset.type = type;
+  };
+
+  const updateExportState = () => {
+    if (exportButton) exportButton.disabled = !currentRecords.length;
   };
 
   setStatus("", "idle");
@@ -572,6 +577,58 @@ document.addEventListener("DOMContentLoaded", () => {
     list.appendChild(pagination);
   };
 
+  const exportRecords = () => {
+    if (!currentRecords.length) {
+      setStatus("Search for repair records before exporting.", "warning");
+      return;
+    }
+
+    if (!window.XLSX) {
+      setStatus("Excel export is unavailable. Please refresh the page and try again.", "error");
+      return;
+    }
+
+    const rows = currentRecords.map((record) => {
+      const itemCode = getRecordValue(record, ["item_code", "ITEM_CODE"]);
+      const machine = currentMachineMap.get(itemCode) || record;
+      const reportedAt = getRecordValue(record, ["start_datetime"]);
+      const repairStartedAt = getRecordValue(record, ["fix_datetime"]);
+      const repairedAt = getRecordValue(record, ["end_datetime"]);
+
+      return {
+        ID: record.id || "",
+        "Item Code": itemCode,
+        "Machine Name": getMachineValue(machine, "machineName"),
+        Plant: getRecordValue(record, ["plant", "PLANT"]),
+        Section: getRecordValue(record, ["section", "SECTION"]),
+        Place: getRecordValue(record, ["place", "PLACE"]),
+        "Reported At": formatDateTime(reportedAt),
+        "Repair Started At": formatDateTime(repairStartedAt),
+        "Repaired At": formatDateTime(repairedAt),
+        "Total Downtime": record.total_downtime ?? "",
+        Issue: getRecordValue(record, ["issue", "issue_nm_vn"]),
+        "Other Issue": getRecordValue(record, ["other_issue", "other_reason"]),
+        Reason: getRecordValue(record, ["reason", "reason_nm_vn"]),
+        Solve: getRecordValue(record, ["solve", "solve_nm_en"]),
+        Technician: record.technician || "",
+        Status: repairedAt ? "Completed" : "Pending"
+      };
+    });
+
+    const worksheet = window.XLSX.utils.json_to_sheet(rows);
+    worksheet["!cols"] = [
+      { wch: 10 }, { wch: 16 }, { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 18 },
+      { wch: 19 }, { wch: 19 }, { wch: 19 }, { wch: 16 }, { wch: 18 }, { wch: 20 },
+      { wch: 24 }, { wch: 18 }, { wch: 18 }, { wch: 14 }
+    ];
+    const workbook = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(workbook, worksheet, "Repair Records");
+
+    const fromDate = document.getElementById("fromDate")?.value || "records";
+    const toDate = document.getElementById("toDate")?.value || "";
+    window.XLSX.writeFile(workbook, `repair-records_${fromDate}${toDate ? `_to_${toDate}` : ""}.xlsx`);
+  };
+
   const searchRecords = async () => {
     const fromDate = document.getElementById("fromDate").value;
     const toDate = document.getElementById("toDate").value;
@@ -598,8 +655,12 @@ document.addEventListener("DOMContentLoaded", () => {
       currentRecords = records;
       currentMachineMap = machines;
       renderRecords(currentRecords, currentMachineMap, 1);
+      updateExportState();
       setStatus(`Found ${records.length} repair records.`, "success");
     } catch (error) {
+      currentRecords = [];
+      currentMachineMap = new Map();
+      updateExportState();
       list.innerHTML = "";
       setStatus(error.message, "error");
     } finally {
@@ -619,6 +680,7 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     searchRecords();
   });
+  exportButton?.addEventListener("click", exportRecords);
 
   document.getElementById("infoPlantTrigger")?.addEventListener("click", togglePlantDropdown);
 
