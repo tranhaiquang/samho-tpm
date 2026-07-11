@@ -36,7 +36,7 @@
             Maintenance
             <i data-lucide="chevron-down"></i>
           </button>
-          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>RM</a>
+          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
           <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
         </section>
 
@@ -86,6 +86,20 @@
               <label>
                 <span><i data-lucide="calendar-days"></i>Đến</span>
                 <input id="toDate" type="date" required />
+              </label>
+              <label>
+                <span><i data-lucide="scan-line"></i>Item Code</span>
+                <input id="infoItemCode" type="search" placeholder="ITEM CODE" />
+              </label>
+              <label>
+                <span><i data-lucide="factory"></i>Plant</span>
+                <div class="scroll-select" id="infoPlantPicker">
+                  <button class="scroll-select-trigger" id="infoPlantTrigger" type="button" aria-expanded="false">
+                    ALL PLANT
+                  </button>
+                  <input id="infoPlant" type="hidden" value="" />
+                  <div class="scroll-select-menu" id="infoPlantMenu" role="listbox" aria-label="Plant options"></div>
+                </div>
               </label>
               <button class="info-search" id="repairInfoSearch" type="submit">
                 <i data-lucide="search"></i>

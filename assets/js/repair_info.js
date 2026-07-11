@@ -93,6 +93,116 @@ document.addEventListener("DOMContentLoaded", () => {
     return response.json();
   };
 
+  const normalizeSearch = (value) => String(value || "").trim().toLowerCase();
+  const allPlantLabel = "ALL PLANT";
+
+  const plantSortRank = (plant) => {
+    const value = normalizeSearch(plant);
+    if (value === "other") return 2;
+    return value.startsWith("plant") ? 0 : 1;
+  };
+
+  const filterRepairRecords = (records, filters = {}) => {
+    const itemCodeFilter = normalizeSearch(filters.itemCode);
+    const plantFilter = normalizeSearch(filters.plant);
+
+    return records.filter((record) => {
+      const itemCode = normalizeSearch(getRecordValue(record, ["item_code", "ITEM_CODE"]));
+      const plant = normalizeSearch(getRecordValue(record, ["plant", "PLANT"]));
+
+      return (!itemCodeFilter || itemCode.includes(itemCodeFilter)) && (!plantFilter || plant === plantFilter);
+    });
+  };
+
+  const populatePlantOptions = (plants) => {
+    const plantInput = document.getElementById("infoPlant");
+    const plantMenu = document.getElementById("infoPlantMenu");
+    const plantTrigger = document.getElementById("infoPlantTrigger");
+    if (!plantInput || !plantMenu || !plantTrigger) return;
+
+    const previous = plantInput.value;
+    const plantOptions = [...new Set(plants.map((plant) => String(plant || "").trim()).filter(Boolean))]
+      .sort((a, b) => {
+        const rankDifference = plantSortRank(a) - plantSortRank(b);
+        return rankDifference || String(a).localeCompare(String(b), undefined, { numeric: true });
+      });
+
+    const options = ["", ...plantOptions];
+    plantMenu.innerHTML = "";
+    options.forEach((plant) => {
+      const option = document.createElement("button");
+      const isActive = plant === previous;
+      option.className = `scroll-select-option${isActive ? " active" : ""}`;
+      option.type = "button";
+      option.dataset.value = plant;
+      option.role = "option";
+      option.ariaSelected = String(isActive);
+      option.textContent = plant || allPlantLabel;
+      option.addEventListener("click", () => {
+        plantInput.value = plant;
+        plantTrigger.textContent = plant || allPlantLabel;
+        closePlantDropdown();
+        if (currentRecords.length) searchRecords();
+      });
+      plantMenu.appendChild(option);
+    });
+
+    if (plantOptions.includes(previous)) {
+      plantInput.value = previous;
+      plantTrigger.textContent = previous;
+    } else {
+      plantInput.value = "";
+      plantTrigger.textContent = allPlantLabel;
+    }
+  };
+
+  const closePlantDropdown = () => {
+    const plantPicker = document.getElementById("infoPlantPicker");
+    const plantTrigger = document.getElementById("infoPlantTrigger");
+    plantPicker?.classList.remove("open");
+    plantTrigger?.setAttribute("aria-expanded", "false");
+  };
+
+  const togglePlantDropdown = () => {
+    const plantPicker = document.getElementById("infoPlantPicker");
+    const plantTrigger = document.getElementById("infoPlantTrigger");
+    if (!plantPicker || !plantTrigger) return;
+
+    const isOpen = plantPicker.classList.toggle("open");
+    plantTrigger.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  const loadPlantOptions = async () => {
+    const pageSize = 1000;
+    const rows = [];
+
+    for (let from = 0; ; from += pageSize) {
+      const params = new URLSearchParams({
+        select: "plant",
+        order: "plant.asc"
+      });
+      const response = await fetch(`${config.url}/${config.repairInfo.table}?${params}`, {
+        headers: {
+          apikey: config.anonKey,
+          Authorization: `Bearer ${config.anonKey}`,
+          Range: `${from}-${from + pageSize - 1}`,
+          ...window.SAMHO_AUTH.authHeaders()
+        }
+      });
+
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || `Request failed (${response.status}).`);
+      }
+
+      const pageRows = await response.json();
+      rows.push(...pageRows);
+      if (pageRows.length < pageSize) break;
+    }
+
+    populatePlantOptions(rows.map((record) => getRecordValue(record, ["plant", "PLANT"])));
+  };
+
   const fetchRepairRecords = async (fromDate, toDate) => {
     const dateColumn = config.repairInfo.dateColumn;
     const params = new URLSearchParams({
@@ -465,6 +575,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchRecords = async () => {
     const fromDate = document.getElementById("fromDate").value;
     const toDate = document.getElementById("toDate").value;
+    const itemCode = document.getElementById("infoItemCode")?.value || "";
+    const plant = document.getElementById("infoPlant")?.value || "";
 
     if (!fromDate || !toDate) {
       setStatus("Please select both from and to dates.", "warning");
@@ -480,7 +592,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setStatus("Searching...", "loading");
 
     try {
-      const records = await fetchRepairRecords(fromDate, toDate);
+      const dateRecords = await fetchRepairRecords(fromDate, toDate);
+      const records = filterRepairRecords(dateRecords, { itemCode, plant });
       const machines = await fetchMachines(records.map((record) => getRecordValue(record, ["item_code", "ITEM_CODE"])));
       currentRecords = records;
       currentMachineMap = machines;
@@ -496,12 +609,20 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const today = new Date();
-  const yearStart = new Date(today.getFullYear(), 0, 1);
-  document.getElementById("fromDate").value = formatDateInput(yearStart);
+  document.getElementById("fromDate").value = formatDateInput(today);
   document.getElementById("toDate").value = formatDateInput(today);
+  loadPlantOptions().catch((error) => {
+    setStatus(`Could not load plant list: ${error.message}`, "warning");
+  });
 
   filterForm.addEventListener("submit", (event) => {
     event.preventDefault();
     searchRecords();
+  });
+
+  document.getElementById("infoPlantTrigger")?.addEventListener("click", togglePlantDropdown);
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#infoPlantPicker")) closePlantDropdown();
   });
 });

@@ -616,6 +616,7 @@ fieldset input {
   padding: 20px 22px;
   border: 1px solid #edf0f4;
   border-radius: 8px;
+  overflow: visible;
 }
 
 .info-filter label {
@@ -641,6 +642,78 @@ fieldset input {
 .info-filter input {
   width: min(250px, 100%);
   height: 32px;
+}
+
+.scroll-select {
+  position: relative;
+  z-index: 35;
+  width: min(250px, 100%);
+}
+
+.scroll-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  padding: 0 34px 0 12px;
+  color: #101828;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.scroll-select-trigger::after {
+  position: absolute;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #667085;
+  border-bottom: 2px solid #667085;
+  content: "";
+  transform: rotate(45deg) translateY(-2px);
+}
+
+.scroll-select-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 6px);
+  left: 0;
+  display: none;
+  width: 100%;
+  max-height: min(360px, 55vh);
+  overflow-y: auto;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 18px 38px rgba(16, 24, 40, 0.14);
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.scroll-select.open .scroll-select-menu {
+  display: block;
+}
+
+.scroll-select-option {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 9px 12px;
+  color: #101828;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.scroll-select-option:hover,
+.scroll-select-option.active {
+  color: var(--blue);
+  background: #eef6ff;
 }
 
 .info-search {
