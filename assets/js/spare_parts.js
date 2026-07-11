@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let spareRows = [];
   let currentPage = 1;
   let activeRecord = null;
+  let userCanEdit = false;
 
   const setStatus = (message, type = "idle") => {
     status.textContent = message;
@@ -43,6 +44,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const result = String(value ?? "").trim();
     return result || fallback;
   };
+
+  const normalizeUserValue = (value) => String(value || "").trim().toLowerCase();
+
+  const getCurrentUserIdentity = () => {
+    const user = window.SAMHO_AUTH?.currentUser?.();
+    const email = normalizeUserValue(user?.email);
+    const loginId = normalizeUserValue(window.SAMHO_AUTH?.currentUserId?.());
+
+    return {
+      email,
+      userId: loginId || email.split("@")[0]
+    };
+  };
+
+  const applyEditPermission = () => {
+    if (!addButton) return;
+    addButton.hidden = !userCanEdit;
+    addButton.disabled = !userCanEdit;
+  };
+
+  applyEditPermission();
 
   const compareIds = (a, b) => {
     const aValue = readField(a, "id");
@@ -147,6 +169,50 @@ document.addEventListener("DOMContentLoaded", () => {
     return body ? JSON.parse(body) : null;
   };
 
+  const canEditFromPermissionRow = (row) => {
+    if (!row) return false;
+    const column = spareConfig.permissions?.canEditColumn;
+    if (!column || row[column] === undefined || row[column] === null) return true;
+    return row[column] === true || row[column] === 1 || normalizeUserValue(row[column]) === "true";
+  };
+
+  const loadEditPermission = async () => {
+    const permission = spareConfig.permissions || {};
+    const table = permission.table;
+    userCanEdit = false;
+
+    if (!table) {
+      applyEditPermission();
+      return;
+    }
+
+    const identity = getCurrentUserIdentity();
+    const checks = [
+      { column: permission.userIdColumn, value: identity.userId },
+      { column: permission.emailColumn, value: identity.email }
+    ].filter((check) => check.column && check.value);
+
+    try {
+      for (const check of checks) {
+        const params = new URLSearchParams({
+          select: permission.canEditColumn || "*",
+          [check.column]: `eq.${check.value}`,
+          limit: "1"
+        });
+        const rows = await fetchJson(`${config.url}/${encodeURIComponent(table)}?${params}`);
+        if (rows.some(canEditFromPermissionRow)) {
+          userCanEdit = true;
+          break;
+        }
+      }
+    } catch (error) {
+      console.warn("Could not check spare part edit permission.", error);
+      userCanEdit = false;
+    } finally {
+      applyEditPermission();
+    }
+  };
+
   const patchSparePart = async (params, payload) => {
     return requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
       method: "PATCH",
@@ -233,6 +299,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("sparePartModal");
     const modalStatus = document.getElementById("sparePartModalStatus");
     const saveButton = document.getElementById("sparePartSave");
+
+    if (!userCanEdit) {
+      modalStatus.textContent = "You do not have permission to edit spare part records.";
+      return;
+    }
 
     modalStatus.textContent = "Saving...";
     saveButton.disabled = true;
@@ -354,6 +425,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const openModal = (row = null) => {
+    if (!userCanEdit) {
+      setStatus("You can view spare parts, but your account cannot edit records.", "warning");
+      return;
+    }
+
     activeRecord = row;
     const modal = ensureModal();
     const isEdit = Boolean(row);
@@ -426,7 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>On Hand</th>
             <th>Location</th>
             <th>Status</th>
-            <th>Edit</th>
+            ${userCanEdit ? "<th>Edit</th>" : ""}
           </tr>
         </thead>
         <tbody></tbody>
@@ -450,12 +526,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${onHand.toLocaleString()}</td>
         <td>${text(readField(row, "location"))}</td>
         <td><span class="repair-table-status ${status.className}">${status.label}</span></td>
-        <td>
-          <button class="repair-edit spare-edit" type="button">
-            <i data-lucide="square-pen"></i>
-            Edit
-          </button>
-        </td>
+        ${userCanEdit
+          ? `<td>
+              <button class="repair-edit spare-edit" type="button">
+                <i data-lucide="square-pen"></i>
+                Edit
+              </button>
+            </td>`
+          : ""}
       `;
 
       tr.insertBefore(createImageCell(itemCode), tr.children[2]);
@@ -490,7 +568,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     list.appendChild(pagination);
-    setStatus(`Showing ${rows.length.toLocaleString()} items`, "success");
+    setStatus(
+      userCanEdit
+        ? `Showing ${rows.length.toLocaleString()} items`
+        : `Showing ${rows.length.toLocaleString()} items. View-only account.`,
+      "success"
+    );
   };
 
   const loadSpareParts = async () => {
@@ -503,6 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setStatus("Loading spare parts...", "loading");
 
     try {
+      await loadEditPermission();
       spareRows = await fetchSpareParts();
       populatePlants(spareRows);
       renderRows();

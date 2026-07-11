@@ -71,6 +71,12 @@ window.SAMHO_SUPABASE = {
     imageBucket: "spare_parts_img",
     imagePathPrefix: "",
     imageExtensions: ["webp", "png", "jpg", "jpeg"],
+    permissions: {
+      table: "spare_part_editors",
+      userIdColumn: "user_id",
+      emailColumn: "email",
+      canEditColumn: "can_edit"
+    },
     insertMap: {
       plant: "plant",
       itemCode: "item_code",

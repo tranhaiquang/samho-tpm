@@ -42,6 +42,15 @@
     return value.includes("@") ? value : `${value}@email.com`;
   };
 
+  const currentUser = () => getSession()?.user || null;
+
+  const currentUserId = () => {
+    const user = currentUser();
+    const email = String(user?.email || "").trim();
+    const loginId = String(user?.user_metadata?.login_id || user?.user_metadata?.user_id || "").trim();
+    return loginId || email.split("@")[0] || "";
+  };
+
   const login = async (userId, password) => {
     const email = toAuthEmail(userId);
 
@@ -85,6 +94,8 @@
   window.SAMHO_AUTH = {
     authHeaders,
     clearSession,
+    currentUser,
+    currentUserId,
     getSession,
     homePage: HOME_PAGE,
     isSessionValid,
