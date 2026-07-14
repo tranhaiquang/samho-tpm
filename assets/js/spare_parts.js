@@ -81,7 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const stockStatus = (safetyStock, onHand) => {
-    const isLow = toNumber(onHand) < toNumber(safetyStock);
+    const safety = toNumber(safetyStock);
+    const onHandQuantity = toNumber(onHand);
+    const isLow = onHandQuantity < safety || (onHandQuantity === 0 && safety === 0);
     return {
       className: isLow ? "pending" : "done",
       label: isLow ? "Low stock" : "OK"
@@ -201,7 +203,10 @@ document.addEventListener("DOMContentLoaded", () => {
           limit: "1"
         });
         const rows = await fetchJson(`${config.url}/${encodeURIComponent(table)}?${params}`);
-        if (rows.some(canEditFromPermissionRow)) {
+        const hasMatchingPermission = rows.some(
+          (row) => normalizeUserValue(row?.[check.column]) === normalizeUserValue(check.value) && canEditFromPermissionRow(row)
+        );
+        if (hasMatchingPermission) {
           userCanEdit = true;
           break;
         }
@@ -260,6 +265,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (plants.includes(previous)) plantSelect.value = previous;
   };
 
+  const populateModalOptions = (modal) => {
+    const setOptions = (selector, values) => {
+      const list = modal.querySelector(selector);
+      if (!list) return;
+
+      list.innerHTML = "";
+      [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((value) => {
+          const option = document.createElement("option");
+          option.value = value;
+          list.appendChild(option);
+        });
+    };
+
+    setOptions("#spareFormPlantOptions", spareRows.map((row) => readField(row, "plant")));
+    setOptions("#spareFormLocationOptions", spareRows.map((row) => readField(row, "location")));
+  };
+
   const buildPayload = () => {
     const form = document.getElementById("sparePartForm");
     const formData = new FormData(form);
@@ -272,8 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
       location: text(formData.get("location"), "")
     };
 
-    if (!values.plant || !values.itemCode || !values.nameVietnamese) {
-      throw new Error("Plant, item code, and name are required.");
+    if (!values.plant || !values.itemCode || !values.nameVietnamese || !values.location) {
+      throw new Error("Plant, item code, name, and location are required.");
     }
 
     if (!Number.isInteger(values.safetyStock) || values.safetyStock < 0 || !Number.isInteger(values.onHand) || values.onHand < 0) {
@@ -288,12 +312,70 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+    const nextId = spareRows
+      .map((row) => Number(readField(row, "id")))
+      .filter((id) => Number.isInteger(id) && id >= 0)
+      .reduce((maximum, id) => Math.max(maximum, id), 0) + 1;
     const map = spareConfig.insertMap;
     return Object.fromEntries(
       Object.entries(map || {})
         .filter(([, column]) => column)
-        .map(([field, column]) => [column, values[field]])
+        .map(([field, column]) => [column, field === "id" ? nextId : values[field]])
     );
+  };
+
+  const getSelectedImage = () => document.getElementById("spareFormImage")?.files?.[0] || null;
+
+  const uploadSparePartImage = async (itemCode, imageFile) => {
+    if (!imageFile) return;
+
+    const isJpeg = imageFile.type === "image/jpeg" || /\.jpe?g$/i.test(imageFile.name);
+    if (!isJpeg) throw new Error("Please select a JPG image.");
+
+    const bucket = String(spareConfig.imageBucket || "").trim();
+    if (!bucket) throw new Error("Add the spare part image bucket in supabase/config.js.");
+
+    const prefix = String(spareConfig.imagePathPrefix || "").replace(/^\/+|\/+$/g, "");
+    const objectPath = [prefix, `${itemCode}.jpg`].filter(Boolean).map(encodeURIComponent).join("/");
+    const storageUrl = config.url.replace(/\/rest\/v1\/?$/, "/storage/v1/object");
+    const response = await fetch(`${storageUrl}/${encodeURIComponent(bucket)}/${objectPath}`, {
+      method: "POST",
+      headers: {
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders(),
+        "Content-Type": "image/jpeg",
+        "x-upsert": "true"
+      },
+      body: imageFile
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Image upload failed (${response.status}).`);
+    }
+  };
+
+  const deleteSparePartImage = async (itemCode) => {
+    const bucket = String(spareConfig.imageBucket || "").trim();
+    if (!bucket || !itemCode) return;
+
+    const prefix = String(spareConfig.imagePathPrefix || "").replace(/^\/+|\/+$/g, "");
+    const objectPath = [prefix, `${itemCode}.jpg`].filter(Boolean).map(encodeURIComponent).join("/");
+    const storageUrl = config.url.replace(/\/rest\/v1\/?$/, "/storage/v1/object");
+    const response = await fetch(`${storageUrl}/${encodeURIComponent(bucket)}/${objectPath}`, {
+      method: "DELETE",
+      headers: {
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders()
+      }
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Image delete failed (${response.status}).`);
+    }
   };
 
   const saveSparePart = async () => {
@@ -311,6 +393,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const payload = buildPayload();
+      const itemCode = text(document.getElementById("spareFormItemCode")?.value, "").toUpperCase();
+      const imageFile = getSelectedImage();
       if (activeRecord) {
         const idColumn = getColumnName(activeRecord, "id");
         const idValue = readField(activeRecord, "id");
@@ -322,7 +406,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (itemCodeColumn && itemCodeValue) {
           await patchSparePart(new URLSearchParams({ [itemCodeColumn]: `eq.${itemCodeValue}` }), payload);
         }
+        if (imageFile) {
+          modalStatus.textContent = "Uploading image...";
+          await uploadSparePartImage(itemCode, imageFile);
+        }
       } else {
+        if (!imageFile) throw new Error("A JPG image is required for a new spare part.");
+        if (spareRows.some((row) => text(readField(row, "itemCode"), "").toUpperCase() === itemCode)) {
+          throw new Error("A spare part with this item code already exists.");
+        }
+
+        modalStatus.textContent = "Uploading image...";
+        await uploadSparePartImage(itemCode, imageFile);
+        modalStatus.textContent = "Saving...";
         await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}`, {
           method: "POST",
           headers: { Prefer: "return=minimal" },
@@ -362,7 +458,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="repair-modal-grid spare-modal-grid">
           <label>
             <span>Plant</span>
-            <input name="plant" id="spareFormPlant" type="text" required />
+            <input name="plant" id="spareFormPlant" type="text" list="spareFormPlantOptions" required />
+            <datalist id="spareFormPlantOptions"></datalist>
           </label>
           <label>
             <span>Item Code</span>
@@ -371,6 +468,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <label class="wide">
             <span>Name Vietnamese</span>
             <input name="nameVietnamese" id="spareFormName" type="text" required />
+          </label>
+          <label class="wide">
+            <span>Image (JPG)</span>
+            <input name="image" id="spareFormImage" type="file" accept="image/jpeg,.jpg,.jpeg" />
           </label>
           <label>
             <span>Safety Stock</span>
@@ -386,7 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <label>
             <span>Location</span>
-            <input name="location" id="spareFormLocation" type="text" />
+            <input name="location" id="spareFormLocation" type="text" list="spareFormLocationOptions" required />
+            <datalist id="spareFormLocationOptions"></datalist>
           </label>
         </div>
         <footer class="repair-modal-footer">
@@ -435,17 +537,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const modal = ensureModal();
     const isEdit = Boolean(row);
 
+    populateModalOptions(modal);
     modal.querySelector("#sparePartEyebrow").textContent = isEdit ? `ID ${text(readField(row, "id"))}` : "New spare part";
     modal.querySelector("#sparePartTitle").textContent = isEdit ? "Edit spare part" : "Add spare part";
     modal.querySelector("#spareFormPlant").value = isEdit ? text(readField(row, "plant"), "") : plantSelect.value;
     modal.querySelector("#spareFormItemCode").value = isEdit ? text(readField(row, "itemCode"), "") : "";
     modal.querySelector("#spareFormName").value = isEdit ? text(readField(row, "nameVietnamese"), "") : "";
+    modal.querySelector("#spareFormImage").value = "";
+    modal.querySelector("#spareFormImage").required = !isEdit;
     modal.querySelector("#spareFormSafety").value = isEdit ? toNumber(readField(row, "safetyStock")) : 0;
     modal.querySelector("#spareFormOnHand").value = isEdit ? toNumber(readField(row, "onHand")) : 0;
     modal.querySelector("#spareFormLocation").value = isEdit ? text(readField(row, "location"), "") : "";
     modal.querySelector("#sparePartModalStatus").textContent = "";
     updateModalStockStatus(modal);
     modal.classList.add("active");
+  };
+
+  const deleteSparePart = async (row) => {
+    if (!userCanEdit) {
+      setStatus("You do not have permission to delete spare part records.", "warning");
+      return;
+    }
+
+    const idColumn = getColumnName(row, "id");
+    const idValue = readField(row, "id");
+    const itemCode = text(readField(row, "itemCode"), "");
+    if (!idColumn || !idValue) {
+      setStatus("Missing spare part ID.", "error");
+      return;
+    }
+    if (!window.confirm(`Delete spare part ${itemCode || idValue}? This cannot be undone.`)) return;
+
+    setStatus("Deleting spare part...", "loading");
+    try {
+      const params = new URLSearchParams({ [idColumn]: `eq.${idValue}` });
+      await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
+        method: "DELETE",
+        headers: { Prefer: "return=minimal" }
+      });
+
+      let imageDeleted = true;
+      try {
+        await deleteSparePartImage(itemCode);
+      } catch (imageError) {
+        console.warn("Spare part image was not deleted.", imageError);
+        imageDeleted = false;
+      }
+
+      await loadSpareParts();
+      setStatus(
+        imageDeleted
+          ? `Deleted spare part ${itemCode || idValue}.`
+          : `Deleted spare part ${itemCode || idValue}, but its image could not be deleted.`,
+        imageDeleted ? "success" : "warning"
+      );
+    } catch (error) {
+      setStatus(error.message, "error");
+    }
   };
 
   const getFilteredRows = () => {
@@ -473,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderStats = (rows) => {
     const totalOnHand = rows.reduce((sum, row) => sum + toNumber(readField(row, "onHand")), 0);
-    const belowSafety = rows.filter((row) => toNumber(readField(row, "onHand")) < toNumber(readField(row, "safetyStock"))).length;
+    const belowSafety = rows.filter((row) => stockStatus(readField(row, "safetyStock"), readField(row, "onHand")).className === "pending").length;
 
     document.getElementById("spareTotalItems").textContent = rows.length.toLocaleString();
     document.getElementById("spareTotalOnHand").textContent = totalOnHand.toLocaleString();
@@ -510,7 +658,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>On Hand</th>
             <th>Location</th>
             <th>Status</th>
-            ${userCanEdit ? "<th>Edit</th>" : ""}
+            ${userCanEdit ? "<th>Actions</th>" : ""}
           </tr>
         </thead>
         <tbody></tbody>
@@ -536,16 +684,21 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><span class="repair-table-status ${status.className}">${status.label}</span></td>
         ${userCanEdit
           ? `<td>
-              <button class="repair-edit spare-edit" type="button">
-                <i data-lucide="square-pen"></i>
-                Edit
-              </button>
+              <div class="spare-row-actions">
+                <button class="repair-edit spare-edit" type="button" aria-label="Edit spare part" title="Edit">
+                  <i data-lucide="square-pen"></i>
+                </button>
+                <button class="repair-edit spare-delete" type="button" aria-label="Delete spare part" title="Delete">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
             </td>`
           : ""}
       `;
 
       tr.insertBefore(createImageCell(itemCode), tr.children[2]);
       tr.querySelector(".spare-edit")?.addEventListener("click", () => openModal(row));
+      tr.querySelector(".spare-delete")?.addEventListener("click", () => deleteSparePart(row));
       tbody.appendChild(tr);
     });
 
@@ -582,6 +735,8 @@ document.addEventListener("DOMContentLoaded", () => {
         : `Showing ${rows.length.toLocaleString()} items. View-only account.`,
       "success"
     );
+
+    if (window.lucide) window.lucide.createIcons();
   };
 
   const loadSpareParts = async () => {

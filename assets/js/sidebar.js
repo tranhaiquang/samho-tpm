@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
 
   const isMobileSidebar = () => window.matchMedia("(max-width: 980px)").matches;
+  if (!isMobileSidebar()) document.body.classList.add("sidebar-collapsed");
 
   document.querySelector("#menuToggle")?.addEventListener("click", () => {
     if (isMobileSidebar()) {
@@ -14,6 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".nav-head").forEach((button) => {
     button.addEventListener("click", () => {
+      if (!isMobileSidebar() && document.body.classList.contains("sidebar-collapsed")) {
+        document.body.classList.remove("sidebar-collapsed");
+        return;
+      }
+
       const group = button.closest(".nav-group");
       if (!group) return;
 

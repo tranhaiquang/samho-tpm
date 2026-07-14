@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Incoming Stock - VietNam SamHo</title>
+    <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+  </head>
+  <body class="dashboard-app incoming-stock-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
+        <div>
+          <strong>VietNam SamHo</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="wrench"></i>
+            Maintenance
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button" aria-expanded="true">
+            <i data-lucide="package-search"></i>
+            Spare Part Management
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <a href="#"><i data-lucide="factory"></i>Machine</a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
+          <a class="current" href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+        </section>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <div class="shell">
+      <main class="content">
+        <section class="info-panel spare-panel">
+          <div class="info-title">
+            <i data-lucide="truck"></i>
+            <h1>Incoming Stock</h1>
+          </div>
+          <p class="incoming-stock-note">Planned spare-part orders. This page currently uses dummy data.</p>
+        </section>
+
+        <section class="spare-summary-grid" aria-label="Incoming stock summary">
+          <article class="spare-stat">
+            <span>Open Orders</span>
+            <strong>4</strong>
+          </article>
+          <article class="spare-stat">
+            <span>Items Ordered</span>
+            <strong>775</strong>
+          </article>
+          <article class="spare-stat">
+            <span>Next Expected</span>
+            <strong>18 Jul</strong>
+          </article>
+        </section>
+
+        <section class="repair-list" aria-label="Incoming spare-part orders">
+          <div class="repair-table-wrap spare-table-wrap">
+            <table class="repair-table spare-table incoming-stock-table">
+              <thead>
+                <tr>
+                  <th>PO No.</th>
+                  <th>Item Code</th>
+                  <th>Name Vietnamese</th>
+                  <th>Plant</th>
+                  <th>Quantity</th>
+                  <th>Expected Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PO-2026-071</td>
+                  <td><strong>BRG-6204-2RS</strong></td>
+                  <td>Vòng bi 6204-2RS</td>
+                  <td>Plant 1</td>
+                  <td>120</td>
+                  <td>18 Jul 2026</td>
+                  <td><span class="repair-table-status pending">Ordered</span></td>
+                </tr>
+                <tr>
+                  <td>PO-2026-072</td>
+                  <td><strong>BELT-A-1250</strong></td>
+                  <td>Dây curoa A-1250</td>
+                  <td>Plant 2</td>
+                  <td>80</td>
+                  <td>21 Jul 2026</td>
+                  <td><span class="repair-table-status pending">Ordered</span></td>
+                </tr>
+                <tr>
+                  <td>PO-2026-073</td>
+                  <td><strong>SEN-PR18-5DN</strong></td>
+                  <td>Cảm biến tiệm cận PR18</td>
+                  <td>Plant 1</td>
+                  <td>25</td>
+                  <td>25 Jul 2026</td>
+                  <td><span class="repair-table-status done">Confirmed</span></td>
+                </tr>
+                <tr>
+                  <td>PO-2026-074</td>
+                  <td><strong>BOLT-M10X30</strong></td>
+                  <td>Bu lông M10 x 30</td>
+                  <td>Plant 3</td>
+                  <td>550</td>
+                  <td>30 Jul 2026</td>
+                  <td><span class="repair-table-status pending">Ordered</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

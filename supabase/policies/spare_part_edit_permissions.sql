@@ -26,8 +26,7 @@ using (
   exists (
     select 1
     from public.spare_part_editors editor
-    where editor.can_edit = true
-      and (
+    where (
         editor.email = auth.jwt() ->> 'email'
         or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
       )
@@ -37,10 +36,120 @@ with check (
   exists (
     select 1
     from public.spare_part_editors editor
-    where editor.can_edit = true
-      and (
+    where (
         editor.email = auth.jwt() ->> 'email'
         or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
       )
+  )
+);
+
+drop policy if exists "Spare part editors can insert spare parts" on public.spare_parts;
+create policy "Spare part editors can insert spare parts"
+on public.spare_parts
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+        editor.email = auth.jwt() ->> 'email'
+        or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+      )
+  )
+);
+
+drop policy if exists "Spare part editors can delete spare parts" on public.spare_parts;
+create policy "Spare part editors can delete spare parts"
+on public.spare_parts
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+      editor.email = auth.jwt() ->> 'email'
+      or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+    )
+  )
+);
+
+drop policy if exists "Spare part editors can read spare part images" on storage.objects;
+create policy "Spare part editors can read spare part images"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'spare_parts_img'
+  and exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+        editor.email = auth.jwt() ->> 'email'
+        or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+      )
+  )
+);
+
+drop policy if exists "Spare part editors can upload spare part images" on storage.objects;
+create policy "Spare part editors can upload spare part images"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'spare_parts_img'
+  and exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+        editor.email = auth.jwt() ->> 'email'
+        or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+      )
+  )
+);
+
+drop policy if exists "Spare part editors can replace spare part images" on storage.objects;
+create policy "Spare part editors can replace spare part images"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'spare_parts_img'
+  and exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+        editor.email = auth.jwt() ->> 'email'
+        or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+      )
+  )
+)
+with check (
+  bucket_id = 'spare_parts_img'
+  and exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+        editor.email = auth.jwt() ->> 'email'
+        or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+      )
+  )
+);
+
+drop policy if exists "Spare part editors can delete spare part images" on storage.objects;
+create policy "Spare part editors can delete spare part images"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'spare_parts_img'
+  and exists (
+    select 1
+    from public.spare_part_editors editor
+    where (
+      editor.email = auth.jwt() ->> 'email'
+      or editor.user_id = split_part(auth.jwt() ->> 'email', '@', 1)
+    )
   )
 );

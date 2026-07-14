@@ -70,14 +70,14 @@ window.SAMHO_SUPABASE = {
     pageSize: 1000,
     imageBucket: "spare_parts_img",
     imagePathPrefix: "",
-    imageExtensions: ["webp", "png", "jpg", "jpeg"],
+    imageExtensions: ["jpg", "jpeg", "png", "webp"],
     permissions: {
       table: "spare_part_editors",
       userIdColumn: "user_id",
-      emailColumn: "email",
-      canEditColumn: "can_edit"
+      emailColumn: "email"
     },
     insertMap: {
+      id: "ID",
       plant: "plant",
       itemCode: "item_code",
       nameVietnamese: "name_vietnamese",

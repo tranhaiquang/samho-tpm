@@ -48,6 +48,7 @@
           </button>
           <a href="#"><i data-lucide="factory"></i>Machine</a>
           <a class="current" href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
         </section>
       </nav>
 
@@ -86,10 +87,14 @@
                 <option value="ok">OK</option>
               </select>
             </label>
-            <button class="info-search" id="spareRefreshButton" type="submit">
-              <i data-lucide="refresh-cw"></i>
-              Refresh
-            </button>
+            <div class="spare-filter-actions">
+              <button class="info-search" id="spareRefreshButton" type="submit" aria-label="Refresh spare parts" title="Refresh">
+                <i data-lucide="refresh-cw"></i>
+              </button>
+              <button class="info-search spare-add-button" id="spareAddButton" type="button" aria-label="Add spare part" title="Add spare part" hidden>
+                <i data-lucide="plus"></i>
+              </button>
+            </div>
             <p class="info-status" id="sparePartsStatus" aria-live="polite"></p>
           </form>
         </section>
