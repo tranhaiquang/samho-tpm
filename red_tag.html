@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Red Tag - Vietnam Samho</title>
+    <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="assets/js/red_tag.js" defer></script>
+  </head>
+  <body class="dashboard-app red-tag-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button"><i data-lucide="menu"></i></button>
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span>Factory System</span></div></div>
+      <nav class="nav-list">
+        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="wrench"></i>Maintenance<i data-lucide="chevron-down"></i></button><a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a><a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a></section>
+        <section class="nav-group active"><button class="nav-head selected" type="button" aria-expanded="true"><i data-lucide="package-search"></i>Spare Part Management<i data-lucide="chevron-down"></i></button><a class="current" href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a><a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a><a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a></section>
+      </nav>
+      <div class="sidebar-footer"><button class="logout sidebar-logout" type="button"><i data-lucide="log-out"></i>Logout</button></div>
+    </aside>
+    <div class="shell"><main class="content">
+      <section class="info-panel spare-panel">
+        <div class="info-title"><i data-lucide="tag"></i><h1>Red Tag</h1></div>
+        <div class="info-filter spare-filter red-tag-filter" aria-label="Filter red tag machines">
+          <label><span><i data-lucide="factory"></i>Plant</span><select id="redTagPlantFilter"><option value="PLANT A">Plant A</option><option value="PLANT B">Plant B</option><option value="PLANT F">Plant F</option></select></label>
+          <label><span><i data-lucide="search"></i>Search</span><input id="redTagSearchInput" type="search" placeholder="Machine name" /></label>
+          <div class="red-tag-filter-actions"><button class="info-search" id="redTagAddButton" type="button" aria-label="Add Red Tag record" title="Add Red Tag record"><i data-lucide="plus"></i></button></div>
+        </div>
+        <p class="info-status red-tag-status" id="redTagStatus" aria-live="polite"></p>
+      </section>
+      <section class="repair-list" aria-label="Red tag machines">
+        <div class="repair-table-wrap spare-table-wrap">
+          <table class="repair-table red-tag-table"><thead><tr><th>No.</th><th>Machine Name</th><th>Quantity</th><th>Detail</th></tr></thead><tbody id="redTagList"><tr><td colspan="4">Loading machines…</td></tr></tbody></table>
+        </div>
+      </section>
+    </main></div>
+    <div class="repair-modal" id="redTagModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-red-tag></div>
+      <section class="repair-modal-dialog red-tag-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="redTagModalTitle">
+        <header class="repair-modal-header"><h2 id="redTagModalTitle">Machine Types</h2><button class="repair-modal-close" type="button" data-close-red-tag aria-label="Close"><i data-lucide="x"></i></button></header>
+        <div class="incoming-stock-modal-list" id="redTagModalList"></div>
+      </section>
+    </div>
+    <div class="repair-modal" id="redTagAddModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-red-tag-add></div>
+      <form class="repair-modal-dialog" id="redTagAddForm">
+        <header class="repair-modal-header"><h2>Add Red Tag Record</h2><button class="repair-modal-close" type="button" data-close-red-tag-add aria-label="Close"><i data-lucide="x"></i></button></header>
+        <div class="repair-modal-grid">
+          <label><span>Plant</span><select name="plant" required><option value="PLANT A">Plant A</option><option value="PLANT B">Plant B</option><option value="PLANT F">Plant F</option></select></label>
+          <label><span>Machine Name</span><input name="machineName" type="text" required /></label>
+          <label><span>Item Code</span><input name="itemCode" type="text" required /></label>
+          <label><span>Date</span><input name="date" type="date" required /></label>
+          <label><span>Line</span><input name="line" type="text" required /></label>
+          <label><span>Status</span><select name="status" id="redTagAddStatusSelect" required><option value="Máy Dự Phòng">Máy Dự Phòng</option><option value="Máy Hư Chờ Sửa">Máy Hư Chờ Sửa</option></select></label>
+          <label id="redTagAddIssueField" hidden><span>Issue</span><input name="issue" id="redTagAddIssueInput" type="text" /></label>
+        </div>
+        <footer class="repair-modal-footer"><p class="repair-modal-status red-tag-add-status" id="redTagAddStatus" aria-live="polite"></p><button class="btn muted" type="button" data-close-red-tag-add>Cancel</button><button class="save" id="redTagAddSave" type="submit"><i data-lucide="save"></i>Save</button></footer>
+      </form>
+    </div>
+  </body>
+</html>

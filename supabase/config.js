@@ -103,6 +103,27 @@ window.SAMHO_SUPABASE = {
       location: ["location", "LOCATION", "Location"]
     }
   },
+  redTag: {
+    table: "redtag_records",
+    insertMap: {
+      plant: "plant",
+      machineName: "name_en",
+      itemCode: "item_code",
+      date: "date",
+      line: "line",
+      status: "status",
+      issue: "issue"
+    },
+    fieldMap: {
+      plant: "plant",
+      machineName: "name_en",
+      itemCode: "item_code",
+      date: "date",
+      line: "line",
+      status: "status",
+      issue: "issue"
+    }
+  },
   fieldMap: {
     itemCode: ["item_code", "ITEM_CODE"],
     machineName: ["name_en", "NAME_EN"],
