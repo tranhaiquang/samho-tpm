@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Incoming Stock - VietNam SamHo</title>
+    <title>Incoming Stock - Vietnam Samho</title>
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,133 +13,49 @@
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="assets/js/incoming_stock.js" defer></script>
   </head>
   <body class="dashboard-app incoming-stock-page">
-    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
-      <i data-lucide="menu"></i>
-    </button>
-
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button"><i data-lucide="menu"></i></button>
     <aside class="sidebar" aria-label="Primary navigation">
-      <div class="brand">
-        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
-        <div>
-          <strong>VietNam SamHo</strong>
-          <span>Factory System</span>
-        </div>
-      </div>
-
+      <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span>Factory System</span></div></div>
       <nav class="nav-list">
-        <section class="nav-group active">
-          <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="wrench"></i>
-            Maintenance
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
-          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
-        </section>
-
-        <section class="nav-group active">
-          <button class="nav-head selected" type="button" aria-expanded="true">
-            <i data-lucide="package-search"></i>
-            Spare Part Management
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <a href="#"><i data-lucide="factory"></i>Machine</a>
-          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
-          <a class="current" href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
-        </section>
+        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="wrench"></i>Maintenance<i data-lucide="chevron-down"></i></button><a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a><a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a></section>
+        <section class="nav-group active"><button class="nav-head selected" type="button" aria-expanded="true"><i data-lucide="package-search"></i>Spare Part Management<i data-lucide="chevron-down"></i></button><a href="#"><i data-lucide="factory"></i>Machine</a><a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a><a class="current" href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a></section>
       </nav>
-
-      <div class="sidebar-footer">
-        <button class="logout sidebar-logout" type="button">
-          <i data-lucide="log-out"></i>
-          Logout
-        </button>
-      </div>
+      <div class="sidebar-footer"><button class="logout sidebar-logout" type="button"><i data-lucide="log-out"></i>Logout</button></div>
     </aside>
-
-    <div class="shell">
-      <main class="content">
-        <section class="info-panel spare-panel">
-          <div class="info-title">
-            <i data-lucide="truck"></i>
-            <h1>Incoming Stock</h1>
-          </div>
-          <p class="incoming-stock-note">Planned spare-part orders. This page currently uses dummy data.</p>
-        </section>
-
-        <section class="spare-summary-grid" aria-label="Incoming stock summary">
-          <article class="spare-stat">
-            <span>Open Orders</span>
-            <strong>4</strong>
-          </article>
-          <article class="spare-stat">
-            <span>Items Ordered</span>
-            <strong>775</strong>
-          </article>
-          <article class="spare-stat">
-            <span>Next Expected</span>
-            <strong>18 Jul</strong>
-          </article>
-        </section>
-
-        <section class="repair-list" aria-label="Incoming spare-part orders">
+    <div class="shell"><main class="content">
+      <section class="info-panel spare-panel">
+        <div class="info-title"><i data-lucide="truck"></i><h1>Incoming Stock</h1></div>
+        <p class="incoming-stock-note">Select spare parts and enter the quantity you want to order.</p>
+        <div class="info-filter spare-filter incoming-stock-filter" aria-label="Filter spare parts">
+          <label><span><i data-lucide="factory"></i>Plant</span><select id="incomingPlantFilter"><option value="">All plants</option></select></label>
+          <label><span><i data-lucide="search"></i>Search</span><input id="incomingSearchInput" type="search" placeholder="Item code or Vietnamese name" /></label>
+        </div>
+        <p class="info-status incoming-stock-status" id="incomingStockStatus" aria-live="polite"></p>
+      </section>
+      <section class="repair-list" aria-label="Spare parts to order">
+        <form id="incomingStockForm">
           <div class="repair-table-wrap spare-table-wrap">
             <table class="repair-table spare-table incoming-stock-table">
-              <thead>
-                <tr>
-                  <th>PO No.</th>
-                  <th>Item Code</th>
-                  <th>Name Vietnamese</th>
-                  <th>Plant</th>
-                  <th>Quantity</th>
-                  <th>Expected Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>PO-2026-071</td>
-                  <td><strong>BRG-6204-2RS</strong></td>
-                  <td>Vòng bi 6204-2RS</td>
-                  <td>Plant 1</td>
-                  <td>120</td>
-                  <td>18 Jul 2026</td>
-                  <td><span class="repair-table-status pending">Ordered</span></td>
-                </tr>
-                <tr>
-                  <td>PO-2026-072</td>
-                  <td><strong>BELT-A-1250</strong></td>
-                  <td>Dây curoa A-1250</td>
-                  <td>Plant 2</td>
-                  <td>80</td>
-                  <td>21 Jul 2026</td>
-                  <td><span class="repair-table-status pending">Ordered</span></td>
-                </tr>
-                <tr>
-                  <td>PO-2026-073</td>
-                  <td><strong>SEN-PR18-5DN</strong></td>
-                  <td>Cảm biến tiệm cận PR18</td>
-                  <td>Plant 1</td>
-                  <td>25</td>
-                  <td>25 Jul 2026</td>
-                  <td><span class="repair-table-status done">Confirmed</span></td>
-                </tr>
-                <tr>
-                  <td>PO-2026-074</td>
-                  <td><strong>BOLT-M10X30</strong></td>
-                  <td>Bu lông M10 x 30</td>
-                  <td>Plant 3</td>
-                  <td>550</td>
-                  <td>30 Jul 2026</td>
-                  <td><span class="repair-table-status pending">Ordered</span></td>
-                </tr>
-              </tbody>
+              <thead><tr><th>Item Code</th><th>Image</th><th>Name Vietnamese</th><th>Plant</th><th>Quantity</th><th><span class="sr-only">Select item</span></th></tr></thead>
+              <tbody id="incomingStockList"><tr><td colspan="6">Loading spare parts…</td></tr></tbody>
             </table>
           </div>
-        </section>
-      </main>
+          <div class="repair-pagination" id="incomingStockPagination" hidden></div>
+          <div class="incoming-stock-actions"><button class="save" type="submit"><i data-lucide="clipboard-check"></i>Review Selected Items</button></div>
+        </form>
+      </section>
+    </main></div>
+    <div class="repair-modal incoming-stock-modal" id="incomingStockModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-incoming></div>
+      <section class="repair-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="incomingStockModalTitle">
+        <header class="repair-modal-header"><h2 id="incomingStockModalTitle">Order Summary</h2><button class="repair-modal-close" type="button" data-close-incoming aria-label="Close"><i data-lucide="x"></i></button></header>
+        <div class="incoming-stock-modal-list" id="incomingStockModalList"></div>
+        <footer class="repair-modal-footer"><div class="incoming-summary-actions"><button class="btn muted" type="button" data-close-incoming>Close</button><button class="save incoming-stock-export" id="incomingStockExport" type="button" aria-label="Export Excel" title="Export Excel"><i data-lucide="download"></i></button></div></footer>
+      </section>
     </div>
   </body>
 </html>
