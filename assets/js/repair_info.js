@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
           modal.classList.remove("active");
         }, 1200);
       } catch (error) {
-        status.textContent = error.message;
+        status.textContent = window.SAMHO_ERRORS.message(error, "save these changes");
       }
     });
     if (window.lucide) window.lucide.createIcons();
@@ -662,7 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentMachineMap = new Map();
       updateExportState();
       list.innerHTML = "";
-      setStatus(error.message, "error");
+      setStatus(window.SAMHO_ERRORS.message(error, "load repair records"), "error");
     } finally {
       searchButton.disabled = false;
       if (window.lucide) window.lucide.createIcons();
@@ -673,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("fromDate").value = formatDateInput(today);
   document.getElementById("toDate").value = formatDateInput(today);
   loadPlantOptions().catch((error) => {
-    setStatus(`Could not load plant list: ${error.message}`, "warning");
+    setStatus(window.SAMHO_ERRORS.message(error, "load the plant list"), "warning");
   });
 
   filterForm.addEventListener("submit", (event) => {

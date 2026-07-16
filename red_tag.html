@@ -12,10 +12,11 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/errors.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="assets/js/red_tag.js" defer></script>
   </head>
-  <body class="dashboard-app red-tag-page">
+  <body class="dashboard-app app-standard red-tag-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button"><i data-lucide="menu"></i></button>
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span>Factory System</span></div></div>
@@ -28,10 +29,10 @@
     <div class="shell"><main class="content">
       <section class="info-panel spare-panel">
         <div class="info-title"><i data-lucide="tag"></i><h1>Red Tag</h1></div>
-        <div class="info-filter spare-filter red-tag-filter" aria-label="Filter red tag machines">
+        <div class="info-filter spare-filter red-tag-filter catalog-filter" aria-label="Filter red tag machines">
           <label><span><i data-lucide="factory"></i>Plant</span><select id="redTagPlantFilter"><option value="PLANT A">Plant A</option><option value="PLANT B">Plant B</option><option value="PLANT F">Plant F</option></select></label>
           <label><span><i data-lucide="search"></i>Search</span><input id="redTagSearchInput" type="search" placeholder="Machine name" /></label>
-          <div class="red-tag-filter-actions"><button class="info-search" id="redTagAddButton" type="button" aria-label="Add Red Tag record" title="Add Red Tag record"><i data-lucide="plus"></i></button></div>
+          <div class="red-tag-filter-actions"><button class="info-search control-icon-button" id="redTagAddButton" type="button" aria-label="Add Red Tag record" title="Add Red Tag record"><i data-lucide="plus"></i></button></div>
         </div>
         <p class="info-status red-tag-status" id="redTagStatus" aria-live="polite"></p>
       </section>
@@ -39,6 +40,8 @@
         <div class="repair-table-wrap spare-table-wrap">
           <table class="repair-table red-tag-table"><thead><tr><th>No.</th><th>Machine Name</th><th>Quantity</th><th>Detail</th></tr></thead><tbody id="redTagList"><tr><td colspan="4">Loading machines…</td></tr></tbody></table>
         </div>
+        <p class="red-tag-table-summary" id="redTagSummary"></p>
+        <div class="repair-pagination" id="redTagPagination" hidden></div>
       </section>
     </main></div>
     <div class="repair-modal" id="redTagModal" aria-hidden="true">

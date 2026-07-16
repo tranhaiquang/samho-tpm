@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const rows = await getRows(monthValue);
       renderDashboard(rows);
     } catch (error) {
-      setStatus(error.message, "error");
+      setStatus(window.SAMHO_ERRORS.message(error, "load dashboard data"), "error");
     }
   };
 
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
       label.textContent = "Month error";
       button.disabled = true;
       menu.innerHTML = `<button type="button" disabled>Month load failed</button>`;
-      setStatus(error.message, "error");
+      setStatus(window.SAMHO_ERRORS.message(error, "load available months"), "error");
       return;
     }
 

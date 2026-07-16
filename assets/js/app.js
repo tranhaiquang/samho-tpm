@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       searchedItemCode = "";
       setMachineData(null);
-      setSearchStatus(error.message, "error");
+      setSearchStatus(window.SAMHO_ERRORS.message(error, "load machine details"), "error");
     } finally {
       searchButton.disabled = false;
     }
@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 450);
     } catch (error) {
       stopScanner();
-      setSearchStatus(`Camera scan failed: ${error.message}`, "error");
+      setSearchStatus(window.SAMHO_ERRORS.message(error, "use the camera scanner"), "error");
     }
   };
 
@@ -562,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setSaveStatus("Repair record saved.", "success");
       resetRepairInputs();
     } catch (error) {
-      setSaveStatus(error.message, "error");
+      setSaveStatus(window.SAMHO_ERRORS.message(error, "save the repair record"), "error");
     } finally {
       saveButton.disabled = false;
     }

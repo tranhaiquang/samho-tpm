@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("incomingStockModal");
   const modalList = document.getElementById("incomingStockModalList");
   const plantFilter = document.getElementById("incomingPlantFilter");
+  const statusFilter = document.getElementById("incomingStatusFilter");
   const searchInput = document.getElementById("incomingSearchInput");
   const pagination = document.getElementById("incomingStockPagination");
   const exportButton = document.getElementById("incomingStockExport");
@@ -19,9 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let orderSummary = [];
   const selectedItems = new Map();
 
-  if (!config || !form || !list || !status || !modal || !modalList || !plantFilter || !searchInput || !pagination || !exportButton) return;
+  if (!config || !form || !list || !status || !modal || !modalList || !plantFilter || !statusFilter || !searchInput || !pagination || !exportButton) return;
 
   const text = (value, fallback = "-") => String(value ?? "").trim() || fallback;
+  const toNumber = (value) => {
+    const number = Number(String(value ?? "").replace(/,/g, ""));
+    return Number.isFinite(number) ? number : 0;
+  };
   const readField = (row, key) => {
     const columns = [].concat(spareConfig.fieldMap?.[key] || []);
     const column = columns.find((name) => row?.[name] !== undefined && row?.[name] !== null);
@@ -29,6 +34,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
   const setStatus = (message, type = "idle") => { status.textContent = message; status.dataset.type = type; };
+  const stockStatus = (safetyStock, onHand) => {
+    const safety = toNumber(safetyStock);
+    const onHandQuantity = toNumber(onHand);
+    const isLow = onHandQuantity < safety || (onHandQuantity === 0 && safety === 0);
+    return isLow ? { className: "pending", label: "Low stock" } : { className: "done", label: "OK" };
+  };
   const getImageUrls = (itemCode) => {
     const bucket = String(spareConfig.imageBucket || "").trim();
     const code = String(itemCode || "").trim();
@@ -75,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderParts = (rows) => {
     if (!rows.length) {
-      list.innerHTML = '<tr><td colspan="6">No spare parts found.</td></tr>';
+      list.innerHTML = '<tr><td colspan="7">No spare parts found.</td></tr>';
       pagination.hidden = true;
       return;
     }
@@ -85,15 +96,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const pageStart = (currentPage - 1) * pageSize;
     const pageRows = rows.slice(pageStart, pageStart + pageSize);
 
-    list.innerHTML = pageRows.map((row, index) => `
+    list.innerHTML = pageRows.map((row, index) => {
+      const itemStatus = stockStatus(readField(row, "safetyStock"), readField(row, "onHand"));
+      return `
       <tr>
         <td><strong>${escapeHtml(text(readField(row, "itemCode")))}</strong></td>
         <td class="spare-image-cell">${imageMarkup(text(readField(row, "itemCode")))}</td>
         <td>${escapeHtml(text(readField(row, "nameVietnamese")))}</td>
         <td>${escapeHtml(text(readField(row, "plant")))}</td>
+        <td><span class="repair-table-status ${itemStatus.className}">${itemStatus.label}</span></td>
         <td><input class="incoming-quantity" type="number" min="1" step="1" inputmode="numeric" aria-label="Quantity to order for ${escapeHtml(text(readField(row, "itemCode")))}" ${selectedItems.has(text(readField(row, "itemCode"))) ? `value="${selectedItems.get(text(readField(row, "itemCode")))}" required` : "disabled"} /></td>
         <td><input class="incoming-select" id="incomingSelect${index}" type="checkbox" aria-label="Select ${escapeHtml(text(readField(row, "itemCode")))}" data-item-code="${escapeHtml(text(readField(row, "itemCode")))}" data-name="${escapeHtml(text(readField(row, "nameVietnamese")))}" data-plant="${escapeHtml(text(readField(row, "plant")))}" ${selectedItems.has(text(readField(row, "itemCode"))) ? "checked" : ""} /></td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
     loadImages();
 
     pagination.hidden = rows.length <= pageSize;
@@ -109,11 +124,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const applyFilters = () => {
     const plant = plantFilter.value;
+    const selectedStatus = statusFilter.value;
+    const selectedStatusClass = { low: "pending", ok: "done" }[selectedStatus];
     const search = searchInput.value.trim().toLowerCase();
     filteredRows = spareRows.filter((row) => {
       const itemCode = text(readField(row, "itemCode"), "").toLowerCase();
       const name = text(readField(row, "nameVietnamese"), "").toLowerCase();
-      return (!plant || text(readField(row, "plant")) === plant) && (!search || itemCode.includes(search) || name.includes(search));
+      return (!plant || text(readField(row, "plant")) === plant)
+        && (!selectedStatus || stockStatus(readField(row, "safetyStock"), readField(row, "onHand")).className === selectedStatusClass)
+        && (!search || itemCode.includes(search) || name.includes(search));
     });
     currentPage = 1;
     renderParts(filteredRows);
@@ -146,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   plantFilter.addEventListener("change", applyFilters);
+  statusFilter.addEventListener("change", applyFilters);
   searchInput.addEventListener("input", applyFilters);
   pagination.addEventListener("click", (event) => {
     const button = event.target.closest(".repair-page-btn");
@@ -196,5 +216,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.lucide) window.lucide.createIcons();
   });
 
-  fetchParts().then((rows) => { spareRows = rows; populatePlants(); applyFilters(); setStatus(`${rows.length} spare part${rows.length === 1 ? "" : "s"} loaded.`, "success"); }).catch((error) => { list.innerHTML = '<tr><td colspan="6">Unable to load spare parts.</td></tr>'; setStatus(error.message, "error"); });
+  fetchParts().then((rows) => { spareRows = rows; populatePlants(); applyFilters(); setStatus(`${rows.length} spare part${rows.length === 1 ? "" : "s"} loaded.`, "success"); }).catch((error) => { list.innerHTML = '<tr><td colspan="7">Unable to load spare parts.</td></tr>'; setStatus(window.SAMHO_ERRORS.message(error, "load spare parts"), "error"); });
 });

@@ -1043,6 +1043,30 @@ fieldset input {
   min-height: auto;
 }
 
+.catalog-filter {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) auto;
+  width: 100%;
+  max-width: 760px;
+  gap: 16px;
+}
+
+.catalog-filter label > input,
+.catalog-filter label > select {
+  min-height: 38px;
+  border-radius: 8px;
+}
+
+.control-icon-button {
+  display: inline-flex;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
 .spare-filter select,
 .spare-filter input {
   width: 100%;
@@ -1107,7 +1131,7 @@ fieldset input {
 }
 
 .incoming-stock-table {
-  min-width: 900px;
+  min-width: 1080px;
 }
 
 .incoming-stock-note {
@@ -1117,16 +1141,10 @@ fieldset input {
 }
 
 .incoming-stock-filter {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  width: 100%;
-  max-width: 520px;
   margin-top: 16px;
 }
 
 .red-tag-filter {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  width: 100%;
-  max-width: 520px;
   margin-top: 16px;
 }
 
@@ -1137,9 +1155,6 @@ fieldset input {
 
 .red-tag-filter-actions .info-search {
   width: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0;
 }
 
 .red-tag-add-status[data-type="error"] {
@@ -1152,6 +1167,7 @@ fieldset input {
 
 .red-tag-table {
   min-width: 560px;
+  table-layout: fixed;
 }
 
 .red-tag-table th,
@@ -1166,9 +1182,28 @@ fieldset input {
 }
 
 .red-tag-table th:nth-child(1),
+.red-tag-table td:nth-child(1) {
+  width: 8%;
+}
+
+.red-tag-table th:nth-child(2),
+.red-tag-table td:nth-child(2) {
+  width: 62%;
+}
+
 .red-tag-table th:nth-child(3),
-.red-tag-table th:nth-child(4) {
-  width: 110px;
+.red-tag-table td:nth-child(3),
+.red-tag-table th:nth-child(4),
+.red-tag-table td:nth-child(4) {
+  width: 15%;
+}
+
+.red-tag-table-summary {
+  margin: 10px 8px 0;
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .sr-only {
@@ -1193,8 +1228,12 @@ fieldset input {
   vertical-align: middle;
 }
 
-.incoming-stock-table td:nth-child(5),
-.incoming-stock-table td:nth-child(6) {
+.incoming-stock-table td:nth-child(5) {
+  min-width: 130px;
+}
+
+.incoming-stock-table td:nth-child(6),
+.incoming-stock-table td:nth-child(7) {
   width: 120px;
 }
 
@@ -1268,7 +1307,7 @@ fieldset input {
 }
 
 .red-tag-summary-table th:nth-child(2) {
-  width: 22%;
+  width: 19%;
 }
 
 .red-tag-summary-table th:nth-child(3) {
@@ -1276,19 +1315,41 @@ fieldset input {
 }
 
 .red-tag-summary-table th:nth-child(4) {
-  width: 12%;
+  width: 11%;
 }
 
 .red-tag-summary-table th:nth-child(5) {
-  width: 10%;
+  width: 8%;
 }
 
 .red-tag-summary-table th:nth-child(6) {
-  width: 18%;
+  width: 16%;
 }
 
 .red-tag-summary-table th:nth-child(7) {
-  width: 19%;
+  width: 18%;
+}
+
+.red-tag-summary-table th:nth-child(8) {
+  width: 9%;
+}
+
+.red-tag-remove {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+.red-tag-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.red-tag-remove svg {
+  width: 15px;
+  height: 15px;
 }
 
 .red-tag-summary-table .repair-table-status {
@@ -2802,6 +2863,72 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   background:
     radial-gradient(circle at 18% 20%, rgba(23, 105, 255, 0.12), transparent 28%),
     linear-gradient(135deg, #f7faff 0%, #eef4fb 100%);
+}
+
+/* Shared application layout for every non-KPI page. */
+.app-standard {
+  --app-control-radius: 10px;
+  --app-control-height: 38px;
+}
+
+.dashboard-app.app-standard .content {
+  width: min(1320px, 100%);
+}
+
+.dashboard-app.app-standard .panel-title,
+.dashboard-app.app-standard .info-title {
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dashboard-app.app-standard .panel-title h1,
+.dashboard-app.app-standard .info-title h1 {
+  color: var(--dash-ink);
+  font-size: 24px;
+}
+
+.dashboard-app.app-standard .panel-title svg,
+.dashboard-app.app-standard .info-title svg {
+  color: var(--dash-blue);
+}
+
+.dashboard-app.app-standard .info-filter {
+  min-height: 0;
+  padding: 16px;
+  gap: 16px;
+  border-radius: 12px;
+}
+
+.dashboard-app.app-standard .info-filter input,
+.dashboard-app.app-standard .info-filter select,
+.dashboard-app.app-standard .scroll-select-trigger {
+  min-height: var(--app-control-height);
+  border-radius: var(--app-control-radius);
+}
+
+.login-page.app-standard {
+  --dash-bg: #f6f8fb;
+  --dash-card: #ffffff;
+  --dash-line: #e5ebf3;
+  --dash-ink: #172033;
+  --dash-muted: #667085;
+  --dash-blue: #1769ff;
+  --dash-shadow: 0 14px 38px rgba(31, 42, 68, 0.08);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(23, 105, 255, 0.12), transparent 28%),
+    var(--dash-bg);
+}
+
+.login-page.app-standard .login-card {
+  border-radius: 16px;
+  background: var(--dash-card);
+  box-shadow: var(--dash-shadow);
+}
+
+.login-page.app-standard .login-form input,
+.login-page.app-standard .login-form button {
+  border-radius: var(--app-control-radius);
 }
 
 .login-shell {

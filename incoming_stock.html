@@ -12,11 +12,12 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/errors.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
     <script src="assets/js/incoming_stock.js" defer></script>
   </head>
-  <body class="dashboard-app incoming-stock-page">
+  <body class="dashboard-app app-standard incoming-stock-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button"><i data-lucide="menu"></i></button>
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span>Factory System</span></div></div>
@@ -30,9 +31,10 @@
       <section class="info-panel spare-panel">
         <div class="info-title"><i data-lucide="truck"></i><h1>Incoming Stock</h1></div>
         <p class="incoming-stock-note">Select spare parts and enter the quantity you want to order.</p>
-        <div class="info-filter spare-filter incoming-stock-filter" aria-label="Filter spare parts">
+        <div class="info-filter spare-filter incoming-stock-filter catalog-filter" aria-label="Filter spare parts">
           <label><span><i data-lucide="factory"></i>Plant</span><select id="incomingPlantFilter"><option value="">All plants</option></select></label>
           <label><span><i data-lucide="search"></i>Search</span><input id="incomingSearchInput" type="search" placeholder="Item code or Vietnamese name" /></label>
+          <label><span><i data-lucide="list-filter"></i>Status</span><select id="incomingStatusFilter"><option value="">All status</option><option value="low">Low stock</option><option value="ok">OK</option></select></label>
         </div>
         <p class="info-status incoming-stock-status" id="incomingStockStatus" aria-live="polite"></p>
       </section>
@@ -40,8 +42,8 @@
         <form id="incomingStockForm">
           <div class="repair-table-wrap spare-table-wrap">
             <table class="repair-table spare-table incoming-stock-table">
-              <thead><tr><th>Item Code</th><th>Image</th><th>Name Vietnamese</th><th>Plant</th><th>Quantity</th><th><span class="sr-only">Select item</span></th></tr></thead>
-              <tbody id="incomingStockList"><tr><td colspan="6">Loading spare parts…</td></tr></tbody>
+              <thead><tr><th>Item Code</th><th>Image</th><th>Name Vietnamese</th><th>Plant</th><th>Status</th><th>Quantity</th><th><span class="sr-only">Select item</span></th></tr></thead>
+              <tbody id="incomingStockList"><tr><td colspan="7">Loading spare parts…</td></tr></tbody>
             </table>
           </div>
           <div class="repair-pagination" id="incomingStockPagination" hidden></div>
@@ -54,7 +56,7 @@
       <section class="repair-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="incomingStockModalTitle">
         <header class="repair-modal-header"><h2 id="incomingStockModalTitle">Order Summary</h2><button class="repair-modal-close" type="button" data-close-incoming aria-label="Close"><i data-lucide="x"></i></button></header>
         <div class="incoming-stock-modal-list" id="incomingStockModalList"></div>
-        <footer class="repair-modal-footer"><div class="incoming-summary-actions"><button class="btn muted" type="button" data-close-incoming>Close</button><button class="save incoming-stock-export" id="incomingStockExport" type="button" aria-label="Export Excel" title="Export Excel"><i data-lucide="download"></i></button></div></footer>
+        <footer class="repair-modal-footer"><div class="incoming-summary-actions"><button class="btn muted" type="button" data-close-incoming>Close</button><button class="save incoming-stock-export control-icon-button" id="incomingStockExport" type="button" aria-label="Export Excel" title="Export Excel"><i data-lucide="download"></i></button></div></footer>
       </section>
     </div>
   </body>

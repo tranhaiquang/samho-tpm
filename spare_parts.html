@@ -12,10 +12,11 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/errors.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="assets/js/spare_parts.js" defer></script>
   </head>
-  <body class="dashboard-app spare-parts-page">
+  <body class="dashboard-app app-standard spare-parts-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
       <i data-lucide="menu"></i>
     </button>
@@ -68,7 +69,7 @@
             <h1>Spare Parts</h1>
           </div>
 
-          <form class="info-filter spare-filter" id="sparePartsFilter">
+          <form class="info-filter spare-filter catalog-filter" id="sparePartsFilter">
             <label>
               <span><i data-lucide="factory"></i>Plant</span>
               <select id="sparePlantSelect">
@@ -88,10 +89,10 @@
               </select>
             </label>
             <div class="spare-filter-actions">
-              <button class="info-search" id="spareRefreshButton" type="submit" aria-label="Refresh spare parts" title="Refresh">
+              <button class="info-search control-icon-button" id="spareRefreshButton" type="submit" aria-label="Refresh spare parts" title="Refresh">
                 <i data-lucide="refresh-cw"></i>
               </button>
-              <button class="info-search spare-add-button" id="spareAddButton" type="button" aria-label="Add spare part" title="Add spare part" hidden>
+              <button class="info-search spare-add-button control-icon-button" id="spareAddButton" type="button" aria-label="Add spare part" title="Add spare part" hidden>
                 <i data-lucide="plus"></i>
               </button>
             </div>

@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.classList.remove("active");
       await loadSpareParts();
     } catch (error) {
-      modalStatus.textContent = error.message;
+      modalStatus.textContent = window.SAMHO_ERRORS.message(error, "save this spare part");
     } finally {
       saveButton.disabled = false;
     }
@@ -592,7 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
         imageDeleted ? "success" : "warning"
       );
     } catch (error) {
-      setStatus(error.message, "error");
+      setStatus(window.SAMHO_ERRORS.message(error, "delete this spare part"), "error");
     }
   };
 
@@ -757,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
       spareRows = [];
       renderStats([]);
       list.innerHTML = "";
-      setStatus(error.message, "error");
+      setStatus(window.SAMHO_ERRORS.message(error, "load spare parts"), "error");
     } finally {
       refreshButton.disabled = false;
       if (window.lucide) window.lucide.createIcons();

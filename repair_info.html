@@ -12,12 +12,13 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/errors.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
     <script src="assets/js/app.js" defer></script>
     <script src="assets/js/repair_info.js" defer></script>
   </head>
-  <body class="dashboard-app repair-info-page">
+  <body class="dashboard-app app-standard repair-info-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
       <i data-lucide="menu"></i>
     </button>
@@ -109,7 +110,7 @@
                 <i data-lucide="search"></i>
                 Tìm kiếm
               </button>
-              <button class="repair-info-export" id="repairInfoExport" type="button" disabled aria-label="Export current records to Excel" title="Export Excel">
+              <button class="repair-info-export control-icon-button" id="repairInfoExport" type="button" disabled aria-label="Export current records to Excel" title="Export Excel">
                 <i data-lucide="download"></i>
               </button>
               </div>
