@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let machineRows = [];
   let displayedGroups = [];
   let currentPage = 1;
+  let validatedMachineItemCode = "";
   const pageSize = 10;
 
   if (!config || !plantFilter || !searchInput || !list || !summary || !pagination || !status || !modal || !modalList || !modalTitle || !addButton || !addModal || !addForm || !addStatus || !addSaveButton || !addStatusSelect || !addIssueField || !addIssueInput || !addItemCodeInput || !addMachineNameInput || !machineSearchButton || !scanButton || !scanModal || !scanVideo || !scanStatus) return;
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `Unable to ${action}. Please try again.`;
   };
   const clearMachineName = () => {
+    validatedMachineItemCode = "";
     addMachineNameInput.value = "";
     addMachineNameInput.readOnly = false;
     addMachineNameInput.disabled = true;
@@ -82,6 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
       addMachineNameInput.value = machineName;
       addMachineNameInput.disabled = false;
       addMachineNameInput.readOnly = true;
+      validatedMachineItemCode = itemCode;
+      addSaveButton.disabled = false;
       addStatus.textContent = "Machine information loaded.";
       addStatus.dataset.type = "success";
     } catch (error) {
@@ -320,8 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
   addForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const values = { ...Object.fromEntries(new FormData(addForm)), machineName: addMachineNameInput.value.trim() };
-    if (!values.machineName) {
-      addStatus.textContent = "Search the Item Code and load the Machine Name before saving.";
+    if (!values.machineName || validatedMachineItemCode !== String(values.itemCode || "").trim().toUpperCase()) {
+      clearMachineName();
+      addStatus.textContent = "Search for a valid Item Code and load the Machine Name before saving.";
       addStatus.dataset.type = "warning";
       return;
     }

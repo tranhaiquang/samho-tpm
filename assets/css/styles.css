@@ -1127,7 +1127,19 @@ fieldset input {
 }
 
 .spare-table {
-  min-width: 1080px;
+  min-width: 1180px;
+}
+
+.spare-stock-difference.negative {
+  color: #dc2626;
+}
+
+.spare-stock-difference.positive {
+  color: #16803c;
+}
+
+.spare-stock-difference.neutral {
+  color: #667085;
 }
 
 .incoming-stock-table {
@@ -2117,6 +2129,15 @@ body.sidebar-collapsed .nav-group a {
   border-top: 1px solid var(--dash-line);
 }
 
+.app-copyright {
+  display: block;
+  margin-top: 10px;
+  color: #7a8799;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .dashboard-app .sidebar-logout {
   display: inline-flex;
   align-items: center;
@@ -2957,6 +2978,13 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   margin: 0 auto;
   align-items: center;
   padding: 36px 0;
+}
+
+.login-copyright {
+  margin-top: 14px;
+  color: #7a8799;
+  font-size: 11px;
+  text-align: center;
 }
 
 .login-card {

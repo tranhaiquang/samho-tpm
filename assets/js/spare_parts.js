@@ -656,6 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>Name Vietnamese</th>
             <th>Safety Stock</th>
             <th>On Hand</th>
+            <th>Difference</th>
             <th>Location</th>
             <th>Status</th>
             ${userCanEdit ? "<th>Actions</th>" : ""}
@@ -669,6 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pageRows.forEach((row) => {
       const safetyStock = toNumber(readField(row, "safetyStock"));
       const onHand = toNumber(readField(row, "onHand"));
+      const difference = onHand - safetyStock;
       const status = stockStatus(safetyStock, onHand);
       const tr = document.createElement("tr");
       if (status.className === "pending") tr.className = "spare-low-stock";
@@ -680,6 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${text(readField(row, "nameVietnamese"))}</td>
         <td>${safetyStock.toLocaleString()}</td>
         <td>${onHand.toLocaleString()}</td>
+        <td><strong class="spare-stock-difference ${difference < 0 ? "negative" : difference > 0 ? "positive" : "neutral"}">${difference.toLocaleString()}</strong></td>
         <td>${text(readField(row, "location"))}</td>
         <td><span class="repair-table-status ${status.className}">${status.label}</span></td>
         ${userCanEdit
