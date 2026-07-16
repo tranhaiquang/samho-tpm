@@ -1161,6 +1161,25 @@ fieldset input {
   color: #dc2626;
 }
 
+.red-tag-code-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.red-tag-code-control input {
+  width: 100%;
+  min-width: 0;
+}
+
+.red-tag-code-control .control-icon-button {
+  width: 36px;
+  min-width: 36px;
+  height: 34px;
+  min-height: 34px;
+}
+
 .red-tag-status {
   margin: 12px 0 0;
 }

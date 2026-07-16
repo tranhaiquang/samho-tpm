@@ -20,12 +20,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const addStatusSelect = document.getElementById("redTagAddStatusSelect");
   const addIssueField = document.getElementById("redTagAddIssueField");
   const addIssueInput = document.getElementById("redTagAddIssueInput");
+  const addItemCodeInput = document.getElementById("redTagAddItemCode");
+  const addMachineNameInput = document.getElementById("redTagAddMachineName");
+  const machineSearchButton = document.getElementById("redTagMachineSearch");
+  const scanButton = document.getElementById("redTagScanButton");
+  const scanModal = document.getElementById("redTagScanModal");
+  const scanVideo = document.getElementById("redTagScanVideo");
+  const scanStatus = document.getElementById("redTagScanStatus");
   let machineRows = [];
   let displayedGroups = [];
   let currentPage = 1;
   const pageSize = 10;
 
-  if (!config || !plantFilter || !searchInput || !list || !summary || !pagination || !status || !modal || !modalList || !modalTitle || !addButton || !addModal || !addForm || !addStatus || !addSaveButton || !addStatusSelect || !addIssueField || !addIssueInput) return;
+  if (!config || !plantFilter || !searchInput || !list || !summary || !pagination || !status || !modal || !modalList || !modalTitle || !addButton || !addModal || !addForm || !addStatus || !addSaveButton || !addStatusSelect || !addIssueField || !addIssueInput || !addItemCodeInput || !addMachineNameInput || !machineSearchButton || !scanButton || !scanModal || !scanVideo || !scanStatus) return;
 
   const text = (value, fallback = "-") => String(value ?? "").trim() || fallback;
   const readField = (row, names) => names.find((name) => row?.[name] !== undefined && row?.[name] !== null) ? row[names.find((name) => row?.[name] !== undefined && row?.[name] !== null)] : "";
@@ -39,6 +46,98 @@ document.addEventListener("DOMContentLoaded", () => {
     if (message.includes("row-level security") || message.includes("permission denied")) return `You do not have permission to ${action}.`;
     if (message.includes("failed to fetch") || message.includes("networkerror")) return "Unable to connect. Please check your network and try again.";
     return `Unable to ${action}. Please try again.`;
+  };
+  const clearMachineName = () => {
+    addMachineNameInput.value = "";
+    addMachineNameInput.readOnly = false;
+    addMachineNameInput.disabled = true;
+  };
+  const findMachineByItemCode = async () => {
+    const itemCode = addItemCodeInput.value.trim().toUpperCase();
+    clearMachineName();
+    if (!itemCode) {
+      addStatus.textContent = "Scan or enter an Item Code first.";
+      addStatus.dataset.type = "warning";
+      return;
+    }
+    machineSearchButton.disabled = true;
+    addStatus.textContent = "Searching machine information...";
+    addStatus.dataset.type = "idle";
+    try {
+      const machineConfig = config.machineInfo || {};
+      const codeColumn = machineConfig.codeColumn || "ITEM_CODE";
+      const params = new URLSearchParams({ select: "*", [codeColumn]: `eq.${itemCode}`, limit: "1" });
+      const response = await fetch(`${config.url}/${encodeURIComponent(machineConfig.table || "machine_info")}?${params}`, {
+        headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
+      });
+      if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
+      const machine = (await response.json())[0];
+      const machineName = String(machine?.name_en || machine?.NAME_EN || "").trim();
+      if (!machineName) {
+        addStatus.textContent = "No machine was found for this Item Code. Please check the barcode and try again.";
+        addStatus.dataset.type = "warning";
+        return;
+      }
+      addItemCodeInput.value = itemCode;
+      addMachineNameInput.value = machineName;
+      addMachineNameInput.disabled = false;
+      addMachineNameInput.readOnly = true;
+      addStatus.textContent = "Machine information loaded.";
+      addStatus.dataset.type = "success";
+    } catch (error) {
+      addStatus.textContent = window.SAMHO_ERRORS.message(error, "load machine information");
+      addStatus.dataset.type = "error";
+    } finally {
+      machineSearchButton.disabled = false;
+    }
+  };
+  let scanStream = null;
+  let scanTimer = null;
+  let barcodeDetector = null;
+  const setScanStatus = (message, type = "idle") => { scanStatus.textContent = message; scanStatus.dataset.type = type; };
+  const stopScanner = () => {
+    if (scanTimer) window.clearInterval(scanTimer);
+    scanTimer = null;
+    scanStream?.getTracks().forEach((track) => track.stop());
+    scanStream = null;
+    scanVideo.pause();
+    scanVideo.srcObject = null;
+    scanModal.classList.remove("active");
+    scanModal.setAttribute("aria-hidden", "true");
+    scanButton.disabled = false;
+  };
+  const startScanner = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || !("BarcodeDetector" in window)) {
+      addStatus.textContent = "Camera scanning is not supported in this browser. Please use a barcode scanner or enter the Item Code.";
+      addStatus.dataset.type = "warning";
+      return;
+    }
+    scanButton.disabled = true;
+    try {
+      scanModal.classList.add("active");
+      scanModal.setAttribute("aria-hidden", "false");
+      setScanStatus("Opening camera...", "idle");
+      barcodeDetector = barcodeDetector || new window.BarcodeDetector({ formats: ["code_128", "code_39", "code_93", "codabar", "ean_13", "ean_8", "itf", "qr_code", "upc_a", "upc_e"] });
+      scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+      scanVideo.srcObject = scanStream;
+      await scanVideo.play();
+      setScanStatus("Point the camera at a barcode.", "idle");
+      scanTimer = window.setInterval(async () => {
+        if (!scanVideo.videoWidth) return;
+        const codes = await barcodeDetector.detect(scanVideo);
+        const itemCode = codes[0]?.rawValue?.trim();
+        if (!itemCode) return;
+        addItemCodeInput.value = itemCode.toUpperCase();
+        stopScanner();
+        await findMachineByItemCode();
+      }, 450);
+    } catch (error) {
+      stopScanner();
+      addStatus.textContent = window.SAMHO_ERRORS.message(error, "use the camera scanner");
+      addStatus.dataset.type = "error";
+    } finally {
+      scanButton.disabled = false;
+    }
   };
 
   const fetchRedTagRecords = async () => {
@@ -167,12 +266,24 @@ document.addEventListener("DOMContentLoaded", () => {
   addButton.addEventListener("click", () => {
     addForm.reset();
     addForm.elements.date.value = new Date().toISOString().slice(0, 10);
+    clearMachineName();
     updateIssueField();
     addStatus.textContent = "";
     addStatus.dataset.type = "idle";
     addModal.classList.add("active");
     addModal.setAttribute("aria-hidden", "false");
+    addItemCodeInput.focus();
   });
+  addItemCodeInput.addEventListener("input", clearMachineName);
+  addItemCodeInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      findMachineByItemCode();
+    }
+  });
+  machineSearchButton.addEventListener("click", findMachineByItemCode);
+  scanButton.addEventListener("click", startScanner);
+  document.querySelectorAll("[data-close-red-tag-scan]").forEach((button) => button.addEventListener("click", stopScanner));
   const updateIssueField = () => {
     const needsIssue = addStatusSelect.value === "Máy Hư Chờ Sửa";
     addIssueField.hidden = !needsIssue;
@@ -183,7 +294,12 @@ document.addEventListener("DOMContentLoaded", () => {
   addStatusSelect.addEventListener("change", updateIssueField);
   addForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const values = Object.fromEntries(new FormData(addForm));
+    const values = { ...Object.fromEntries(new FormData(addForm)), machineName: addMachineNameInput.value.trim() };
+    if (!values.machineName) {
+      addStatus.textContent = "Search the Item Code and load the Machine Name before saving.";
+      addStatus.dataset.type = "warning";
+      return;
+    }
     const payload = Object.fromEntries(Object.entries(redTagConfig.insertMap || {}).map(([field, column]) => [column, String(values[field] || "").trim()]));
     addStatus.textContent = "Saving...";
     addStatus.dataset.type = "idle";
