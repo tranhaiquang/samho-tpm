@@ -94,10 +94,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let scanStream = null;
   let scanTimer = null;
   let barcodeDetector = null;
+  let zxingReader = null;
+  let zxingControls = null;
   const setScanStatus = (message, type = "idle") => { scanStatus.textContent = message; scanStatus.dataset.type = type; };
   const stopScanner = () => {
     if (scanTimer) window.clearInterval(scanTimer);
     scanTimer = null;
+    zxingControls?.stop();
+    zxingControls = null;
     scanStream?.getTracks().forEach((track) => track.stop());
     scanStream = null;
     scanVideo.pause();
@@ -107,8 +111,15 @@ document.addEventListener("DOMContentLoaded", () => {
     scanButton.disabled = false;
   };
   const startScanner = async () => {
-    if (!navigator.mediaDevices?.getUserMedia || !("BarcodeDetector" in window)) {
-      addStatus.textContent = "Camera scanning is not supported in this browser. Please use a barcode scanner or enter the Item Code.";
+    const supportsNativeScanner = "BarcodeDetector" in window;
+    const supportsZxingScanner = Boolean(window.ZXingBrowser?.BrowserMultiFormatReader);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      addStatus.textContent = "Camera access requires HTTPS and a supported browser.";
+      addStatus.dataset.type = "warning";
+      return;
+    }
+    if (!supportsNativeScanner && !supportsZxingScanner) {
+      addStatus.textContent = "Barcode scanner is still loading. Please try again in a moment.";
       addStatus.dataset.type = "warning";
       return;
     }
@@ -117,6 +128,22 @@ document.addEventListener("DOMContentLoaded", () => {
       scanModal.classList.add("active");
       scanModal.setAttribute("aria-hidden", "false");
       setScanStatus("Opening camera...", "idle");
+      const handleDetectedCode = async (value) => {
+        if (!value) return;
+        addItemCodeInput.value = value.toUpperCase();
+        stopScanner();
+        await findMachineByItemCode();
+      };
+      if (!supportsNativeScanner) {
+        zxingReader = zxingReader || new window.ZXingBrowser.BrowserMultiFormatReader();
+        zxingControls = await zxingReader.decodeFromConstraints(
+          { audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
+          scanVideo,
+          (result) => handleDetectedCode(result?.getText()?.trim())
+        );
+        setScanStatus("Point the camera at a barcode.", "idle");
+        return;
+      }
       barcodeDetector = barcodeDetector || new window.BarcodeDetector({ formats: ["code_128", "code_39", "code_93", "codabar", "ean_13", "ean_8", "itf", "qr_code", "upc_a", "upc_e"] });
       scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
       scanVideo.srcObject = scanStream;
@@ -127,9 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const codes = await barcodeDetector.detect(scanVideo);
         const itemCode = codes[0]?.rawValue?.trim();
         if (!itemCode) return;
-        addItemCodeInput.value = itemCode.toUpperCase();
-        stopScanner();
-        await findMachineByItemCode();
+        await handleDetectedCode(itemCode);
       }, 450);
     } catch (error) {
       stopScanner();
