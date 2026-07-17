@@ -26,6 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getSelectedMechanics = () => getValue("mechanic").split(",").map((name) => name.trim()).filter(Boolean);
 
+  const normalizeMechanicSearch = (value) => String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .toLocaleLowerCase()
+    .trim();
+
   const renderMechanicSelection = (names) => {
     const mechanic = document.getElementById("mechanic");
     const chips = document.getElementById("mechanicChips");
@@ -61,9 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!search || !options) return;
 
     const selected = getSelectedMechanics();
-    const query = search.value.trim().toLocaleLowerCase();
+    const query = normalizeMechanicSearch(search.value);
+    const queryWords = query.split(/\s+/).filter(Boolean);
     const matches = mechanicNames
-      .filter((name) => !selected.includes(name) && name.toLocaleLowerCase().includes(query))
+      .filter((name) => {
+        const nameWords = normalizeMechanicSearch(name).split(/\s+/);
+        return !selected.includes(name) && queryWords.every((word) => nameWords.some((nameWord) => nameWord.startsWith(word)));
+      })
       .slice(0, 3);
     options.replaceChildren(
       ...matches.map((name) => {
@@ -81,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return option;
       })
     );
-    options.hidden = document.activeElement !== search || !matches.length;
+    options.hidden = !query || document.activeElement !== search || !matches.length;
   };
 
   const setDefaultMechanic = () => {
@@ -95,12 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!picker || !search) return;
 
     search.addEventListener("input", renderMechanicOptions);
-    search.addEventListener("focus", renderMechanicOptions);
-    search.addEventListener("keydown", (event) => {
-      if (event.key !== "Backspace" || search.value || !getSelectedMechanics().length) return;
-      renderMechanicSelection(getSelectedMechanics().slice(0, -1));
-      renderMechanicOptions();
-    });
     document.addEventListener("click", (event) => {
       if (!picker.contains(event.target)) document.getElementById("mechanicOptions").hidden = true;
     });
