@@ -36,18 +36,20 @@ document.addEventListener("DOMContentLoaded", () => {
       ...names.map((name) => {
         const chip = document.createElement("span");
         chip.className = "mechanic-chip";
-        chip.textContent = name;
-        chip.addEventListener("click", (event) => event.stopPropagation());
+        const nameLabel = document.createElement("span");
+        nameLabel.className = "mechanic-name";
+        nameLabel.textContent = name;
         const removeButton = document.createElement("button");
         removeButton.className = "mechanic-remove";
         removeButton.type = "button";
         removeButton.textContent = "×";
         removeButton.setAttribute("aria-label", `Remove ${name}`);
-        removeButton.addEventListener("click", () => {
+        removeButton.addEventListener("click", (event) => {
+          event.stopPropagation();
           renderMechanicSelection(names.filter((selected) => selected !== name));
           renderMechanicOptions();
         });
-        chip.appendChild(removeButton);
+        chip.append(nameLabel, removeButton);
         return chip;
       })
     );

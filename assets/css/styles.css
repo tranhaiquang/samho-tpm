@@ -306,11 +306,6 @@ button {
   font-weight: 700;
 }
 
-.mechanic-remove:hover {
-  color: #fff;
-  background: #667085;
-}
-
 #mechanicSearch {
   flex: 1 1 130px;
   min-width: 130px;
