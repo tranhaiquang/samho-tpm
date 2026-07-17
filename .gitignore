@@ -6,3 +6,4 @@
 supabase_auth_results_*.csv
 supabase_password_update_results_*.csv
 supabase_auth_delete_results_*.csv
+supabase/update-display-name.js

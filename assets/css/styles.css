@@ -1011,6 +1011,32 @@ fieldset input {
   stroke-width: 2.6;
 }
 
+.repair-row-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.repair-row-actions .repair-edit,
+.repair-row-actions .repair-delete {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.repair-row-actions .repair-delete {
+  border: 1px solid #fecdca;
+  border-radius: 5px;
+  color: #b42318;
+  background: #fff5f4;
+}
+
+.repair-row-actions svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+}
+
 .repair-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

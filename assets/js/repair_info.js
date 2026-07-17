@@ -323,6 +323,24 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   };
 
+  const deleteRepairInfo = async (recordId) => {
+    const params = new URLSearchParams({ [config.repairInfo.idColumn]: `eq.${recordId}` });
+    const response = await fetch(`${config.url}/${config.repairInfo.table}?${params}`, {
+      method: "DELETE",
+      headers: {
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
+        ...window.SAMHO_AUTH.authHeaders(),
+        Prefer: "return=minimal"
+      }
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Delete failed (${response.status}).`);
+    }
+  };
+
   const ensureEditModal = () => {
     let modal = document.getElementById("repairEditModal");
     if (modal) return modal;
@@ -488,8 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th>reason</th>
             <th>Solve</th>
             <th>technician</th>
-            <th>Status</th>
-            <th>Edit</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -511,8 +528,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const otherIssueValue = getRecordValue(record, ["other_issue", "other_reason"]);
       const reasonValue = getRecordValue(record, ["reason", "reason_nm_vn"]);
       const solveValue = getRecordValue(record, ["solve", "solve_nm_en"]);
-      const isDone = !!repairedAt;
-
       const row = document.createElement("tr");
       row.dataset.recordId = record.id || "";
       row.innerHTML = `
@@ -531,17 +546,35 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${reasonValue || "-"}</td>
         <td>${solveValue || "-"}</td>
         <td>${record.technician || "-"}</td>
-        <td><span class="repair-table-status ${isDone ? "done" : "pending"}">${isDone ? "Hoan thanh" : "Chua xong"}</span></td>
         <td>
-          <button class="repair-edit" type="button" data-record-id="${record.id || ""}">
-            <i data-lucide="square-pen"></i>
-            Edit
-          </button>
+          <div class="repair-row-actions">
+            <button class="repair-edit" type="button" data-record-id="${record.id || ""}" aria-label="Edit repair record" title="Edit">
+              <i data-lucide="square-pen"></i>
+            </button>
+            <button class="repair-delete" type="button" data-record-id="${record.id || ""}" aria-label="Delete repair record" title="Delete">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
         </td>
       `;
 
       row.querySelector(".repair-edit")?.addEventListener("click", () => {
         emitEdit({ record, machine, itemCode, reportedAt, repairStartedAt, repairedAt });
+      });
+
+      row.querySelector(".repair-delete")?.addEventListener("click", async () => {
+        if (!record.id || !window.confirm(`Delete repair record ${record.id}?`)) return;
+
+        try {
+          await deleteRepairInfo(record.id);
+          currentRecords = currentRecords.filter((current) => String(current.id) !== String(record.id));
+          renderRecords(currentRecords, currentMachineMap, currentPage);
+          updateExportState();
+          setStatus(`Deleted repair record ${record.id}.`, "success");
+          if (window.lucide) window.lucide.createIcons();
+        } catch (error) {
+          setStatus(window.SAMHO_ERRORS.message(error, "delete this repair record"), "error");
+        }
       });
 
       tbody.appendChild(row);
