@@ -46,6 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const nameLabel = document.createElement("span");
         nameLabel.className = "mechanic-name";
         nameLabel.textContent = name;
+        const blockChipClick = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        };
         const removeButton = document.createElement("button");
         removeButton.className = "mechanic-remove";
         removeButton.type = "button";
@@ -56,6 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
           renderMechanicSelection(names.filter((selected) => selected !== name));
           renderMechanicOptions();
         });
+        chip.addEventListener("click", (event) => {
+          if (event.target !== removeButton) blockChipClick(event);
+        }, true);
         chip.append(nameLabel, removeButton);
         return chip;
       })
