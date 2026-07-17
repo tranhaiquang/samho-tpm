@@ -22,6 +22,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getValue = (id) => document.getElementById(id)?.value.trim() || "";
 
+  let mechanicNames = [];
+
+  const getSelectedMechanics = () => getValue("mechanic").split(",").map((name) => name.trim()).filter(Boolean);
+
+  const renderMechanicSelection = (names) => {
+    const mechanic = document.getElementById("mechanic");
+    const chips = document.getElementById("mechanicChips");
+    if (!mechanic || !chips) return;
+
+    mechanic.value = names.join(", ");
+    chips.replaceChildren(
+      ...names.map((name) => {
+        const chip = document.createElement("button");
+        chip.className = "mechanic-chip";
+        chip.type = "button";
+        chip.textContent = name;
+        chip.setAttribute("aria-label", `Remove ${name}`);
+        chip.addEventListener("click", () => {
+          renderMechanicSelection(names.filter((selected) => selected !== name));
+          renderMechanicOptions();
+        });
+        return chip;
+      })
+    );
+  };
+
+  const renderMechanicOptions = () => {
+    const search = document.getElementById("mechanicSearch");
+    const options = document.getElementById("mechanicOptions");
+    if (!search || !options) return;
+
+    const selected = getSelectedMechanics();
+    const query = search.value.trim().toLocaleLowerCase();
+    const matches = mechanicNames
+      .filter((name) => !selected.includes(name) && name.toLocaleLowerCase().includes(query))
+      .slice(0, 3);
+    options.replaceChildren(
+      ...matches.map((name) => {
+        const option = document.createElement("button");
+        option.className = "mechanic-option";
+        option.type = "button";
+        option.role = "option";
+        option.textContent = name;
+        option.addEventListener("click", () => {
+          renderMechanicSelection([...getSelectedMechanics(), name]);
+          search.value = "";
+          renderMechanicOptions();
+          search.focus();
+        });
+        return option;
+      })
+    );
+    options.hidden = !matches.length;
+  };
+
+  const setDefaultMechanic = () => {
+    const displayName = String(window.SAMHO_AUTH?.currentUser?.()?.user_metadata?.display_name || "").trim();
+    if (!getSelectedMechanics().length && displayName) renderMechanicSelection([displayName]);
+  };
+
+  const initMechanicPicker = () => {
+    const picker = document.getElementById("mechanicPicker");
+    const search = document.getElementById("mechanicSearch");
+    if (!picker || !search) return;
+
+    search.addEventListener("input", renderMechanicOptions);
+    search.addEventListener("focus", renderMechanicOptions);
+    search.addEventListener("keydown", (event) => {
+      if (event.key !== "Backspace" || search.value || !getSelectedMechanics().length) return;
+      renderMechanicSelection(getSelectedMechanics().slice(0, -1));
+      renderMechanicOptions();
+    });
+    document.addEventListener("click", (event) => {
+      if (!picker.contains(event.target)) document.getElementById("mechanicOptions").hidden = true;
+    });
+  };
+
+  const loadMechanicOptions = async () => {
+    const options = document.getElementById("mechanicOptions");
+    if (!options) return;
+
+    try {
+      const response = await fetch(`${supabaseConfig.url}/rpc/list_user_display_names`, {
+        headers: {
+          apikey: supabaseConfig.anonKey,
+          Authorization: `Bearer ${supabaseConfig.anonKey}`,
+          ...window.SAMHO_AUTH.authHeaders()
+        }
+      });
+
+      if (!response.ok) throw new Error(`Could not load mechanic names (${response.status}).`);
+
+      const names = await response.json();
+      mechanicNames = [...new Set(names.map(({ display_name }) => display_name).filter(Boolean))];
+      renderMechanicOptions();
+    } catch (error) {
+      console.warn("Could not load mechanic name suggestions.", error);
+    }
+  };
+
   const getLocalTimezoneOffset = () => {
     const offset = -new Date().getTimezoneOffset();
     const sign = offset >= 0 ? "+" : "-";
@@ -98,6 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   if (document.getElementById("noteGrid")) renderNoteGrid();
+  initMechanicPicker();
+  setDefaultMechanic();
+  loadMechanicOptions();
 
   const fetchRowByCode = async ({ table, codeColumn, selectColumns }, code) => {
     const requestRow = async (operator, value) => {
@@ -522,6 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     syncOtherInputState();
+    setDefaultMechanic();
   };
 
   document.getElementById("repairForm")?.addEventListener("submit", async (event) => {

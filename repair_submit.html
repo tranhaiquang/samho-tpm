@@ -169,7 +169,12 @@
               </label>
               <label class="field">
                 <span>Người sửa chữa / Mechanic</span>
-                <input id="mechanic" type="text" required />
+                <div class="mechanic-picker" id="mechanicPicker">
+                  <div class="mechanic-chip-list" id="mechanicChips"></div>
+                  <input id="mechanicSearch" type="text" autocomplete="off" placeholder="Type a mechanic name" aria-label="Search mechanic names" />
+                  <div class="mechanic-options" id="mechanicOptions" role="listbox" hidden></div>
+                </div>
+                <input id="mechanic" type="hidden" required />
               </label>
             </div>
 

@@ -253,6 +253,82 @@ button {
   padding: 12px 15px 28px;
 }
 
+.app-greeting {
+  margin-bottom: 14px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.mechanic-picker {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+}
+
+.mechanic-chip-list {
+  display: contents;
+}
+
+.mechanic-chip,
+.mechanic-option {
+  border: 0;
+  font: inherit;
+}
+
+.mechanic-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #344054;
+  background: #e9eef5;
+}
+
+.mechanic-chip::after {
+  content: " ×";
+  color: #667085;
+  font-weight: 700;
+}
+
+#mechanicSearch {
+  flex: 1 1 130px;
+  min-width: 130px;
+  border: 0;
+  outline: 0;
+}
+
+.mechanic-options {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.mechanic-option {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+}
+
+.mechanic-option:hover {
+  background: #eef5ff;
+}
+
 .mode-tabs {
   display: grid;
   gap: 10px;
@@ -2861,6 +2937,34 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 
   .dashboard-app input,
   .dashboard-app select {
+    font-size: 16px;
+  }
+
+  .mechanic-picker {
+    min-height: 48px;
+    gap: 8px;
+    padding: 7px 10px;
+  }
+
+  .mechanic-chip {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  #mechanicSearch {
+    min-height: 34px;
+    flex-basis: 150px;
+  }
+
+  .mechanic-options {
+    max-height: 172px;
+    overflow-y: auto;
+  }
+
+  .mechanic-option {
+    min-height: 46px;
+    padding: 12px;
     font-size: 16px;
   }
 

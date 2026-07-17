@@ -91,6 +91,20 @@
     });
   };
 
+  const initGreeting = () => {
+    const content = document.querySelector("main.content");
+    if (!content) return;
+
+    const user = currentUser();
+    const displayName = String(user?.user_metadata?.display_name || currentUserId()).trim();
+    if (!displayName) return;
+
+    const greeting = document.createElement("header");
+    greeting.className = "app-greeting";
+    greeting.textContent = `Hello, ${displayName}`;
+    content.prepend(greeting);
+  };
+
   window.SAMHO_AUTH = {
     authHeaders,
     clearSession,
@@ -105,5 +119,8 @@
   };
 
   requireAuth();
-  document.addEventListener("DOMContentLoaded", initLogoutButtons);
+  document.addEventListener("DOMContentLoaded", () => {
+    initLogoutButtons();
+    initGreeting();
+  });
 })();
