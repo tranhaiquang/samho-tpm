@@ -34,15 +34,20 @@ document.addEventListener("DOMContentLoaded", () => {
     mechanic.value = names.join(", ");
     chips.replaceChildren(
       ...names.map((name) => {
-        const chip = document.createElement("button");
+        const chip = document.createElement("span");
         chip.className = "mechanic-chip";
-        chip.type = "button";
         chip.textContent = name;
-        chip.setAttribute("aria-label", `Remove ${name}`);
-        chip.addEventListener("click", () => {
+        chip.addEventListener("click", (event) => event.stopPropagation());
+        const removeButton = document.createElement("button");
+        removeButton.className = "mechanic-remove";
+        removeButton.type = "button";
+        removeButton.textContent = "×";
+        removeButton.setAttribute("aria-label", `Remove ${name}`);
+        removeButton.addEventListener("click", () => {
           renderMechanicSelection(names.filter((selected) => selected !== name));
           renderMechanicOptions();
         });
+        chip.appendChild(removeButton);
         return chip;
       })
     );
@@ -74,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return option;
       })
     );
-    options.hidden = !matches.length;
+    options.hidden = document.activeElement !== search || !matches.length;
   };
 
   const setDefaultMechanic = () => {
