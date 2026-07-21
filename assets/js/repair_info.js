@@ -384,7 +384,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </label>
           <label>
             <span>Solve</span>
-            <input id="editSolve" type="text" required />
+            <select id="editSolve" required>
+              <option>SỬA CHỮA</option>
+              <option>THAY THẾ</option>
+              <option>VỆ SINH</option>
+            </select>
           </label>
           <label>
             <span>Mechanic</span>
