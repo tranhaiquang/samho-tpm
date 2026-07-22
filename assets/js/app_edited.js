@@ -270,28 +270,40 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const machineExistsByCode = async (code) => {
-    const table = supabaseConfig.machineInfo?.table || supabaseConfig.table;
-    const codeColumn = supabaseConfig.machineInfo?.codeColumn || supabaseConfig.codeColumn;
-    const params = new URLSearchParams({
-      select: codeColumn,
-      [codeColumn]: `eq.${code}`,
-      limit: "1"
-    });
+    const tables = [
+      { table: supabaseConfig.machineInfo?.table || supabaseConfig.table, codeColumn: supabaseConfig.machineInfo?.codeColumn || supabaseConfig.codeColumn },
+      { table: supabaseConfig.table, codeColumn: supabaseConfig.codeColumn }
+    ];
 
-    const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
-      headers: {
-        apikey: supabaseConfig.anonKey,
-        Authorization: `Bearer ${supabaseConfig.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders()
+    const seen = new Set();
+    for (const { table, codeColumn } of tables) {
+      const key = `${table}:${codeColumn}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const params = new URLSearchParams({
+        select: codeColumn,
+        [codeColumn]: `eq.${code}`,
+        limit: "1"
+      });
+
+      const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
+        headers: {
+          apikey: supabaseConfig.anonKey,
+          Authorization: `Bearer ${supabaseConfig.anonKey}`,
+          ...window.SAMHO_AUTH.authHeaders()
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Machine validation failed (${response.status}).`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Machine validation failed (${response.status}).`);
+      const rows = await response.json();
+      if (rows.length > 0) return true;
     }
 
-    const rows = await response.json();
-    return rows.length > 0;
+    return false;
   };
 
   const fetchVisibleMachineCount = async () => {

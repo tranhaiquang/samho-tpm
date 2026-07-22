@@ -14,7 +14,6 @@ window.SAMHO_SUPABASE = {
   repairRecords: {
     table: "repair_records",
     insertMap: {
-      id: "id",
       brokenAt: "start_datetime",
       repairStartedAt: "fix_datetime",
       repairFinishedAt: "end_datetime",
