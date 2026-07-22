@@ -210,13 +210,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const fetchRepairRecords = async (fromDate, toDate) => {
     const dateColumn = config.repairInfo.dateColumn;
-    const params = new URLSearchParams({
-      select: "*",
-      order: `${config.repairInfo.idColumn || "id"}.desc`,
-      limit: "1000"
-    });
+    const pageSize = 1000;
+    const rows = [];
 
-    const rows = await fetchJson(`${config.url}/${config.repairInfo.table}?${params}`);
+    for (let from = 0; ; from += pageSize) {
+      const url = `${config.url}/${config.repairInfo.table}?select=*&order=${config.repairInfo.idColumn || "id"}.desc&limit=${pageSize}&offset=${from}`;
+      const response = await fetch(url, {
+        headers: {
+          apikey: config.anonKey,
+          Authorization: `Bearer ${config.anonKey}`,
+          ...window.SAMHO_AUTH.authHeaders()
+        }
+      });
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || `Request failed (${response.status}).`);
+      }
+      const pageRows = await response.json();
+      rows.push(...pageRows);
+      if (pageRows.length < pageSize) break;
+    }
+
     const fromTime = new Date(`${fromDate}T00:00:00`).getTime();
     const toTime = new Date(`${toDate}T23:59:59`).getTime();
 

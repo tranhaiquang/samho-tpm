@@ -1,0 +1,57 @@
+# AGENTS.md — Samho TPM (Maintenance Management)
+
+## Stack
+
+- **Frontend:** Vanilla HTML5 + CSS3 + ES6 — no frameworks, no bundler, no build step.
+- **Backend:** Supabase (PostgreSQL + Auth + Storage), accessed directly from the browser via REST.
+- **Dependencies (all CDN):** Lucide icons, SheetJS/xlsx, ZXing barcode, Google Fonts (Inter).
+- **Config:** All Supabase URL/keys, table/column mappings, and Power BI embed URL live in `supabase/config.js`.
+- **Auth:** Supabase email/password; session persisted in `localStorage` under key `samho.auth.session`. Users log in with a short ID — it gets `@email.com` appended automatically (`auth.js:toAuthEmail`).
+
+## Commands
+
+No package manager, no build, no test, no lint, no typecheck, no CI. Open any `.html` in a browser or serve with any static server:
+
+```sh
+python -m http.server 8080
+npx serve .
+```
+
+The only Node.js script is `node supabase/update-display-name.js` (ESM, requires the Supabase service_role key — file is `.gitignore`-d). Never commit it.
+
+## Project Layout
+
+```
+index.html               → redirects to login.html
+login.html               → auth entry
+repair_submit.html        → BM (breakdown maintenance) form
+repair_info.html          → repair record browse/edit/delete/export
+kpi_dashboard.html        → downtime/MTTR/MTBF charts + Power BI iframe
+red_tag.html              → red tag machine tracking + barcode scanner
+spare_parts.html          → spare parts inventory + image upload
+incoming_stock.html       → reorder workflow → Excel export
+assets/css/styles.css     → single monolithic stylesheet
+assets/js/{app,repair_info,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors,sidebar}.js
+supabase/config.js        → **central config** (tables, columns, keys, URLs)
+supabase/policies/        → RLS SQL policies
+```
+
+## Key Conventions & Gotchas
+
+- **Script loading order (all pages use `defer`):** `config.js` → `auth.js` → `errors.js` → `sidebar.js` → (CDN deps if needed: `@zxing/browser` on `repair_submit` & `red_tag`; `xlsx` on `repair_info` & `incoming_stock`) → page-specific JS. The `app.js` shared between `repair_submit` and `repair_info`.
+- **No cache-busting standard** — some pages use `?v=YYYYMMDD-N`, most do not.
+- **Bilingual UI** — labels mix Vietnamese and English (e.g. "Vấn Đề / Issue", "Người sửa chữa / Mechanic"). Match existing patterns.
+- **Modal-based CRUD** — all create/edit/delete uses dynamically generated modal dialogs, not separate pages.
+- **Pagination** — data fetches use manual offset-based pagination at 1000 rows per page.
+- **Excel export** — uses SheetJS (`XLSX`) from CDN; available on `repair_info` and `incoming_stock`.
+- **Barcode scanning** — prefers native `BarcodeDetector` API, falls back to `@zxing/browser` CDN.
+- **Spare parts table discovery** — spare parts module tries multiple table names (`spare_parts`, `sparepart`, etc.) via `tableCandidates` in config.
+- **Repair record `id` is manually generated** — `fetchNextRepairRecordId()` queries max `id` + 1 (not auto-increment).
+- **Machine search** — `fetchMachineByCode()` queries `repair_records` then `machine_info` and merges results. BM form requires the code to be searched and loaded before submission.
+- **Mechanic autocomplete** — calls Supabase RPC `list_user_display_names` (a `security definer` function exposing Auth user display names; SQL in `supabase/policies/`).
+- **Sidebar** — responsive: collapsed by default on desktop (>980px), toggles open on mobile. Standardized sidebar HTML is duplicated across every HTML page.
+- **RLS** — Row Level Security is enforced via Supabase policies in `supabase/policies/`; the anon key is publicly visible by design.
+- **No `.env`** — all config values are hardcoded in `supabase/config.js`.
+- **Images** — spare part images stored in Supabase Storage bucket `spare_parts_img`.
+- **Power BI** — embedded report URL configured in `supabase/config.js`.
+- **Service role key** — only in the (gitignored) `supabase/update-display-name.js`. Never commit it.
