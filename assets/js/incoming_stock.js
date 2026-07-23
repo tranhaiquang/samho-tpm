@@ -78,7 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams({ select: "*", limit: String(spareConfig.pageSize || 1000) });
         const response = await fetch(`${config.url}/${encodeURIComponent(tableName)}?${params}`, { headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) } });
         if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
-        return response.json();
+        const rows = await response.json();
+        return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
       } catch (error) { errors.push(`${tableName}: ${error.message}`); }
     }
     throw new Error(`Could not load spare parts. ${errors.join(" | ")}`);

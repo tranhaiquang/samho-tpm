@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
 
   const config = window.SAMHO_SUPABASE;
@@ -399,9 +399,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <label>
             <span>Solve</span>
             <select id="editSolve" required>
-              <option>SỬA CHỮA</option>
-              <option>THAY THẾ</option>
-              <option>VỆ SINH</option>
+              <option>Sá»¬A CHá»®A</option>
+              <option>THAY THáº¾</option>
+              <option>Vá»† SINH</option>
             </select>
           </label>
           <label>
@@ -509,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <table class="repair-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>No.</th>
             <th>item code</th>
             <th>name</th>
             <th>Plant</th>
@@ -533,7 +533,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const tbody = tableWrap.querySelector("tbody");
 
-    pageRecords.forEach((record) => {
+    pageRecords.forEach((record, idx) => {
+      const rowNumber = pageStart + idx + 1;
       const itemCode = getRecordValue(record, ["item_code", "ITEM_CODE"]);
       const machine = machineMap.get(itemCode) || record;
       const reportedAt = getRecordValue(record, ["start_datetime"]);
@@ -549,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const row = document.createElement("tr");
       row.dataset.recordId = record.id || "";
       row.innerHTML = `
-        <td>${record.id || "-"}</td>
+        <td>${rowNumber}</td>
         <td><strong>${itemCode || "-"}</strong></td>
         <td>${getMachineValue(machine, "machineName") || "-"}</td>
         <td>${plant || "-"}</td>
@@ -639,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const rows = currentRecords.map((record) => {
+    const rows = currentRecords.map((record, idx) => {
       const itemCode = getRecordValue(record, ["item_code", "ITEM_CODE"]);
       const machine = currentMachineMap.get(itemCode) || record;
       const reportedAt = getRecordValue(record, ["start_datetime"]);
@@ -647,7 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const repairedAt = getRecordValue(record, ["end_datetime"]);
 
       return {
-        ID: record.id || "",
+        "No.": idx + 1,
         "Item Code": itemCode,
         "Machine Name": getMachineValue(machine, "machineName"),
         Plant: getRecordValue(record, ["plant", "PLANT"]),

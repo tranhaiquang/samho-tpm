@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
 
   const config = window.SAMHO_SUPABASE;
@@ -241,7 +241,10 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const rows = await fetchJson(url);
         spareConfig.activeTable = tableName;
-        return rows;
+        if (rows.length) {
+          console.log("spare_parts columns:", Object.keys(rows[0]));
+        }
+        return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
       } catch (error) {
         errors.push(`${tableName}: ${error.message}`);
       }
@@ -262,7 +265,9 @@ document.addEventListener("DOMContentLoaded", () => {
       plantSelect.appendChild(option);
     });
 
-    if (plants.includes(previous)) plantSelect.value = previous;
+    if (previous && plants.includes(previous)) {
+      plantSelect.value = previous;
+    }
   };
 
   const populateModalOptions = (modal) => {
@@ -304,23 +309,10 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error("Safety stock and on hand must be whole numbers greater than or equal to 0.");
     }
 
-    if (activeRecord) {
-      return Object.fromEntries(
-        Object.keys(values)
-          .map((field) => [getColumnName(activeRecord, field), values[field]])
-          .filter(([column]) => column)
-      );
-    }
-
-    const nextId = spareRows
-      .map((row) => Number(readField(row, "id")))
-      .filter((id) => Number.isInteger(id) && id >= 0)
-      .reduce((maximum, id) => Math.max(maximum, id), 0) + 1;
-    const map = spareConfig.insertMap;
+    const map = activeRecord ? spareConfig.updateMap : spareConfig.insertMap;
+    const entries = Object.entries(map || {}).filter(([, column]) => column);
     return Object.fromEntries(
-      Object.entries(map || {})
-        .filter(([, column]) => column)
-        .map(([field, column]) => [column, field === "id" ? nextId : values[field]])
+      entries.map(([field, column]) => [column, values[field]])
     );
   };
 
@@ -538,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isEdit = Boolean(row);
 
     populateModalOptions(modal);
-    modal.querySelector("#sparePartEyebrow").textContent = isEdit ? `ID ${text(readField(row, "id"))}` : "New spare part";
+    modal.querySelector("#sparePartEyebrow").textContent = isEdit ? `Item ${text(readField(row, "itemCode"))}` : "New spare part";
     modal.querySelector("#sparePartTitle").textContent = isEdit ? "Edit spare part" : "Add spare part";
     modal.querySelector("#spareFormPlant").value = isEdit ? text(readField(row, "plant"), "") : plantSelect.value;
     modal.querySelector("#spareFormItemCode").value = isEdit ? text(readField(row, "itemCode"), "") : "";
@@ -597,7 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getFilteredRows = () => {
-    const plant = plantSelect.value;
+    const plant = String(plantSelect.value);
     const keyword = searchInput.value.trim().toLowerCase();
     const selectedStatus = statusSelect?.value || "";
     const selectedStatusClass = { low: "pending", ok: "done" }[selectedStatus];
@@ -611,11 +603,14 @@ document.addEventListener("DOMContentLoaded", () => {
         readField(row, "location")
       ].join(" ").toLowerCase();
 
-      return (
-        (!plant || rowPlant === plant) &&
-        (!keyword || haystack.includes(keyword)) &&
-        (!selectedStatus || rowStatus === selectedStatusClass)
-      );
+      if (!plant || rowPlant === plant) {
+        if (!keyword || haystack.includes(keyword)) {
+          if (!selectedStatus || rowStatus === selectedStatusClass) {
+            return true;
+          }
+        }
+      }
+      return false;
     });
   };
 
@@ -650,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <table class="repair-table spare-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>No.</th>
             <th>Item Code</th>
             <th>Image</th>
             <th>Name Vietnamese</th>
@@ -667,7 +662,8 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     const tbody = tableWrap.querySelector("tbody");
-    pageRows.forEach((row) => {
+    pageRows.forEach((row, idx) => {
+      const rowNumber = pageStart + idx + 1;
       const safetyStock = toNumber(readField(row, "safetyStock"));
       const onHand = toNumber(readField(row, "onHand"));
       const difference = onHand - safetyStock;
@@ -677,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const itemCode = readField(row, "itemCode");
 
       tr.innerHTML = `
-        <td>${text(readField(row, "id"))}</td>
+        <td>${rowNumber}</td>
         <td><strong>${text(itemCode)}</strong></td>
         <td>${text(readField(row, "nameVietnamese"))}</td>
         <td>${safetyStock.toLocaleString()}</td>

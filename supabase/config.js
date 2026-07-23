@@ -76,7 +76,6 @@ window.SAMHO_SUPABASE = {
       emailColumn: "email"
     },
     insertMap: {
-      id: "ID",
       plant: "plant",
       itemCode: "item_code",
       nameVietnamese: "name_vietnamese",
