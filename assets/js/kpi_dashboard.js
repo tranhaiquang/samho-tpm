@@ -42,7 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getMonthOptionLabel = (month) => {
-    if (month.key.includes("-")) return `${month.label} ${month.key.slice(0, 4)}`;
+    if (/\d/.test(month.label)) return month.label;
+    if (month.key.includes("-")) return `${month.label} ${month.key.slice(2, 4)}`;
     return month.label;
   };
 
@@ -50,12 +51,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!value) return { key: "all", label: "All Data", order: 99 };
 
     const raw = String(value).trim();
+
+    const yyyymm = raw.match(/^(\d{4})-(\d{2})$/);
+    if (yyyymm) {
+      const year = Number(yyyymm[1]);
+      const monthIndex = Number(yyyymm[2]) - 1;
+      if (year && monthIndex >= 0 && monthIndex < 12) {
+        return { key: raw, label: monthNames[monthIndex], order: monthIndex };
+      }
+    }
+
     const compactDate = raw.match(/^(\d{4})(\d{2})(\d{2})/);
     if (compactDate) {
       const year = Number(compactDate[1]);
       const index = Number(compactDate[2]) - 1;
       if (year && index >= 0 && index < 12) {
         return { key: `${year}-${String(index + 1).padStart(2, "0")}`, label: monthNames[index], order: index };
+      }
+    }
+
+    const monthYearMatch = raw.match(/^([A-Za-z]{3,})\s+(\d{2,4})$/);
+    if (monthYearMatch) {
+      const foundIndex = monthNames.findIndex((m) => m.toLowerCase() === monthYearMatch[1].toLowerCase().slice(0, 3));
+      if (foundIndex >= 0) {
+        let year = Number(monthYearMatch[2]);
+        if (year < 100) year += 2000;
+        return { key: `${year}-${String(foundIndex + 1).padStart(2, "0")}`, label: raw, order: foundIndex };
       }
     }
 
@@ -67,7 +88,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const lower = raw.toLowerCase();
     const foundIndex = monthNames.findIndex((month) => lower.includes(month.toLowerCase()));
-    if (foundIndex >= 0) return { key: monthNames[foundIndex], label: monthNames[foundIndex], order: foundIndex };
+    if (foundIndex >= 0) {
+      const yearDigits = raw.match(/\b(20\d{2}|\d{2})\b/);
+      if (yearDigits) {
+        let year = Number(yearDigits[1]);
+        if (year < 100) year += 2000;
+        return { key: `${year}-${String(foundIndex + 1).padStart(2, "0")}`, label: raw, order: foundIndex };
+      }
+      return { key: monthNames[foundIndex], label: monthNames[foundIndex], order: foundIndex };
+    }
 
     const monthNumber = Number.parseInt(raw, 10);
     if (monthNumber >= 1 && monthNumber <= 12) {
@@ -174,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const months = new Map();
     rows.forEach((row) => {
       const month = normalizeMonth(row[monthColumn]);
-      if (month.key === "all") return;
+      if (month.key === "all" || !month.key.includes("-")) return;
       months.set(String(row[monthColumn]), {
         value: String(row[monthColumn]),
         key: month.key,
@@ -194,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const rawValue = readField(row, "month") || row[monthColumn];
       if (rawValue == null || rawValue === "") return;
       const month = normalizeMonth(rawValue);
-      if (month.key === "all") return;
+      if (month.key === "all" || !month.key.includes("-")) return;
       months.set(String(rawValue), {
         value: String(rawValue),
         key: month.key,
