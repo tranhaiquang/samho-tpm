@@ -14,7 +14,7 @@
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
-    <script src="assets/js/kpi_dashboard.js" defer></script>
+    <script src="assets/js/kpi_dashboard_edited.js" defer></script>
   </head>
   <body class="dashboard-app kpi-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -80,7 +80,19 @@
                 <button type="button" disabled>Loading months...</button>
               </div>
             </div>
-
+            <div class="plant-filter">
+              <button class="quarter-pill" id="plantFilterButton" type="button" aria-expanded="false" aria-controls="plantFilterMenu">
+                <i data-lucide="building-2"></i>
+                <span id="plantFilterLabel">C2B</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div class="month-filter-menu" id="plantFilterMenu" hidden>
+                <button type="button" data-plant-value="C2B" class="active">C2B</button>
+                <button type="button" data-plant-value="SF">SF</button>
+                <button type="button" data-plant-value="OS">OS</button>
+                <button type="button" data-plant-value="Treatment">Treatment</button>
+              </div>
+            </div>
           </div>
         </section>
 

@@ -3325,7 +3325,8 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   height: 15px;
 }
 
-.month-filter {
+.month-filter,
+.plant-filter {
   position: relative;
 }
 
