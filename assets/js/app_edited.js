@@ -141,31 +141,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const getLocalTimezoneOffset = () => {
-    const offset = -new Date().getTimezoneOffset();
-    const sign = offset >= 0 ? "+" : "-";
-    const hours = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
-    const minutes = String(Math.abs(offset) % 60).padStart(2, "0");
-    return `${sign}${hours}:${minutes}`;
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const parseSimpleDateTime = (value) => {
+    if (!value) return null;
+    const parts = value.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
+    if (parts) {
+      const [, dd, mm, yyyy, hh = "0", min = "0"] = parts;
+      const year = yyyy.length === 2 ? 2000 + Number(yyyy) : Number(yyyy);
+      return new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min));
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
   };
 
   const getDateTimeValue = (dateId, timeId) => {
     const date = getValue(dateId);
     const time = getValue(timeId);
     if (!date || !time) return "";
-    return `${date}T${time}:00${getLocalTimezoneOffset()}`;
+    const [yyyy, mm, dd] = date.split("-");
+    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
   };
 
   const getDowntimeMinutes = (startValue, endValue) => {
-    const start = new Date(startValue);
-    const end = new Date(endValue);
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "";
+    const start = parseSimpleDateTime(startValue);
+    const end = parseSimpleDateTime(endValue);
+    if (!start || !end) return "";
     return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
   };
 
   const getMonthValue = (dateTimeValue) => {
     if (!dateTimeValue) return "";
-    return dateTimeValue.slice(0, 7);
+    const parts = dateTimeValue.match(/^(\d{2})-(\d{2})-(\d{2})/);
+    if (!parts) return "";
+    const [, , mm, yy] = parts;
+    return `${monthNames[parseInt(mm) - 1]}-${yy}`;
   };
 
   const getFieldLabel = (field) => {
@@ -209,8 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const timeInput = document.getElementById(timeId);
     if (!dateInput || !timeInput || !value) return;
 
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return;
+    const date = parseSimpleDateTime(value);
+    if (!date) return;
 
     dateInput.value = date.toISOString().slice(0, 10);
     timeInput.value = date.toTimeString().slice(0, 5);
