@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
-    <script src="assets/js/errors.js" defer></script>
+    <script src="assets/js/errors_edited.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="assets/js/kpi_dashboard_edited.js" defer></script>
   </head>
@@ -70,29 +70,37 @@
             <p id="kpiSubtitle">Real-time downtime analysis</p>
           </div>
           <div class="kpi-head-actions">
-            <div class="month-filter">
-              <button class="quarter-pill" id="monthFilterButton" type="button" aria-expanded="false" aria-controls="monthFilterMenu">
-                <i data-lucide="calendar-days"></i>
-                <span id="monthFilterLabel">Loading...</span>
-                <i data-lucide="chevron-down"></i>
-              </button>
-              <div class="month-filter-menu" id="monthFilterMenu" hidden>
-                <button type="button" disabled>Loading months...</button>
-              </div>
+            <div class="date-range-filter">
+              <label class="date-pill">
+                <i data-lucide="calendar"></i>
+                <span>From</span>
+                <input type="date" id="kpiFromDate" />
+              </label>
+              <span class="date-sep">→</span>
+              <label class="date-pill">
+                <i data-lucide="calendar"></i>
+                <span>To</span>
+                <input type="date" id="kpiToDate" />
+              </label>
             </div>
             <div class="plant-filter">
               <button class="quarter-pill" id="plantFilterButton" type="button" aria-expanded="false" aria-controls="plantFilterMenu">
                 <i data-lucide="building-2"></i>
-                <span id="plantFilterLabel">C2B</span>
+                <span id="plantFilterLabel">All Plants</span>
                 <i data-lucide="chevron-down"></i>
               </button>
               <div class="month-filter-menu" id="plantFilterMenu" hidden>
-                <button type="button" data-plant-value="C2B" class="active">C2B</button>
+                <button type="button" data-plant-value="">All Plants</button>
+                <button type="button" data-plant-value="" class="active">All Plants</button>
                 <button type="button" data-plant-value="SF">SF</button>
                 <button type="button" data-plant-value="OS">OS</button>
                 <button type="button" data-plant-value="Treatment">Treatment</button>
               </div>
             </div>
+            <button class="quarter-pill" id="kpiDateSearch" type="button">
+              <i data-lucide="search"></i>
+              Search
+            </button>
           </div>
         </section>
 

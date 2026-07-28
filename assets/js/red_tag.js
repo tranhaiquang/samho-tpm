@@ -188,8 +188,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const loadRecords = async () => {
     setStatus("Loading Red Tag records...", "idle");
-    machineRows = await fetchRedTagRecords();
-    renderMachines();
+    window.SAMHO_LOADING.show("Loading Red Tag records...");
+    try {
+      machineRows = await fetchRedTagRecords();
+      renderMachines();
+    } finally {
+      window.SAMHO_LOADING.hide();
+    }
   };
 
   const renderMachines = () => {
@@ -335,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addStatus.dataset.type = "idle";
     addSaveButton.disabled = true;
     try {
+      window.SAMHO_LOADING.show("Saving Red Tag record...");
       const response = await fetch(`${config.url}/${encodeURIComponent(redTagConfig.table || "redtag_records")}`, {
         method: "POST",
         headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}), "Content-Type": "application/json", Prefer: "return=minimal" },
@@ -353,6 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderMachines();
       closeAddModal();
       setStatus("Red Tag record saved.", "success");
+      window.SAMHO_LOADING.show("Reloading records...");
       try {
         await loadRecords();
         setStatus("Red Tag record saved.", "success");
@@ -363,6 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
       addStatus.textContent = friendlyError(error, "save this record");
       addStatus.dataset.type = "error";
     } finally {
+      window.SAMHO_LOADING.hide();
       addSaveButton.disabled = false;
     }
   });

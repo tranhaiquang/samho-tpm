@@ -217,5 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.lucide) window.lucide.createIcons();
   });
 
-  fetchParts().then((rows) => { spareRows = rows; populatePlants(); applyFilters(); setStatus(`${rows.length} spare part${rows.length === 1 ? "" : "s"} loaded.`, "success"); }).catch((error) => { list.innerHTML = '<tr><td colspan="7">Unable to load spare parts.</td></tr>'; setStatus(window.SAMHO_ERRORS.message(error, "load spare parts"), "error"); });
+  window.SAMHO_LOADING.show("Loading spare parts...");
+  fetchParts().then((rows) => { spareRows = rows; populatePlants(); applyFilters(); setStatus(`${rows.length} spare part${rows.length === 1 ? "" : "s"} loaded.`, "success"); }).catch((error) => { list.innerHTML = '<tr><td colspan="7">Unable to load spare parts.</td></tr>'; setStatus(window.SAMHO_ERRORS.message(error, "load spare parts"), "error"); }).finally(() => { window.SAMHO_LOADING.hide(); });
 });

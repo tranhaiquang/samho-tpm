@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const getValue = (id) => document.getElementById(id)?.value.trim() || "";
 
   let mechanicNames = [];
+  let defaultMechanicName = '';
 
   const getSelectedMechanics = () => getValue("mechanic").split(",").map((name) => name.trim()).filter(Boolean);
 
@@ -50,20 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
           event.preventDefault();
           event.stopPropagation();
         };
-        const removeButton = document.createElement("button");
-        removeButton.className = "mechanic-remove";
-        removeButton.type = "button";
-        removeButton.textContent = "×";
-        removeButton.setAttribute("aria-label", `Remove ${name}`);
-        removeButton.addEventListener("click", (event) => {
-          event.stopPropagation();
-          renderMechanicSelection(names.filter((selected) => selected !== name));
-          renderMechanicOptions();
-        });
-        chip.addEventListener("click", (event) => {
-          if (event.target !== removeButton) blockChipClick(event);
-        }, true);
-        chip.append(nameLabel, removeButton);
+        const isDefault = name === defaultMechanicName;
+        if (!isDefault) {
+          const removeButton = document.createElement("button");
+          removeButton.className = "mechanic-remove";
+          removeButton.type = "button";
+          removeButton.textContent = "×";
+          removeButton.setAttribute("aria-label", `Remove ${name}`);
+          removeButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            renderMechanicSelection(names.filter((selected) => selected !== name));
+            renderMechanicOptions();
+          });
+          chip.addEventListener("click", (event) => {
+            if (event.target !== removeButton) blockChipClick(event);
+          }, true);
+          chip.append(nameLabel, removeButton);
+        } else {
+          chip.addEventListener("click", blockChipClick, true);
+          chip.append(nameLabel);
+        }
         return chip;
       })
     );
@@ -104,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const setDefaultMechanic = () => {
     const displayName = String(window.SAMHO_AUTH?.currentUser?.()?.user_metadata?.display_name || "").trim();
+    defaultMechanicName = displayName;
     if (!getSelectedMechanics().length && displayName) renderMechanicSelection([displayName]);
   };
 
@@ -667,6 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setSaveStatus("Checking machine code...", "loading");
 
     try {
+      window.SAMHO_LOADING.show("Saving repair record...");
       const machineExists = await machineExistsByCode(formData.itemCode);
       if (!machineExists) {
         setSaveStatus(`Item Code ${formData.itemCode} does not exist in machine_info.`, "warning");
@@ -680,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       setSaveStatus(window.SAMHO_ERRORS.message(error, "save the repair record"), "error");
     } finally {
+      window.SAMHO_LOADING.hide();
       saveButton.disabled = false;
     }
   });

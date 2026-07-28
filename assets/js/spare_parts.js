@@ -382,6 +382,7 @@
 
     modalStatus.textContent = "Saving...";
     saveButton.disabled = true;
+    window.SAMHO_LOADING.show("Saving spare part...");
 
     try {
       const payload = buildPayload();
@@ -424,6 +425,7 @@
     } catch (error) {
       modalStatus.textContent = window.SAMHO_ERRORS.message(error, "save this spare part");
     } finally {
+      window.SAMHO_LOADING.hide();
       saveButton.disabled = false;
     }
   };
@@ -561,6 +563,7 @@
     if (!window.confirm(`Delete spare part ${itemCode || idValue}? This cannot be undone.`)) return;
 
     setStatus("Deleting spare part...", "loading");
+    window.SAMHO_LOADING.show("Deleting spare part...");
     try {
       const params = new URLSearchParams({ [idColumn]: `eq.${idValue}` });
       await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
@@ -585,6 +588,8 @@
       );
     } catch (error) {
       setStatus(window.SAMHO_ERRORS.message(error, "delete this spare part"), "error");
+    } finally {
+      window.SAMHO_LOADING.hide();
     }
   };
 
@@ -746,6 +751,7 @@
 
     refreshButton.disabled = true;
     setStatus("Loading spare parts...", "loading");
+    window.SAMHO_LOADING.show("Loading spare parts...");
 
     try {
       await loadEditPermission();
@@ -758,6 +764,7 @@
       list.innerHTML = "";
       setStatus(window.SAMHO_ERRORS.message(error, "load spare parts"), "error");
     } finally {
+      window.SAMHO_LOADING.hide();
       refreshButton.disabled = false;
       if (window.lucide) window.lucide.createIcons();
     }

@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const colors = ["#2d75dc", "#d9364f", "#3f9b5f", "#6d35f2", "#ff8a2a"];
   const operatingHoursPerDay = 7.5;
   let activeMonth = "";
-  let activePlant = "C2B";
+  let activePlant = "";
+  let activeFromDate = "";
+  let activeToDate = "";
   const plantFilterMap = { C2B: ["PLANT A", "PLANT B"], OS: ["PLANT H"], SF: ["PLANT E"], Treatment: ["PLANT D", "PLANT I"] };
 
   const text = (id, value) => {
@@ -33,6 +35,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const cleaned = String(value).replace(/,/g, "").trim();
     const number = Number.parseFloat(cleaned);
     return Number.isFinite(number) ? number : 0;
+  };
+
+  const parseDateTime = (value) => {
+    if (!value) return null;
+    const str = String(value).trim();
+
+    let match = str.match(/^(\d{2})-(\d{2})-(\d{2,4})(?:\s+(\d{2}):(\d{2}))?/);
+    if (match) {
+      let year = Number(match[3]);
+      if (year < 100) year += 2000;
+      return new Date(year, Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0));
+    }
+
+    match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+    }
+
+    return null;
   };
 
   const configuredColumn = (field) => downtimeConfig?.fieldMap?.[field] || "";
@@ -149,6 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
           .filter(Boolean)
       )
     );
+
+    const dateColumn = "start_datetime";
+    if (!selectedColumns.includes(dateColumn)) {
+      selectedColumns.push(dateColumn);
+    }
 
     const params = new URLSearchParams({
       select: selectedColumns.join(",") || "*",
@@ -328,14 +354,31 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   };
 
-  const renderMetricTrend = (items, selectedMonth) => {
+  const renderSimplePlantChart = (plants) => {
+    const container = document.getElementById("monthlyDowntimeChart");
+    const legend = document.getElementById("monthlyLegend");
+    if (!container || !legend) return;
+
+    const top = plants.slice(0, 5);
+    const max = Math.max(...top.map((p) => p.total), 1);
+
+    container.innerHTML = top
+      .map((plant, index) => {
+        const height = Math.max((plant.total / max) * 88, plant.total > 0 ? 8 : 0);
+        return `<div class="cluster" data-label="${plant.label}"><span class="value-badge">${formatNumber(plant.total)} min</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${plant.label}: ${formatNumber(plant.total)} min"></b></div>`;
+      })
+      .join("") || `<p class="kpi-empty">No downtime data.</p>`;
+
+    legend.innerHTML = `<span><b style="background:${colors[0]}"></b>Total downtime</span>`;
+  };
+
+  const renderMetricTrend = (items, operationDays) => {
     const container = document.getElementById("monthlyTrendBars");
     const lines = document.getElementById("comboLines");
     if (!container) return;
     if (lines) lines.innerHTML = "";
 
     const top = items.slice(0, 3);
-    const operationDays = getOperationDaysMonSat(selectedMonth);
     const maxDowntime = Math.max(...top.map((item) => item.total), 1);
     const mttrValues = top.map((item) => (item.count ? item.total / item.count : 0));
     const mtbfValues = top.map((item) => (item.count ? Math.max(operationDays * operatingHoursPerDay * 60 - item.total, 0) / item.count : 0));
@@ -372,6 +415,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const applyDateFilter = (rows) => {
+    if (!activeFromDate && !activeToDate) return rows;
+    const fromDate = activeFromDate ? new Date(activeFromDate + "T00:00:00") : null;
+    const toDate = activeToDate ? new Date(activeToDate + "T23:59:59") : null;
+    return rows.filter((row) => {
+      const dt = parseDateTime(row.start_datetime);
+      if (!dt) return !fromDate && !toDate;
+      if (fromDate && dt < fromDate) return false;
+      if (toDate && dt > toDate) return false;
+      return true;
+    });
+  };
+
   const renderDashboard = (sourceRows) => {
     const monthColumn = configuredColumn("month");
     const rows = sourceRows
@@ -396,7 +452,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const rowCount = rows.length;
     const totalErrors = rowCount;
     const uniqueItemCount = new Set(rows.map((row) => row.itemCode).filter(Boolean)).size;
-    const operatingMinutes = getOperatingMinutes(activeMonth, uniqueItemCount, totalDowntime);
+    let operationDays;
+    if (activeFromDate || activeToDate) {
+      const start = activeFromDate ? new Date(activeFromDate + "T00:00:00") : new Date(0);
+      const end = activeToDate ? new Date(activeToDate + "T00:00:00") : new Date();
+      operationDays = countWeekdaysMonSat(start, end);
+    } else {
+      operationDays = getOperationDaysMonSat(activeMonth);
+    }
+    const scheduledMinutes = uniqueItemCount * operationDays * operatingHoursPerDay * 60;
+    const operatingMinutes = Math.max(scheduledMinutes - totalDowntime, 0);
     const avgMttr = totalErrors ? totalDowntime / totalErrors : 0;
     const avgMtbf =
       configuredColumn("mtbf") && rows.some((row) => row.mtbf)
@@ -435,12 +500,16 @@ document.addEventListener("DOMContentLoaded", () => {
     text("machineFooterTotal", `Total Downtime: ${formatNumber(totalDowntime)} min`);
     text("machineFooterCount", `${formatNumber(machineGroups.length)} machines`);
     const activeLabel = document.getElementById("monthFilterLabel")?.textContent || "Selected month";
-    text("kpiSubtitle", monthColumn ? `Downtime sorted and calculated by ${monthColumn} · ${activeLabel}` : "Downtime totals from table · map a month column in supabase/config.js for monthly split");
+    text("kpiSubtitle", "Real-time downtime analysis");
 
     renderRankList(sectionGroups);
     renderMachineBars(machineGroups);
-    renderMonthlyChart(months, plantMonthGroups);
-    renderMetricTrend(machineGroups, activeMonth);
+    if (activeFromDate || activeToDate) {
+      renderSimplePlantChart(plantGroups);
+    } else {
+      renderMonthlyChart(months, plantMonthGroups);
+    }
+    renderMetricTrend(machineGroups, operationDays);
 
     setStatus(
       monthColumn
@@ -458,10 +527,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       setStatus("Loading downtime data...", "idle");
+      window.SAMHO_LOADING.show("Loading dashboard data...");
       const rows = await getRows(monthValue, plantValue);
-      renderDashboard(rows);
+      const filteredRows = applyDateFilter(rows);
+      renderDashboard(filteredRows);
     } catch (error) {
       setStatus(window.SAMHO_ERRORS.message(error, "load dashboard data"), "error");
+    } finally {
+      window.SAMHO_LOADING.hide();
     }
   };
 
@@ -492,7 +565,6 @@ document.addEventListener("DOMContentLoaded", () => {
         label.textContent = item.textContent.trim();
         menu.querySelectorAll("[data-month-value]").forEach((buttonItem) => buttonItem.classList.toggle("active", buttonItem === item));
         closeMonthMenu();
-        fetchAndRender(activeMonth, activePlant);
       });
     });
   };
@@ -575,7 +647,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (activeMonth) fetchAndRender(activeMonth, activePlant);
+    setStatus("Set filters and click Search to load data.", "idle");
+  };
+
+  const countWeekdaysMonSat = (start, end) => {
+    let days = 0;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (d.getDay() !== 0) days += 1;
+    }
+    return days;
   };
 
   const initPlantFilter = () => {
@@ -611,7 +691,6 @@ document.addEventListener("DOMContentLoaded", () => {
         label.textContent = item.textContent.trim();
         menu.querySelectorAll("[data-plant-value]").forEach((btn) => btn.classList.toggle("active", btn === item));
         closePlantMenu();
-        fetchAndRender(activeMonth, activePlant);
       });
     });
 
@@ -627,6 +706,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const initDateFilter = () => {
+    const fromInput = document.getElementById("kpiFromDate");
+    const toInput = document.getElementById("kpiToDate");
+    const searchBtn = document.getElementById("kpiDateSearch");
+    if (!fromInput || !toInput || !searchBtn) return;
+
+    const today = new Date();
+    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const fmt = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
+    fromInput.value = fmt(firstOfMonth);
+    toInput.value = fmt(today);
+    activeFromDate = fromInput.value;
+    activeToDate = toInput.value;
+
+    const applyDateRange = () => {
+      activeFromDate = fromInput.value;
+      activeToDate = toInput.value;
+      fetchAndRender(activeMonth, activePlant);
+    };
+
+    searchBtn.addEventListener("click", applyDateRange);
+  };
+
+  initDateFilter();
   initPlantFilter();
   initMonthFilter();
+  fetchAndRender(activeMonth, activePlant);
 });

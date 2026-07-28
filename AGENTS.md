@@ -31,14 +31,14 @@ red_tag.html              → red tag machine tracking + barcode scanner
 spare_parts.html          → spare parts inventory + image upload
 incoming_stock.html       → reorder workflow → Excel export
 assets/css/styles.css     → single monolithic stylesheet
-assets/js/{app_edited,repair_info_edited,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors,sidebar}.js
+assets/js/{app_edited,repair_info_edited,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors_edited,sidebar}.js
 supabase/config.js        → **central config** (tables, columns, keys, URLs)
 supabase/policies/        → RLS SQL policies
 ```
 
 ## Key Conventions & Gotchas
 
-- **Script loading order (all pages use `defer`):** `config.js` → `auth.js` → `errors.js` → `sidebar.js` → (CDN deps if needed: `@zxing/browser` on `repair_submit` & `red_tag`; `xlsx` on `repair_info` & `incoming_stock`) → page-specific JS. `repair_submit` uses `app_edited.js`; `repair_info` uses `app_edited.js` + `repair_info_edited.js`. The `_edited` suffix indicates the file has been modified from the original.
+- **Script loading order (all pages use `defer`):** `config.js` → `auth.js` → `errors_edited.js` → `sidebar.js` → (CDN deps if needed: `@zxing/browser` on `repair_submit` & `red_tag`; `xlsx` on `repair_info` & `incoming_stock`) → page-specific JS. `repair_submit` uses `app_edited.js`; `repair_info` uses `app_edited.js` + `repair_info_edited.js`. The `_edited` suffix indicates the file has been modified from the original.
 - **No cache-busting standard** — some pages use `?v=YYYYMMDD-N`, most do not.
 - **Bilingual UI** — labels mix Vietnamese and English (e.g. "Vấn Đề / Issue", "Người sửa chữa / Mechanic"). Match existing patterns.
 - **Modal-based CRUD** — all create/edit/delete uses dynamically generated modal dialogs, not separate pages.
@@ -56,3 +56,13 @@ supabase/policies/        → RLS SQL policies
 - **Images** — spare part images stored in Supabase Storage bucket `spare_parts_img`.
 - **Power BI** — embedded report URL configured in `supabase/config.js`.
 - **Service role key** — only in the (gitignored) `supabase/update-display-name.js`. Never commit it.
+- **Loading overlay** — global CSS spinner + JS utility (`SAMHO_LOADING.show()`/`hide()`) in `errors_edited.js`. Used across all pages during data fetches. Overlay is a fixed full-viewport element with opacity transition; spinner is a CSS border-animated circle.
+- **`errors_edited.js`** — extends the original `errors.js` with the `window.SAMHO_LOADING` utility. All HTML files reference `errors_edited.js`; the original `errors.js` is no longer used.
+
+## Git Workflow
+
+- **Before every `git push`, update this AGENTS.md** — review the current project layout, key conventions, and commands section to reflect any recent changes. Keep the doc in sync with the actual codebase so the next session starts with accurate context.
+
+## Interaction Style
+
+- **Rephrase requests** — before responding to the user, first rephrase their request in clearer, more professional language. This ensures mutual understanding before any action is taken.

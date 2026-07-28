@@ -392,9 +392,9 @@
           <label>
             <span>Solve</span>
             <select id="editSolve" required>
-              <option>Sá»¬A CHá»®A</option>
-              <option>THAY THáº¾</option>
-              <option>Vá»† SINH</option>
+              <option>SỬA CHỮA</option>
+              <option>THAY THẾ</option>
+              <option>VỆ SINH</option>
             </select>
           </label>
           <label>
@@ -692,6 +692,7 @@
 
     searchButton.disabled = true;
     setStatus("Searching...", "loading");
+    window.SAMHO_LOADING.show("Loading repair records...");
 
     try {
       const dateRecords = await fetchRepairRecords(fromDate, toDate);
@@ -709,6 +710,7 @@
       list.innerHTML = "";
       setStatus(window.SAMHO_ERRORS.message(error, "load repair records"), "error");
     } finally {
+      window.SAMHO_LOADING.hide();
       searchButton.disabled = false;
       if (window.lucide) window.lucide.createIcons();
     }
