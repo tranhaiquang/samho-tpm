@@ -30,10 +30,12 @@ kpi_dashboard.html        → downtime/MTTR/MTBF charts + Power BI iframe
 red_tag.html              → red tag machine tracking + barcode scanner
 spare_parts.html          → spare parts inventory + image upload
 incoming_stock.html       → reorder workflow → Excel export
+pm.html                   → PM schedule calendar, task catalog, CRUD (new)
 assets/css/styles.css     → single monolithic stylesheet
-assets/js/{app_edited,repair_info_edited,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors_edited,sidebar}.js
+assets/js/{app_edited,repair_info_edited,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors_edited,sidebar,pm}.js
 supabase/config.js        → **central config** (tables, columns, keys, URLs)
 supabase/policies/        → RLS SQL policies
+data/                     → static data files (PM Excel master data)
 ```
 
 ## Key Conventions & Gotchas
@@ -58,6 +60,8 @@ supabase/policies/        → RLS SQL policies
 - **Service role key** — only in the (gitignored) `supabase/update-display-name.js`. Never commit it.
 - **Loading overlay** — global CSS spinner + JS utility (`SAMHO_LOADING.show()`/`hide()`) in `errors_edited.js`. Used across all pages during data fetches. Overlay is a fixed full-viewport element with opacity transition; spinner is a CSS border-animated circle.
 - **`errors_edited.js`** — extends the original `errors.js` with the `window.SAMHO_LOADING` utility. All HTML files reference `errors_edited.js`; the original `errors.js` is no longer used.
+- **PM module (`pm.js`)** — data-driven from `data/pm_master_data.js` (pre-converted to `window.PM_MASTER_DATA`, no runtime XLSX). Schedule data from `PM_Task_Schedule` sheet; task catalog from per-equipment sheets and `PM_Task_Detail`. Records are generated dynamically per calendar month — one per machine, distributed Tue–Fri. **3-status flow:** ĐANG CHỜ → HOÀN THÀNH (technician marks done) → ĐÃ XÁC NHẬN (validator checks all validation boxes). Task progress in `pm_task_progress`, validation in `pm_task_validation`, record status in `pm_completed_data`, manual records in `pm_manual_records` (all localStorage). Task checklist modal shows technician checkboxes (all users) and validator checkboxes (`isValidator` role based on `config.pm.validatorTeam`). Status select dropdown has 3 options; stats show 3 cards. Past-due records auto-initialize as HOÀN THÀNH. Edit/delete restricted to PID role, only on manual records (non-completed/non-validated).
+- **PM machine config** — `supabase/config.js` has `config.pm.equipmentMap` mapping Excel equipment type names (e.g. `"ATOM FLASHCUT"`) to arrays of machine item codes. New equipment types added: EM CUTTING MACHINE, AUTO MARKING LINER, SEMI CUTTING, AUTO LASER HOLE PUNCHING MC, SOCKLINER (with plausible placeholder item codes — review before production use).
 
 ## Git Workflow
 

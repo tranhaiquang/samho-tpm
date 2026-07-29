@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PM Schedule - Vietnam Samho</title>
+    <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=2" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="supabase/config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/sidebar.js" defer></script>
+    <script src="data/pm_master_data.js" defer></script>
+    <script src="assets/js/pm.js" defer></script>
+  </head>
+  <body class="dashboard-app app-standard pm-page">
+    <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
+        <div>
+          <strong>Vietnam Samho</strong>
+          <span>Factory System</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="wrench"></i>Maintenance<i data-lucide="chevron-down"></i>
+          </button>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head selected" type="button" aria-expanded="true">
+            <i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i>
+          </button>
+          <a class="current" href="pm.html"><i data-lucide="calendar-check"></i>PM</a>
+        </section>
+
+        <section class="nav-group active">
+          <button class="nav-head" type="button" aria-expanded="true">
+            <i data-lucide="package-search"></i>Spare Part Management<i data-lucide="chevron-down"></i>
+          </button>
+          <a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+        </section>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout sidebar-logout" type="button">
+          <i data-lucide="log-out"></i>Logout
+        </button>
+        <small class="app-copyright">&copy; 2026 LEAN Department, Vietnam Samho</small>
+      </div>
+    </aside>
+
+    <div class="shell">
+      <main class="content">
+        <div class="info-panel">
+          <div class="info-title" style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <i data-lucide="calendar-check"></i>
+              <h1>Lịch Bảo Trì / PM Schedule</h1>
+            </div>
+          </div>
+        </div>
+
+        <section class="page-view active" id="pmScheduleView">
+          <section class="pm-stats-row" id="pmStatsRow">
+            <article class="pm-stat-card pending"><i data-lucide="clock-alert"></i><div><strong id="pmStatPending">0</strong><span>ĐANG CHỜ</span></div></article>
+            <article class="pm-stat-card completed"><i data-lucide="check-circle"></i><div><strong id="pmStatCompleted">0</strong><span>HOÀN THÀNH</span></div></article>
+            <article class="pm-stat-card validated"><i data-lucide="badge-check"></i><div><strong id="pmStatValidated">0</strong><span>ĐÃ XÁC NHẬN</span></div></article>
+          </section>
+
+          <section class="pm-calendar-section">
+            <div class="pm-calendar-header">
+              <button class="cal-nav" id="calPrev" type="button">◀</button>
+              <h3 id="calMonthLabel">May 2026</h3>
+              <button class="cal-nav" id="calNext" type="button">▶</button>
+              <div class="cal-legend">
+                <span><b class="pending"></b> ĐANG CHỜ</span>
+                <span><b class="completed"></b> HOÀN THÀNH</span>
+                <span><b class="validated"></b> ĐÃ XÁC NHẬN</span>
+              </div>
+            </div>
+            <div class="pm-calendar-grid" id="pmCalendarGrid"></div>
+          </section>
+
+          <section class="repair-list" aria-label="PM schedule list">
+            <div class="repair-table-wrap">
+              <table class="repair-table pm-table">
+                <thead>
+                    <tr>
+                      <th>No.</th>
+                      <th>Machine</th>
+                      <th>Plant</th>
+                      <th>Due Date</th>
+                      <th>Team</th>
+                      <th>Status</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="pmScheduleList"><tr><td colspan="7">Loading PM schedule...</td></tr></tbody>
+              </table>
+            </div>
+            <p class="pm-summary" id="pmScheduleSummary"></p>
+            <div class="repair-pagination" id="pmSchedulePagination">
+              <span id="pmSchedulePageInfo"></span>
+              <div class="repair-pagination-actions">
+                <button class="repair-page-btn" id="pmSchedulePrevPage" type="button" disabled><i data-lucide="chevron-left"></i>Prev</button>
+                <button class="repair-page-btn" id="pmScheduleNextPage" type="button">Next<i data-lucide="chevron-right"></i></button>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <!-- Complete Modal -->
+    <div class="repair-modal" id="pmCompleteModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-pm-complete></div>
+      <form class="repair-modal-dialog" id="pmCompleteForm">
+        <header class="repair-modal-header">
+          <h2>Xác Nhận PM / Complete PM</h2>
+          <button class="repair-modal-close" type="button" data-close-pm-complete aria-label="Close"><i data-lucide="x"></i></button>
+        </header>
+        <div class="repair-modal-grid">
+          <label><span>Machine</span><input id="pmCompleteMachine" type="text" disabled /></label>
+          <label><span>Due Date</span><input id="pmCompleteDueDate" type="text" disabled /></label>
+          <div class="field">
+            <span>Người sửa chữa / Technician</span>
+            <div class="mechanic-picker" id="pmCompleteMechanicPicker">
+              <div class="mechanic-chip-list" id="pmCompleteChips"></div>
+              <input id="pmCompleteMechanicSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search mechanic names" />
+              <div class="mechanic-options" id="pmCompleteOptions" role="listbox" hidden></div>
+            </div>
+            <input id="pmCompleteTechnician" type="hidden" required />
+          </div>
+          <label><span>Notes / Ghi chú</span><textarea id="pmCompleteNotes" rows="3"></textarea></label>
+        </div>
+        <footer class="repair-modal-footer">
+          <p class="repair-modal-status" id="pmCompleteStatus" aria-live="polite"></p>
+          <button class="btn muted" type="button" data-close-pm-complete>Cancel</button>
+          <button class="save" id="pmCompleteSave" type="submit"><i data-lucide="check"></i>Complete</button>
+        </footer>
+      </form>
+    </div>
+
+    <!-- Create/Edit Modal (PID only) -->
+    <div class="repair-modal" id="pmFormModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-pm-form></div>
+      <form class="repair-modal-dialog" id="pmForm">
+        <header class="repair-modal-header">
+          <h2 id="pmFormTitle">Thêm PM / Create PM</h2>
+          <button class="repair-modal-close" type="button" data-close-pm-form aria-label="Close"><i data-lucide="x"></i></button>
+        </header>
+        <div class="repair-modal-grid">
+          <label><span>Machine</span>
+            <select id="pmFormMachine" required>
+              <option value="">-- Select machine --</option>
+            </select>
+          </label>
+          <label><span>Due Date</span><input id="pmFormDueDate" type="date" required /></label>
+          <label><span>Assigned Team</span>
+            <div class="mechanic-picker" id="pmFormTeamPicker">
+              <div class="mechanic-chip-list" id="pmFormTeamChips"></div>
+              <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" />
+              <div class="mechanic-options" id="pmFormTeamOptions" role="listbox" hidden></div>
+            </div>
+            <input id="pmFormTeam" type="hidden" />
+          </label>
+        </div>
+        <footer class="repair-modal-footer">
+          <p class="repair-modal-status" id="pmFormStatus" aria-live="polite"></p>
+          <button class="btn muted" type="button" data-close-pm-form>Cancel</button>
+          <button class="save" id="pmFormSave" type="submit"><i data-lucide="save"></i>Save</button>
+        </footer>
+      </form>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div class="repair-modal" id="pmTaskModal" aria-hidden="true">
+      <div class="repair-modal-backdrop" data-close-pm-task></div>
+      <div class="repair-modal-dialog repair-modal-dialog-wide">
+        <header class="repair-modal-header">
+          <div>
+            <h2 id="pmTaskDetailTitle">Task Checklist</h2>
+            <span class="task-progress" id="pmTaskProgress">Hoàn thành: 0/0</span>
+          </div>
+          <button class="repair-modal-close" type="button" data-close-pm-task aria-label="Close"><i data-lucide="x"></i></button>
+        </header>
+        <div class="task-checklist" id="pmTaskChecklist"></div>
+        <footer class="repair-modal-footer">
+          <button class="btn primary" id="pmApproveBtn" type="button" hidden>Xác Nhận</button>
+          <button class="btn muted" type="button" data-close-pm-task>Close</button>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
