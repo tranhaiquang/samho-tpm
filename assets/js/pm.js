@@ -484,7 +484,6 @@
         </select>`}</td>
         <td class="pm-actions">
           <button class="info-search control-icon-button pm-viewtask-btn" data-equip="${r.equipmentName}" data-id="${r.id}" type="button" title="View Task"><i data-lucide="clipboard-list"></i></button>
-          <button class="info-search control-icon-button pm-complete-btn" data-id="${r.id}" type="button" title="Complete PM"><i data-lucide="check-circle"></i></button>
           ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="Edit"><i data-lucide="pencil"></i></button>
           <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="Delete"><i data-lucide="trash-2"></i></button>` : ""}
         </td>
@@ -499,9 +498,6 @@
     });
     tbody.querySelectorAll(".pm-viewtask-btn").forEach((btn) => {
       btn.addEventListener("click", () => openTaskModal(btn.dataset.equip, btn.dataset.id));
-    });
-    tbody.querySelectorAll(".pm-complete-btn").forEach((btn) => {
-      btn.addEventListener("click", () => openCompleteModal(btn.dataset.id));
     });
     tbody.querySelectorAll(".pm-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => openEditModal(btn.dataset.id));

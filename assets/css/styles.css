@@ -1052,6 +1052,49 @@ fieldset input {
   min-width: 1560px;
   border-collapse: collapse;
 }
+.repair-table.pm-table {
+  min-width: auto;
+  table-layout: fixed;
+}
+.repair-table.pm-table th,
+.repair-table.pm-table td {
+  white-space: normal;
+  word-break: break-word;
+  padding: 8px 6px;
+  font-size: 12px;
+}
+.repair-table.pm-table th:last-child,
+.repair-table.pm-table td:last-child {
+  padding-right: 6px;
+}
+.repair-table.pm-table td:nth-child(1),
+.repair-table.pm-table th:nth-child(1) { width: 5%; }
+.repair-table.pm-table td:nth-child(2),
+.repair-table.pm-table th:nth-child(2) { width: 26%; }
+.repair-table.pm-table td:nth-child(3),
+.repair-table.pm-table th:nth-child(3) { width: 10%; }
+.repair-table.pm-table td:nth-child(4),
+.repair-table.pm-table th:nth-child(4) { width: 12%; }
+.repair-table.pm-table td:nth-child(5),
+.repair-table.pm-table th:nth-child(5) { width: 18%; }
+.repair-table.pm-table td:nth-child(6),
+.repair-table.pm-table th:nth-child(6) { width: 15%; }
+.repair-table.pm-table td:nth-child(7),
+.repair-table.pm-table th:nth-child(7) { width: 14%; text-align: right; }
+.repair-table.pm-table td:nth-child(7) .control-icon-button {
+  width: 26px;
+  height: 26px;
+  padding: 3px;
+}
+.repair-table.pm-table td:nth-child(7) .control-icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+.repair-table.pm-table .pm-status-select {
+  font-size: 11px;
+  padding: 2px 4px;
+  max-width: 100%;
+}
 
 .repair-table th,
 .repair-table td {
