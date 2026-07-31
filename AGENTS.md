@@ -17,7 +17,7 @@ python -m http.server 8080
 npx serve .
 ```
 
-The only Node.js script is `node supabase/update-display-name.js` (ESM, requires the Supabase service_role key — file is `.gitignore`-d). Never commit it.
+Admin scripts live in `supabase/`: `update-display-name.js`, `sync-users.mjs`, `prune-users.mjs` (all ESM). They require the Supabase service_role key and are all `.gitignore`-d — never commit them. The two `.mjs` scripts read the key from the `SUPABASE_SERVICE_ROLE_KEY` env var (set it inline, e.g. `$env:SUPABASE_SERVICE_ROLE_KEY="..."`), not from the file itself.
 
 ## Project Layout
 
