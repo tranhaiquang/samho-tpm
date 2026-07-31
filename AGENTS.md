@@ -19,6 +19,8 @@ npx serve .
 
 Admin scripts live in `supabase/`: `update-display-name.js`, `sync-users.mjs`, `prune-users.mjs` (all ESM). They require the Supabase service_role key and are all `.gitignore`-d — never commit them. The two `.mjs` scripts read the key from the `SUPABASE_SERVICE_ROLE_KEY` env var (set it inline, e.g. `$env:SUPABASE_SERVICE_ROLE_KEY="..."`), not from the file itself.
 
+Build script: `scripts/convert-pm-excel.js` regenerates `data/pm_master_data.js` from `Master Data - PM - TECH.xlsx`. It needs the `xlsx` npm package (`npm i xlsx`) and reads from `data/`.
+
 ## Project Layout
 
 ```
@@ -32,10 +34,11 @@ spare_parts.html          → spare parts inventory + image upload
 incoming_stock.html       → reorder workflow → Excel export
 pm.html                   → PM schedule calendar, task catalog, CRUD (new)
 assets/css/styles.css     → single monolithic stylesheet
-assets/js/{app_edited,repair_info_edited,kpi_dashboard,red_tag,spare_parts,incoming_stock,auth,errors_edited,sidebar,pm}.js
+assets/js/{app_edited,repair_info_edited,kpi_dashboard_edited,red_tag,spare_parts,incoming_stock,auth,errors_edited,sidebar,pm}.js
 supabase/config.js        → **central config** (tables, columns, keys, URLs)
-supabase/policies/        → RLS SQL policies
-data/                     → static data files (PM Excel master data)
+supabase/policies/        → RLS SQL policies (list_user_display_names, pm_rls, spare_part_edit_permissions)
+scripts/convert-pm-excel.js → Node build script: Excel → data/pm_master_data.js
+data/pm_master_data.js    → PM master data (generated from "Master Data - PM - TECH.xlsx")
 ```
 
 ## Key Conventions & Gotchas
@@ -57,7 +60,7 @@ data/                     → static data files (PM Excel master data)
 - **No `.env`** — all config values are hardcoded in `supabase/config.js`.
 - **Images** — spare part images stored in Supabase Storage bucket `spare_parts_img`.
 - **Power BI** — embedded report URL configured in `supabase/config.js`.
-- **Service role key** — only in the (gitignored) `supabase/update-display-name.js`. Never commit it.
+- **Service role key** — `supabase/update-display-name.js`, `sync-users.mjs`, and `prune-users.mjs` are all gitignored admin scripts. The key is hardcoded only in `update-display-name.js`; the two `.mjs` scripts read it from the `SUPABASE_SERVICE_ROLE_KEY` env var. Never commit the key — a leaked key was rotated/removed from tracking (commit `61c8326`); rotate the Supabase secret if it was ever pushed.
 - **Loading overlay** — global CSS spinner + JS utility (`SAMHO_LOADING.show()`/`hide()`) in `errors_edited.js`. Used across all pages during data fetches. Overlay is a fixed full-viewport element with opacity transition; spinner is a CSS border-animated circle.
 - **`errors_edited.js`** — extends the original `errors.js` with the `window.SAMHO_LOADING` utility. All HTML files reference `errors_edited.js`; the original `errors.js` is no longer used.
 - **PM module (`pm.js`)** — data-driven from `data/pm_master_data.js` (pre-converted to `window.PM_MASTER_DATA`, no runtime XLSX). Schedule data from `PM_Task_Schedule` sheet; task catalog from per-equipment sheets and `PM_Task_Detail`. Records are generated dynamically per calendar month — one per machine, distributed Tue–Fri. **3-status flow:** ĐANG CHỜ → HOÀN THÀNH (technician marks done) → ĐÃ XÁC NHẬN (validator checks all validation boxes). Task progress in `pm_task_progress`, validation in `pm_task_validation`, record status in `pm_completed_data`, manual records in `pm_manual_records` (all localStorage). Task checklist modal shows technician checkboxes (all users) and validator checkboxes (`isValidator` role based on `config.pm.validatorTeam`). Status select dropdown has 3 options; stats show 3 cards. Past-due records auto-initialize as HOÀN THÀNH. Edit/delete restricted to PID role, only on manual records (non-completed/non-validated).
