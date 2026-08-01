@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (match) {
       let year = Number(match[3]);
       if (year < 100) year += 2000;
-      return new Date(year, Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0));
+      return new Date(year, Number(match[1]) - 1, Number(match[2]), Number(match[4] || 0), Number(match[5] || 0));
     }
 
     match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
@@ -140,6 +140,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
+  const monthKeyFromDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+  const rowMonth = (row) => {
+    const rawMonth = readField(row, "month") || row[configuredColumn("month")];
+    if (rawMonth) return normalizeMonth(rawMonth);
+    const dt = parseDateTime(row.start_datetime);
+    if (!dt) return { key: "all", label: "All Data", order: 99 };
+    const index = dt.getMonth();
+    return { key: monthKeyFromDate(dt), label: monthNames[index], order: index };
+  };
+
   const getOperationDaysMonSat = (monthValue) => {
     const range = getMonthDateRange(monthValue);
     if (!range) return 0;
@@ -163,11 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getRows = async (monthValue = activeMonth, plantValue = activePlant) => {
+    const monthColumn = configuredColumn("month");
     const selectedColumns = Array.from(
       new Set(
         Object.values(downtimeConfig.fieldMap)
           .flatMap((value) => [].concat(value || []))
           .filter(Boolean)
+          .filter((column) => column !== monthColumn)
       )
     );
 
@@ -180,10 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
       select: selectedColumns.join(",") || "*",
       limit: "5000"
     });
-    const monthColumn = configuredColumn("month");
-    if (monthColumn && monthValue) {
-      params.set(monthColumn, `eq.${monthValue}`);
-    }
     const plantColumn = configuredColumn("plant");
     if (plantColumn && plantValue) {
       const mappedPlants = plantFilterMap[plantValue];
@@ -194,7 +203,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    return fetchPagedDowntime(params);
+    const allRows = await fetchPagedDowntime(params);
+    const dateRangeActive = Boolean(activeFromDate || activeToDate);
+    if (monthColumn && monthValue && !dateRangeActive) {
+      return allRows.filter((row) => rowMonth(row).key === monthValue);
+    }
+    return allRows;
   };
 
   const fetchPagedDowntime = async (params, pageSize = 1000) => {
@@ -227,26 +241,23 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getAvailableMonths = async () => {
-    const monthColumn = configuredColumn("month");
-    if (!monthColumn) return [];
-
     const params = new URLSearchParams({
-      select: monthColumn,
-      order: `${monthColumn}.desc`
+      select: "start_datetime",
+      limit: "5000"
     });
-    params.set(monthColumn, "not.is.null");
+    params.set("start_datetime", "not.is.null");
 
     const rows = await fetchPagedDowntime(params);
     const months = new Map();
     rows.forEach((row) => {
-      const month = normalizeMonth(row[monthColumn]);
+      const month = rowMonth(row);
       if (month.key === "all" || !month.key.includes("-")) return;
-      months.set(String(row[monthColumn]), {
-        value: String(row[monthColumn]),
+      months.set(month.key, {
+        value: month.key,
         key: month.key,
         label: getMonthOptionLabel(month),
         order: month.order,
-        year: month.key.includes("-") ? Number(month.key.slice(0, 4)) : 0
+        year: Number(month.key.slice(0, 4))
       });
     });
 
@@ -254,19 +265,16 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getMonthsFromRows = (rows) => {
-    const monthColumn = configuredColumn("month");
     const months = new Map();
     rows.forEach((row) => {
-      const rawValue = readField(row, "month") || row[monthColumn];
-      if (rawValue == null || rawValue === "") return;
-      const month = normalizeMonth(rawValue);
+      const month = rowMonth(row);
       if (month.key === "all" || !month.key.includes("-")) return;
-      months.set(String(rawValue), {
-        value: String(rawValue),
+      months.set(month.key, {
+        value: month.key,
         key: month.key,
         label: getMonthOptionLabel(month),
         order: month.order,
-        year: month.key.includes("-") ? Number(month.key.slice(0, 4)) : 0
+        year: Number(month.key.slice(0, 4))
       });
     });
 
@@ -429,10 +437,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const renderDashboard = (sourceRows) => {
-    const monthColumn = configuredColumn("month");
     const rows = sourceRows
       .map((row) => {
-        const month = normalizeMonth(readField(row, "month"));
+        const month = rowMonth(row);
         return {
           raw: row,
           downtime: toNumber(readField(row, "totalDowntime")),
@@ -512,9 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMetricTrend(machineGroups, operationDays);
 
     setStatus(
-      monthColumn
-        ? `Loaded ${formatNumber(rows.length)} downtime records for ${activeLabel}.`
-        : `Loaded ${formatNumber(rows.length)} downtime records. Month column is not mapped, so totals are grouped as All Data.`,
+      `Loaded ${formatNumber(rows.length)} downtime records for ${activeLabel}.`,
       rows.length ? "success" : "warning"
     );
   };

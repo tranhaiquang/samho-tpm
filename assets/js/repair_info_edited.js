@@ -56,7 +56,7 @@
 
     const supabaseTextDate = text.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
     if (supabaseTextDate) {
-      const [, dd, mm, yy, hh = "0", min = "0"] = supabaseTextDate;
+      const [, mm, dd, yy, hh = "0", min = "0"] = supabaseTextDate;
       return new Date(normalizeYear(yy), Number(mm) - 1, Number(dd), Number(hh), Number(min));
     }
 
@@ -78,7 +78,7 @@
     const dd = String(date.getDate()).padStart(2, "0");
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");
-    return `${hh}:${min} ${dd}-${mm}-${yyyy}`;
+    return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
   };
 
   const fetchJson = async (url) => {
@@ -287,7 +287,7 @@
     const time = document.getElementById(timeId)?.value || "";
     if (!date || !time) return null;
     const [yyyy, mm, dd] = date.split("-");
-    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
+    return `${mm}-${dd}-${yyyy} ${time}`;
   };
 
   const patchRepairInfo = async (recordId, payload) => {

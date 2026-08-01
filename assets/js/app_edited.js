@@ -149,13 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
   const parseSimpleDateTime = (value) => {
     if (!value) return null;
     const parts = value.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
     if (parts) {
-      const [, dd, mm, yyyy, hh = "0", min = "0"] = parts;
+      const [, mm, dd, yyyy, hh = "0", min = "0"] = parts;
       const year = yyyy.length === 2 ? 2000 + Number(yyyy) : Number(yyyy);
       return new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min));
     }
@@ -168,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const time = getValue(timeId);
     if (!date || !time) return "";
     const [yyyy, mm, dd] = date.split("-");
-    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
+    return `${mm}-${dd}-${yyyy} ${time}`;
   };
 
   const getDowntimeMinutes = (startValue, endValue) => {
@@ -176,14 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const end = parseSimpleDateTime(endValue);
     if (!start || !end) return "";
     return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
-  };
-
-  const getMonthValue = (dateTimeValue) => {
-    if (!dateTimeValue) return "";
-    const parts = dateTimeValue.match(/^(\d{2})-(\d{2})-(\d{2})/);
-    if (!parts) return "";
-    const [, , mm, yy] = parts;
-    return `${monthNames[parseInt(mm) - 1]}-${yy}`;
   };
 
   const getFieldLabel = (field) => {
@@ -574,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
       machinePlant: getValue("machinePlant"),
       machineSection: getValue("machineSection"),
       totalDowntime: getDowntimeMinutes(brokenAt, repairFinishedAt),
-      month: getMonthValue(brokenAt),
       issue: getValue("issue"),
       other: getValue("other"),
       reason: getValue("reason"),
@@ -802,17 +791,49 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   hideSubModeActions();
 
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10);
-  const time = now.toTimeString().slice(0, 5);
+  const timePickerInstances = {};
+  const initTimePickers = () => {
+    const common = {
+      enableTime: true,
+      noCalendar: true,
+      time_24hr: true,
+      dateFormat: "H:i",
+      minuteIncrement: 1,
+      disableMobile: true,
+    };
+    ["brokenTime", "startTime", "doneTime"].forEach((id) => {
+      const input = document.getElementById(id);
+      if (input) timePickerInstances[id] = flatpickr(input, common);
+    });
+  };
 
-  ["brokenDate", "startDate"].forEach((id) => {
+  initTimePickers();
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const toDateStr = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const toTimeStr = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+  const baseNow = new Date();
+  const brokenAt = baseNow;
+  const startAt = new Date(brokenAt.getTime() + 5 * 60000);
+  const doneAt = new Date(startAt.getTime() + 5 * 60000);
+
+  const timeDefaults = {
+    brokenDate: toDateStr(brokenAt), brokenTime: toTimeStr(brokenAt),
+    startDate: toDateStr(startAt), startTime: toTimeStr(startAt),
+    doneDate: toDateStr(doneAt), doneTime: toTimeStr(doneAt)
+  };
+
+  ["brokenDate", "startDate", "doneDate"].forEach((id) => {
     const input = document.getElementById(id);
-    if (input) input.value = date;
+    if (input) input.value = timeDefaults[id];
   });
 
-  ["brokenTime", "startTime"].forEach((id) => {
+  ["brokenTime", "startTime", "doneTime"].forEach((id) => {
     const input = document.getElementById(id);
-    if (input) input.value = time;
+    if (input) {
+      if (timePickerInstances[id]) timePickerInstances[id].setDate(timeDefaults[id], false);
+      else input.value = timeDefaults[id];
+    }
   });
 });
