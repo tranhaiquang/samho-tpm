@@ -9,12 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles.css?v=20260717-2" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="https://unpkg.com/@zxing/browser@0.1.5" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
     <script src="assets/js/app_edited.js" defer></script>
   </head>
   <body class="dashboard-app app-standard repair-submit-page">
@@ -134,17 +136,17 @@
               <fieldset>
                 <legend>Báo hư</legend>
                 <input type="date" id="brokenDate" required />
-                <input type="time" id="brokenTime" required />
+                <input type="text" id="brokenTime" placeholder="HH:mm" aria-label="Báo hư - giờ 24h" required />
               </fieldset>
               <fieldset>
                 <legend>Bắt đầu sửa</legend>
                 <input type="date" id="startDate" required />
-                <input type="time" id="startTime" required />
+                <input type="text" id="startTime" placeholder="HH:mm" aria-label="Bắt đầu sửa - giờ 24h" required />
               </fieldset>
               <fieldset>
                 <legend>Sửa xong</legend>
                 <input type="date" id="doneDate" required />
-                <input type="time" id="doneTime" required />
+                <input type="text" id="doneTime" placeholder="HH:mm" aria-label="Sửa xong - giờ 24h" required />
               </fieldset>
             </div>
 

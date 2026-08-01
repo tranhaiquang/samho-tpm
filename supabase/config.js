@@ -23,7 +23,6 @@ window.SAMHO_SUPABASE = {
       machinePlant: "plant",
       machineSection: "section",
       totalDowntime: "total_downtime",
-      month: "month",
       issue: "issue",
       other: "other_issue",
       reason: "reason",
@@ -57,7 +56,7 @@ window.SAMHO_SUPABASE = {
       section: "section",
       plant: "plant",
       totalDowntime: "total_downtime",
-      month: "month",
+      month: "",
       errorCount: "",
       mttr: "",
       mtbf: ""
@@ -136,6 +135,17 @@ window.SAMHO_SUPABASE = {
     defaultIntervalDays: 30,
     defaultTeam: ["LEAN TECH"],
     validatorTeam: ["LEAD TECH", "25102801", "21051708"],
+    tasksTable: "pm_tasks",
+    taskFields: {
+      equipment: "equipment",
+      machineName: "machine_name",
+      taskNo: "task_no",
+      taskName: "task_name",
+      itemGroup: "item_group",
+      itemTask: "item_task",
+      frequency: "frequency",
+      taskDetail: "task_detail"
+    },
     equipmentMap: {
       "ATOM FLASHCUT": ["ATOM-A01","ATOM-A02","ATOM-A03","ATOM-A04","ATOM-A05","ATOM-A06","ATOM-A07","ATOM-B01","ATOM-B02","ATOM-B03","ATOM-B04","ATOM-B05","ATOM-B06"],
       "EM CUTTING MACHINE": ["EMCUT-C01","EMCUT-C02"],
