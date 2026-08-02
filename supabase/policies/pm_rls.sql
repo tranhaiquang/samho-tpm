@@ -2,17 +2,18 @@
 create table if not exists public.pm_records (
   id uuid primary key default gen_random_uuid(),
   item_code text not null,
-  equipment text not null,
   plant text,
-  section text,
-  assigned_team text[],
-  status text not null default 'pending' check (status in ('pending', 'completed', 'overdue')),
+  pic text[],
+  status text not null default 'pending' check (status in ('pending', 'completed', 'validated')),
   due_date date not null,
-  completed_at timestamptz,
   technician text[],
   notes text,
+  record_type text not null default 'generated' check (record_type in ('generated', 'manual')),
+  task_progress text,
+  task_validation text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (item_code, due_date)
 );
 
 alter table public.pm_records enable row level security;

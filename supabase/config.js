@@ -146,6 +146,22 @@ window.SAMHO_SUPABASE = {
       frequency: "frequency",
       taskDetail: "task_detail"
     },
+    recordsTable: {
+      table: "pm_records",
+      fieldMap: {
+        id: "id",
+        itemCode: "item_code",
+        plant: "plant",
+        pic: "pic",
+        status: "status",
+        dueDate: "due_date",
+        technician: "technician",
+        notes: "notes",
+        recordType: "record_type",
+        taskProgress: "task_progress",
+        taskValidation: "task_validation"
+      }
+    },
     equipmentMap: {
       "ATOM FLASHCUT": ["ATOM-A01","ATOM-A02","ATOM-A03","ATOM-A04","ATOM-A05","ATOM-A06","ATOM-A07","ATOM-B01","ATOM-B02","ATOM-B03","ATOM-B04","ATOM-B05","ATOM-B06"],
       "EM CUTTING MACHINE": ["EMCUT-C01","EMCUT-C02"],

@@ -2,6 +2,12 @@
   const config = window.SAMHO_SUPABASE.pm;
   if (!config) return;
 
+  const supabase = window.SAMHO_SUPABASE;
+  const recordsConfig = config.recordsTable || {};
+  const recordsTable = recordsConfig.table || "pm_records";
+  const recCol = recordsConfig.fieldMap || {};
+  const col = (key, fallback) => recCol[key] || fallback;
+
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
@@ -13,7 +19,7 @@
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    const [y, m, d] = dateStr.split("-");
+    const [y, m, d] = String(dateStr).slice(0, 10).split("-");
     return `${m}/${d}/${y}`;
   };
 
@@ -33,12 +39,14 @@
   config.machines.forEach((m) => { machineMap[m.itemCode] = m; });
   const getMachineByCode = (code) => machineMap[code] || null;
 
+  const equipReverse = {};
+  Object.entries(config.equipmentMap || {}).forEach(([equipName, codes]) => {
+    codes.forEach((code) => { if (!equipReverse[code]) equipReverse[code] = equipName; });
+  });
+
   let scheduleRows = [];
   let taskCatalog = {};
-  let completedData = {};
-  let manualRecords = [];
-  let taskProgress = {};
-  let taskValidation = {};
+  let currentRecords = [];
   let isValidator = false;
   let currentUserRole = "viewer";
   let calMonth = today.getMonth();
@@ -47,38 +55,68 @@
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
-  const LS_COMPLETED = "pm_completed_data";
-  const LS_MANUAL = "pm_manual_records";
-  const LS_TASK_PROGRESS = "pm_task_progress";
-  const LS_TASK_VALIDATION = "pm_task_validation";
-
-  const loadPersistence = () => {
-    try {
-      const c = localStorage.getItem(LS_COMPLETED);
-      if (c) completedData = JSON.parse(c);
-      const m = localStorage.getItem(LS_MANUAL);
-      if (m) manualRecords = JSON.parse(m);
-      const p = localStorage.getItem(LS_TASK_PROGRESS);
-      if (p) taskProgress = JSON.parse(p);
-      const v = localStorage.getItem(LS_TASK_VALIDATION);
-      if (v) taskValidation = JSON.parse(v);
-    } catch (e) {}
+  const apiRequest = async (path, options = {}) => {
+    const response = await fetch(`${supabase.url}/${path}`, {
+      ...options,
+      headers: {
+        apikey: supabase.anonKey,
+        Authorization: `Bearer ${supabase.anonKey}`,
+        ...(window.SAMHO_AUTH?.authHeaders?.() || {}),
+        ...(options.headers || {})
+      }
+    });
+    if (!response.ok) {
+      const detail = await response.text();
+      let message = detail || `Request failed (${response.status}).`;
+      try { message = JSON.parse(detail).message || message; } catch { /* Use the response text when it is not JSON. */ }
+      throw new Error(message);
+    }
+    return response;
   };
 
-  const saveCompleted = () => {
-    try { localStorage.setItem(LS_COMPLETED, JSON.stringify(completedData)); } catch (e) {}
+  const apiGet = async (params) => {
+    const response = await apiRequest(`${encodeURIComponent(recordsTable)}?${params}`);
+    return response.json();
   };
 
-  const saveManual = () => {
-    try { localStorage.setItem(LS_MANUAL, JSON.stringify(manualRecords)); } catch (e) {}
+  const apiInsert = async (payload) => {
+    await apiRequest(encodeURIComponent(recordsTable), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(payload)
+    });
   };
 
-  const saveTaskProgress = () => {
-    try { localStorage.setItem(LS_TASK_PROGRESS, JSON.stringify(taskProgress)); } catch (e) {}
+  const apiUpdate = async (id, payload) => {
+    await apiRequest(`${encodeURIComponent(recordsTable)}?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(payload)
+    });
   };
 
-  const saveTaskValidation = () => {
-    try { localStorage.setItem(LS_TASK_VALIDATION, JSON.stringify(taskValidation)); } catch (e) {}
+  const apiDelete = async (id) => {
+    await apiRequest(`${encodeURIComponent(recordsTable)}?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { Prefer: "return=minimal" }
+    });
+  };
+
+  const apiFindByCodeAndDate = async (itemCode, dueDate) => {
+    const params = new URLSearchParams({
+      select: "id",
+      [col("itemCode", "item_code")]: `eq.${itemCode}`,
+      [col("dueDate", "due_date")]: `eq.${dueDate}`
+    });
+    return apiGet(params.toString());
+  };
+
+  const friendlyError = (error, action) => {
+    const message = String(error?.message || error || "").toLowerCase();
+    if (message.includes("duplicate key") || message.includes("unique constraint")) return "A record already exists for this machine and date.";
+    if (message.includes("row-level security") || message.includes("permission denied")) return `You do not have permission to ${action}.`;
+    if (message.includes("failed to fetch") || message.includes("networkerror")) return "Unable to connect. Please check your network and try again.";
+    return `Unable to ${action}. Please try again.`;
   };
 
   const loadMasterData = () => {
@@ -86,70 +124,6 @@
       scheduleRows = window.PM_MASTER_DATA.scheduleRows || [];
       taskCatalog = window.PM_MASTER_DATA.taskCatalog || {};
     }
-  };
-
-  const getMonthRecords = () => {
-    const result = [];
-    const equipMap = config.equipmentMap || {};
-
-    const equipTasks = {};
-    for (const row of scheduleRows) {
-      const marker = row.months[calMonth];
-      if (!marker) continue;
-      if (!equipTasks[row.equipmentName]) equipTasks[row.equipmentName] = [];
-      equipTasks[row.equipmentName].push(row);
-    }
-
-    const getPMDays = () => {
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const result = [];
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dow = new Date(calYear, calMonth, d).getDay();
-        if (dow >= 2 && dow <= 5) result.push(d);
-      }
-      return result;
-    };
-    const pmDays = getPMDays();
-    for (const [equipName, tasks] of Object.entries(equipTasks)) {
-      const machines = equipMap[equipName];
-      if (!machines || !machines.length) continue;
-      const step = Math.max(1, Math.floor(pmDays.length / machines.length));
-      for (let i = 0; i < machines.length; i++) {
-        const code = machines[i];
-        const day = pmDays[Math.min(i * step, pmDays.length - 1)];
-        const dateStr = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-        const isPast = dateStr < todayStr;
-        const m = getMachineByCode(code) || {};
-        const key = `pm_${code}_${calYear}_${calMonth}`;
-        const saved = completedData[key];
-        const taskNos = [...new Set(tasks.map((t) => t.taskNo).filter(Boolean))];
-        result.push({
-          id: key,
-          _type: "generated",
-          itemCode: code,
-          equipment: m.equipment || code,
-          plant: m.plant || "",
-          section: m.section || "",
-          equipmentName: equipName,
-          tasks,
-          taskNo: taskNos.length <= 3 ? taskNos.join(", ") : `${taskNos.length} tasks`,
-          taskName: taskNos.length <= 3 ? tasks.map((t) => t.taskName).filter(Boolean).join("; ") : `${taskNos.length} tasks`,
-          dueDate: dateStr,
-          status: saved ? saved.status : (isPast ? "completed" : "pending"),
-          completedAt: saved ? saved.completedAt : (isPast ? dateStr : null),
-          technician: saved ? saved.technician : [],
-          notes: saved ? saved.notes : "",
-          assignedTeam: [...config.defaultTeam]
-        });
-      }
-    }
-    for (const rec of manualRecords) {
-      const due = parseDate(rec.dueDate);
-      if (due && due.getMonth() === calMonth && due.getFullYear() === calYear) {
-        result.push(rec);
-      }
-    }
-    return result;
   };
 
   const getStatus = (rec) => {
@@ -315,19 +289,19 @@
   };
 
   const fetchTasks = async (equipmentName) => {
-    const supabase = window.SAMHO_SUPABASE;
-    const pmConfig = supabase?.pm || {};
+    const supabaseCfg = window.SAMHO_SUPABASE;
+    const pmConfig = supabaseCfg?.pm || {};
     const table = pmConfig.tasksTable || "pm_tasks";
     const fields = pmConfig.taskFields || {};
     const equipmentCol = fields.equipment || "equipment";
-    if (!supabase?.url || !supabase?.anonKey) return null;
+    if (!supabaseCfg?.url || !supabaseCfg?.anonKey) return null;
     const params = new URLSearchParams({
       select: "*",
       [equipmentCol]: `eq.${equipmentName}`,
       order: fields.taskNo || "task_no"
     });
-    const response = await fetch(`${supabase.url}/${encodeURIComponent(table)}?${params}`, {
-      headers: { apikey: supabase.anonKey, Authorization: `Bearer ${supabase.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
+    const response = await fetch(`${supabaseCfg.url}/${encodeURIComponent(table)}?${params}`, {
+      headers: { apikey: supabaseCfg.anonKey, Authorization: `Bearer ${supabaseCfg.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
     });
     if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
     const rows = await response.json();
@@ -344,7 +318,111 @@
     }));
   };
 
-  const openTaskModal = async (equipmentName, recordId) => {
+  const rowToRecord = (row) => {
+    const recordType = row[col("recordType", "record_type")] || "generated";
+    const itemCode = row[col("itemCode", "item_code")] || "";
+    const machine = getMachineByCode(itemCode) || {};
+    let taskProgress = {};
+    let taskValidation = {};
+    try { taskProgress = JSON.parse(row[col("taskProgress", "task_progress")] || "{}"); } catch (e) {}
+    try { taskValidation = JSON.parse(row[col("taskValidation", "task_validation")] || "{}"); } catch (e) {}
+    return {
+      id: row[col("id", "id")],
+      _type: recordType === "manual" ? "manual" : "generated",
+      itemCode,
+      equipment: machine.equipment || itemCode,
+      plant: row[col("plant", "plant")] || machine.plant || "",
+      section: machine.section || "",
+      equipmentName: recordType === "generated" ? (equipReverse[itemCode] || "") : "",
+      dueDate: String(row[col("dueDate", "due_date")] || "").slice(0, 10),
+      status: row[col("status", "status")] || "pending",
+      technician: row[col("technician", "technician")] || [],
+      notes: row[col("notes", "notes")] || "",
+      assignedTeam: row[col("pic", "pic")] || [],
+      taskProgress,
+      taskValidation
+    };
+  };
+
+  const getPMDays = () => {
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const result = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dow = new Date(calYear, calMonth, d).getDay();
+      if (dow >= 2 && dow <= 5) result.push(d);
+    }
+    return result;
+  };
+
+  const computeGeneratedRows = () => {
+    const equipMap = config.equipmentMap || {};
+    const equipTasks = {};
+    for (const row of scheduleRows) {
+      const marker = row.months[calMonth];
+      if (!marker) continue;
+      if (!equipTasks[row.equipmentName]) equipTasks[row.equipmentName] = [];
+      equipTasks[row.equipmentName].push(row);
+    }
+    const pmDays = getPMDays();
+    const result = [];
+    for (const [equipName, tasks] of Object.entries(equipTasks)) {
+      const machines = equipMap[equipName];
+      if (!machines || !machines.length) continue;
+      const step = Math.max(1, Math.floor(pmDays.length / machines.length));
+      for (let i = 0; i < machines.length; i++) {
+        const code = machines[i];
+        const day = pmDays[Math.min(i * step, pmDays.length - 1)];
+        const dueDate = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+        const m = getMachineByCode(code) || {};
+        result.push({
+          itemCode: code,
+          equipment: m.equipment || code,
+          plant: m.plant || "",
+          section: m.section || "",
+          equipmentName: equipName,
+          dueDate
+        });
+      }
+    }
+    return result;
+  };
+
+  const monthParams = () => {
+    const first = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-01`;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const last = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`;
+    const params = new URLSearchParams({ select: "*" });
+    params.append(col("dueDate", "due_date"), `gte.${first}`);
+    params.append(col("dueDate", "due_date"), `lte.${last}`);
+    return params;
+  };
+
+  const loadMonthRecords = async () => {
+    const params = monthParams();
+    let rows = await apiGet(params.toString());
+    const existing = new Set(rows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
+    let inserted = 0;
+    for (const g of computeGeneratedRows()) {
+      const key = `${g.itemCode}::${g.dueDate}`;
+      if (existing.has(key)) continue;
+      await apiInsert({
+        [col("itemCode", "item_code")]: g.itemCode,
+        [col("plant", "plant")]: g.plant,
+        [col("pic", "pic")]: [...config.defaultTeam],
+        [col("status", "status")]: "pending",
+        [col("dueDate", "due_date")]: g.dueDate,
+        [col("recordType", "record_type")]: "generated"
+      });
+      existing.add(key);
+      inserted++;
+    }
+    if (inserted) rows = await apiGet(params.toString());
+    currentRecords = rows.map(rowToRecord);
+    return currentRecords;
+  };
+
+  const openTaskModal = async (record) => {
+    const equipmentName = record?.equipmentName || "";
     let tasks = null;
     if (equipmentName) {
       try {
@@ -363,10 +441,8 @@
     const progressEl = document.getElementById("pmTaskProgress");
 
     if (!container || !title || !progressEl) return;
-    const parts = recordId ? recordId.split("_") : [];
-    const pkey = parts.length >= 4 ? `${parts[1]}_${parts[2]}_${parts[3]}` : "";
-    const prog = pkey ? (taskProgress[pkey] || {}) : {};
-    const val = pkey ? (taskValidation[pkey] || {}) : {};
+    const prog = record?.taskProgress || {};
+    const val = record?.taskValidation || {};
     title.textContent = `Task Checklist - ${tasks[0].equipmentName}`;
     container.innerHTML = tasks.map((t) => {
       const doneChecked = prog[t.taskNo] || false;
@@ -375,12 +451,12 @@
       const doneCls = doneChecked ? " done" : "";
       const valCls = valChecked ? " validated" : "";
       const valCb = isValidator ? `<label class="task-val-check${valChecked ? ' checked' : ''}">
-        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-pkey="${pkey}" data-task-no="${t.taskNo}" />
+        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${t.taskNo}" />
         <span>Xác Nhận</span>
       </label>` : "";
       return `<div class="task-card${doneCls}${valCls}">
         <label class="task-card-check">
-          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-pkey="${pkey}" data-task-no="${t.taskNo}" />
+          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-task-no="${t.taskNo}" />
           <div class="task-card-body">
             <div class="task-card-header">
               <div class="task-card-title">
@@ -406,81 +482,106 @@
       const done = container.querySelectorAll(".done-cb:checked").length;
       const validated = container.querySelectorAll(".val-cb:checked").length;
       progressEl.textContent = `Hoàn thành: ${done}/${total}  •  Đã xác nhận: ${validated}/${total}`;
-      const allDone = done === total;
-      const allVal = validated === total;
-      if (allVal && pkey) {
-        completedData[recordId] = completedData[recordId] || {};
-        completedData[recordId].status = "validated";
-        if (!completedData[recordId].completedAt) completedData[recordId].completedAt = todayStr;
-        saveCompleted();
-      }
     };
 
     container.querySelectorAll(".done-cb").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const k = cb.dataset.pkey;
+      cb.addEventListener("change", async () => {
         const tn = cb.dataset.taskNo;
-        if (!k) return;
-        if (!taskProgress[k]) taskProgress[k] = {};
-        if (cb.checked) {
-          taskProgress[k][tn] = true;
-          cb.closest(".task-card").classList.add("done");
-        } else {
-          delete taskProgress[k][tn];
-          cb.closest(".task-card").classList.remove("done");
+        if (!tn || !record) return;
+        const next = { ...record.taskProgress };
+        if (cb.checked) next[tn] = true; else delete next[tn];
+        cb.disabled = true;
+        try {
+          await apiUpdate(record.id, { [col("taskProgress", "task_progress")]: JSON.stringify(next) });
+          record.taskProgress = next;
+          cb.closest(".task-card").classList.toggle("done", cb.checked);
+        } catch (e) {
+          cb.checked = !cb.checked;
+          setStatusMsg("pmScheduleStatus", friendlyError(e, "save task progress"), "error");
+        } finally {
+          cb.disabled = false;
+          updateProgress();
         }
-        saveTaskProgress();
-        updateProgress();
       });
     });
 
     container.querySelectorAll(".val-cb").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const k = cb.dataset.pkey;
+      cb.addEventListener("change", async () => {
         const tn = cb.dataset.taskNo;
-        if (!k) return;
-        if (!taskValidation[k]) taskValidation[k] = {};
-        if (cb.checked) {
-          taskValidation[k][tn] = true;
-          cb.closest(".task-val-check").classList.add("checked");
-        } else {
-          delete taskValidation[k][tn];
-          cb.closest(".task-val-check").classList.remove("checked");
+        if (!tn || !record) return;
+        const next = { ...record.taskValidation };
+        if (cb.checked) next[tn] = true; else delete next[tn];
+        cb.disabled = true;
+        try {
+          await apiUpdate(record.id, { [col("taskValidation", "task_validation")]: JSON.stringify(next) });
+          record.taskValidation = next;
+          cb.closest(".task-val-check").classList.toggle("checked", cb.checked);
+          const total = container.querySelectorAll(".val-cb").length;
+          const checked = container.querySelectorAll(".val-cb:checked").length;
+          if (total && checked === total && record.status !== "validated") {
+            await apiUpdate(record.id, { [col("status", "status")]: "validated" });
+            record.status = "validated";
+          }
+        } catch (e) {
+          cb.checked = !cb.checked;
+          setStatusMsg("pmScheduleStatus", friendlyError(e, "save validation"), "error");
+        } finally {
+          cb.disabled = false;
+          updateProgress();
         }
-        saveTaskValidation();
-        updateProgress();
       });
     });
 
     updateProgress();
     const modal = document.getElementById("pmTaskModal");
-    modal.dataset.activeRecordId = recordId || "";
+    modal.dataset.activeRecordId = record?.id || "";
     const approveBtn = document.getElementById("pmApproveBtn");
     if (approveBtn) {
-      const rec = getMonthRecords().find((r) => r.id === recordId);
-      const st = rec ? getStatus(rec) : "pending";
+      const st = record ? getStatus(record) : "pending";
       approveBtn.hidden = !(isValidator && st !== "validated");
-      approveBtn.onclick = () => {
-        completedData[recordId] = completedData[recordId] || {};
-        completedData[recordId].status = "validated";
-        completedData[recordId].completedAt = completedData[recordId].completedAt || todayStr;
-        saveCompleted();
-        modal.classList.remove("active");
-        renderScheduleTab();
+      approveBtn.onclick = async () => {
+        try {
+          await apiUpdate(record.id, { [col("status", "status")]: "validated" });
+          record.status = "validated";
+          modal.classList.remove("active");
+          await renderScheduleTab();
+        } catch (e) {
+          setStatusMsg("pmScheduleStatus", friendlyError(e, "validate this record"), "error");
+        }
       };
     }
     modal.classList.add("active");
     lucideIcons();
   };
 
-  const renderScheduleTab = () => {
-    const allRecords = getMonthRecords();
+  const renderScheduleTab = async () => {
+    window.SAMHO_LOADING?.show("Loading PM schedule...");
+    let allRecords = [];
+    let loadError = null;
+    try {
+      allRecords = await loadMonthRecords();
+    } catch (e) {
+      loadError = e;
+      allRecords = [];
+    }
+
     renderStats(allRecords);
     renderCalendar(allRecords);
 
     const tbody = document.getElementById("pmScheduleList");
     const summary = document.getElementById("pmScheduleSummary");
-    if (!tbody) return;
+    if (tbody) {
+      if (loadError) {
+        tbody.innerHTML = '<tr><td colspan="7">Unable to load PM schedules.</td></tr>';
+        if (summary) summary.textContent = "";
+        document.getElementById("pmSchedulePagination")?.classList.add("sr-only");
+        const raw = String(loadError?.message || loadError || "").slice(0, 300);
+        setStatusMsg("pmScheduleStatus", `Unable to load PM records. ${raw}`, "error");
+        window.SAMHO_LOADING?.hide();
+        return;
+      }
+    }
+    if (!tbody) { window.SAMHO_LOADING?.hide(); return; }
 
     let filtered = [...allRecords];
     if (scheduleFilter.plant) filtered = filtered.filter((r) => r.plant === scheduleFilter.plant);
@@ -501,6 +602,7 @@
       tbody.innerHTML = '<tr><td colspan="7">No PM schedules found for this month.</td></tr>';
       summary.textContent = "0 schedules";
       document.getElementById("pmSchedulePagination")?.classList.add("sr-only");
+      window.SAMHO_LOADING?.hide();
       return;
     }
 
@@ -521,7 +623,7 @@
           <option value="completed" ${st === "completed" ? "selected" : ""}>HOÀN THÀNH</option>
         </select>`}</td>
         <td class="pm-actions">
-          <button class="info-search control-icon-button pm-viewtask-btn" data-equip="${r.equipmentName}" data-id="${r.id}" type="button" title="View Task"><i data-lucide="clipboard-list"></i></button>
+          <button class="info-search control-icon-button pm-viewtask-btn" data-id="${r.id}" type="button" title="View Task"><i data-lucide="clipboard-list"></i></button>
           ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="Edit"><i data-lucide="pencil"></i></button>
           <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="Delete"><i data-lucide="trash-2"></i></button>` : ""}
         </td>
@@ -535,7 +637,10 @@
       sel.addEventListener("change", () => updateStatus(sel.dataset.id, sel.value));
     });
     tbody.querySelectorAll(".pm-viewtask-btn").forEach((btn) => {
-      btn.addEventListener("click", () => openTaskModal(btn.dataset.equip, btn.dataset.id));
+      btn.addEventListener("click", () => {
+        const rec = currentRecords.find((r) => r.id === btn.dataset.id);
+        if (rec) openTaskModal(rec);
+      });
     });
     tbody.querySelectorAll(".pm-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => openEditModal(btn.dataset.id));
@@ -545,27 +650,24 @@
     });
 
     lucideIcons();
+    window.SAMHO_LOADING?.hide();
   };
 
-  const updateStatus = (id, value) => {
-    const record = getMonthRecords().find((r) => r.id === id);
+  const updateStatus = async (id, value) => {
+    const record = currentRecords.find((r) => r.id === id);
     if (!record) return;
-    if (record._type === "manual") {
-      const mr = manualRecords.find((r) => r.id === id);
-      if (mr) { mr.status = value; mr.completedAt = value === "completed" || value === "validated" ? todayStr : null; saveManual(); }
-    } else {
-      const key = id;
-      completedData[key] = completedData[key] || {};
-      completedData[key].status = value;
-      if (value === "completed" || value === "validated") completedData[key].completedAt = todayStr;
-      else if (value === "pending") completedData[key].completedAt = null;
-      saveCompleted();
+    try {
+      await apiUpdate(id, { [col("status", "status")]: value });
+    } catch (e) {
+      setStatusMsg("pmScheduleStatus", friendlyError(e, "update this record"), "error");
+      return;
     }
-    renderScheduleTab();
+    await renderScheduleTab();
   };
 
   const openCompleteModal = (id) => {
-    const record = getMonthRecords().find((r) => r.id === id);
+    const record = currentRecords.find((r) => r.id === id);
+    if (!record) return;
     const st = getStatus(record);
     if (st === "completed" || st === "validated") return;
     setValue("pmCompleteMachine", `${record.equipment} (${record.itemCode})`);
@@ -577,18 +679,20 @@
     document.getElementById("pmCompleteModal").classList.add("active");
   };
 
-  const completePM = (id, technician, notes) => {
-    const record = getMonthRecords().find((r) => r.id === id);
+  const completePM = async (id, technician, notes) => {
+    const record = currentRecords.find((r) => r.id === id);
     if (!record) return false;
-    if (record._type === "manual") {
-      const mr = manualRecords.find((r) => r.id === id);
-      if (mr) { mr.status = "completed"; mr.completedAt = todayStr; mr.technician = technician; mr.notes = notes; saveManual(); }
-    } else {
-      const key = id;
-      completedData[key] = { status: "completed", completedAt: todayStr, technician, notes };
-      saveCompleted();
+    try {
+      await apiUpdate(id, {
+        [col("status", "status")]: "completed",
+        [col("technician", "technician")]: technician,
+        [col("notes", "notes")]: notes
+      });
+      return true;
+    } catch (e) {
+      setStatusMsg("pmCompleteStatus", friendlyError(e, "complete this record"), "error");
+      return false;
     }
-    return true;
   };
 
   const openCreateModal = () => {
@@ -603,36 +707,34 @@
     document.getElementById("pmFormModal").classList.add("active");
   };
 
-  const createPM = (itemCode, dueDate, team) => {
+  const createPM = async (itemCode, dueDate, team) => {
     const machine = getMachineByCode(itemCode);
     if (!machine) return false;
-    const id = `manual_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-    manualRecords.push({
-      id,
-      _type: "manual",
-      itemCode: machine.itemCode,
-      equipment: machine.equipment,
-      plant: machine.plant,
-      section: machine.section,
-      equipmentName: "",
-      taskNo: "",
-      taskName: "Manual PM",
-      itemGroup: "",
-      itemTask: "",
-      frequency: "",
-      dueDate,
-      status: "pending",
-      completedAt: null,
-      technician: [],
-      notes: "",
-      assignedTeam: team
-    });
-    saveManual();
-    return true;
+    try {
+      const existing = await apiFindByCodeAndDate(itemCode, dueDate);
+      if (existing && existing.length) {
+        setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
+        return false;
+      }
+      await apiInsert({
+        [col("itemCode", "item_code")]: machine.itemCode,
+        [col("equipment", "equipment")]: machine.equipment,
+        [col("plant", "plant")]: machine.plant,
+        [col("section", "section")]: machine.section,
+        [col("pic", "pic")]: team,
+        [col("status", "status")]: "pending",
+        [col("dueDate", "due_date")]: dueDate,
+        [col("recordType", "record_type")]: "manual"
+      });
+      return true;
+    } catch (e) {
+      setStatusMsg("pmFormStatus", friendlyError(e, "create this record"), "error");
+      return false;
+    }
   };
 
   const openEditModal = (id) => {
-    const rec = manualRecords.find((r) => r.id === id);
+    const rec = currentRecords.find((r) => r.id === id);
     if (!rec || rec.status === "completed" || rec.status === "validated") return;
     document.getElementById("pmFormTitle").textContent = "Sửa PM / Edit PM";
     const select = document.getElementById("pmFormMachine");
@@ -645,29 +747,44 @@
     document.getElementById("pmFormModal").classList.add("active");
   };
 
-  const editPM = (id, itemCode, dueDate, team) => {
-    const rec = manualRecords.find((r) => r.id === id);
+  const editPM = async (id, itemCode, dueDate, team) => {
+    const rec = currentRecords.find((r) => r.id === id);
     if (!rec) return false;
     const machine = getMachineByCode(itemCode);
-    if (machine) {
-      rec.itemCode = machine.itemCode;
-      rec.equipment = machine.equipment;
-      rec.plant = machine.plant;
-      rec.section = machine.section;
+    try {
+      const existing = await apiFindByCodeAndDate(itemCode, dueDate);
+      if (existing && existing.length && existing[0].id !== id) {
+        setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
+        return false;
+      }
+      const payload = {
+        [col("dueDate", "due_date")]: dueDate,
+        [col("pic", "pic")]: team
+      };
+      if (machine) {
+        payload[col("itemCode", "item_code")] = machine.itemCode;
+        payload[col("equipment", "equipment")] = machine.equipment;
+        payload[col("plant", "plant")] = machine.plant;
+        payload[col("section", "section")] = machine.section;
+      }
+      await apiUpdate(id, payload);
+      return true;
+    } catch (e) {
+      setStatusMsg("pmFormStatus", friendlyError(e, "update this record"), "error");
+      return false;
     }
-    rec.dueDate = dueDate;
-    rec.assignedTeam = team;
-    saveManual();
-    return true;
   };
 
-  const deletePM = (id) => {
-    const rec = manualRecords.find((r) => r.id === id);
+  const deletePM = async (id) => {
+    const rec = currentRecords.find((r) => r.id === id);
     if (!rec || rec.status === "completed" || rec.status === "validated") return;
     if (!confirm(`Delete PM for ${rec.equipment}?`)) return;
-    manualRecords = manualRecords.filter((r) => r.id !== id);
-    saveManual();
-    renderScheduleTab();
+    try {
+      await apiDelete(id);
+      await renderScheduleTab();
+    } catch (e) {
+      setStatusMsg("pmScheduleStatus", friendlyError(e, "delete this record"), "error");
+    }
   };
 
   const checkUserRole = async () => {
@@ -678,11 +795,10 @@
     if (config.validatorTeam && config.validatorTeam.includes(userId)) isValidator = true;
   };
 
-  document.addEventListener("DOMContentLoaded", () => {
-    loadPersistence();
+  document.addEventListener("DOMContentLoaded", async () => {
     loadMasterData();
 
-    checkUserRole();
+    await checkUserRole();
 
     const machineSelect = document.getElementById("pmFormMachine");
     if (machineSelect) {
@@ -690,40 +806,38 @@
         config.machines.map((m) => `<option value="${m.itemCode}">${m.equipment} (${m.itemCode})</option>`).join("");
     }
 
-    renderScheduleTab();
+    await renderScheduleTab();
 
     initMechanicPicker("pmCompleteTechnician", "pmCompleteChips", "pmCompleteMechanicSearch", "pmCompleteOptions");
     initMechanicPicker("pmFormTeam", "pmFormTeamChips", "pmFormTeamSearch", "pmFormTeamOptions");
 
-    document.getElementById("pmCompleteForm")?.addEventListener("submit", (e) => {
+    document.getElementById("pmCompleteForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const id = e.target.dataset.recordId;
       const technician = getSelectedMechanics("pmCompleteTechnician");
       if (!technician.length) { setStatusMsg("pmCompleteStatus", "Please select a technician.", "warning"); return; }
       const notes = getValue("pmCompleteNotes");
-      if (completePM(id, technician, notes)) {
+      if (await completePM(id, technician, notes)) {
         document.getElementById("pmCompleteModal").classList.remove("active");
         setStatusMsg("pmScheduleStatus", "PM completed successfully.", "success");
-        renderScheduleTab();
+        await renderScheduleTab();
       }
     });
 
     document.getElementById("pmAddButton")?.addEventListener("click", openCreateModal);
 
-    document.getElementById("pmForm")?.addEventListener("submit", (e) => {
+    document.getElementById("pmForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const editId = e.target.dataset.editId;
       const itemCode = getValue("pmFormMachine");
       const dueDate = getValue("pmFormDueDate");
       const team = getSelectedMechanics("pmFormTeam");
       if (!itemCode || !dueDate) { setStatusMsg("pmFormStatus", "Please fill all fields.", "warning"); return; }
-      if (editId) {
-        editPM(editId, itemCode, dueDate, team);
-      } else {
-        createPM(itemCode, dueDate, team);
+      const ok = editId ? await editPM(editId, itemCode, dueDate, team) : await createPM(itemCode, dueDate, team);
+      if (ok) {
+        document.getElementById("pmFormModal").classList.remove("active");
+        await renderScheduleTab();
       }
-      document.getElementById("pmFormModal").classList.remove("active");
-      renderScheduleTab();
     });
 
     document.querySelectorAll("[data-close-pm-complete]").forEach((el) => {
@@ -746,24 +860,24 @@
       });
     });
 
-    document.getElementById("pmSchedulePrevPage")?.addEventListener("click", () => {
-      if (schedulePage > 0) { schedulePage--; renderScheduleTab(); }
+    document.getElementById("pmSchedulePrevPage")?.addEventListener("click", async () => {
+      if (schedulePage > 0) { schedulePage--; await renderScheduleTab(); }
     });
-    document.getElementById("pmScheduleNextPage")?.addEventListener("click", () => {
-      schedulePage++; renderScheduleTab();
+    document.getElementById("pmScheduleNextPage")?.addEventListener("click", async () => {
+      schedulePage++; await renderScheduleTab();
     });
 
-    document.getElementById("calPrev")?.addEventListener("click", () => {
+    document.getElementById("calPrev")?.addEventListener("click", async () => {
       calMonth--;
       if (calMonth < 0) { calMonth = 11; calYear--; }
       schedulePage = 0;
-      renderScheduleTab();
+      await renderScheduleTab();
     });
-    document.getElementById("calNext")?.addEventListener("click", () => {
+    document.getElementById("calNext")?.addEventListener("click", async () => {
       calMonth++;
       if (calMonth > 11) { calMonth = 0; calYear++; }
       schedulePage = 0;
-      renderScheduleTab();
+      await renderScheduleTab();
     });
 
     lucideIcons();
