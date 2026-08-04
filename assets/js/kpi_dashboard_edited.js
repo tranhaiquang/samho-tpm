@@ -41,16 +41,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!value) return null;
     const str = String(value).trim();
 
-    let match = str.match(/^(\d{2})-(\d{2})-(\d{2,4})(?:\s+(\d{2}):(\d{2}))?/);
+    let match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+    }
+
+    match = str.match(/^(\d{2})-(\d{2})-(\d{2,4})(?:\s+(\d{2}):(\d{2}))?/);
     if (match) {
       let year = Number(match[3]);
       if (year < 100) year += 2000;
-      return new Date(year, Number(match[1]) - 1, Number(match[2]), Number(match[4] || 0), Number(match[5] || 0));
-    }
-
-    match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
-    if (match) {
-      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+      return new Date(year, Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0));
     }
 
     return null;

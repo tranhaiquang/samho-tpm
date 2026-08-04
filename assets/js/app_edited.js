@@ -151,9 +151,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const parseSimpleDateTime = (value) => {
     if (!value) return null;
+
+    const isoParts = value.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    if (isoParts) {
+      return new Date(Number(isoParts[1]), Number(isoParts[2]) - 1, Number(isoParts[3]), Number(isoParts[4]), Number(isoParts[5]));
+    }
+
     const parts = value.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
     if (parts) {
-      const [, mm, dd, yyyy, hh = "0", min = "0"] = parts;
+      const [, dd, mm, yyyy, hh = "0", min = "0"] = parts;
       const year = yyyy.length === 2 ? 2000 + Number(yyyy) : Number(yyyy);
       return new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min));
     }
@@ -166,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const time = getValue(timeId);
     if (!date || !time) return "";
     const [yyyy, mm, dd] = date.split("-");
-    return `${mm}-${dd}-${yyyy} ${time}`;
+    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
   };
 
   const getDowntimeMinutes = (startValue, endValue) => {

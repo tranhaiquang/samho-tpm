@@ -1790,6 +1790,13 @@ fieldset input {
   font-weight: 700;
 }
 
+.repair-modal-downtime {
+  margin: 10px 0 0;
+  color: #405166;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .repair-empty {
   padding: 26px;
   color: var(--muted);

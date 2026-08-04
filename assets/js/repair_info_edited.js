@@ -54,9 +54,14 @@
     if (!value) return null;
     const text = String(value).trim();
 
+    const isoDate = text.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    if (isoDate) {
+      return new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]), Number(isoDate[4]), Number(isoDate[5]));
+    }
+
     const supabaseTextDate = text.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
     if (supabaseTextDate) {
-      const [, mm, dd, yy, hh = "0", min = "0"] = supabaseTextDate;
+      const [, dd, mm, yy, hh = "0", min = "0"] = supabaseTextDate;
       return new Date(normalizeYear(yy), Number(mm) - 1, Number(dd), Number(hh), Number(min));
     }
 
@@ -78,7 +83,7 @@
     const dd = String(date.getDate()).padStart(2, "0");
     const hh = String(date.getHours()).padStart(2, "0");
     const min = String(date.getMinutes()).padStart(2, "0");
-    return `${mm}/${dd}/${yyyy} ${hh}:${min}`;
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   };
 
   const fetchJson = async (url) => {
@@ -287,7 +292,14 @@
     const time = document.getElementById(timeId)?.value || "";
     if (!date || !time) return null;
     const [yyyy, mm, dd] = date.split("-");
-    return `${mm}-${dd}-${yyyy} ${time}`;
+    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
+  };
+
+  const getDowntimeMinutes = (startValue, endValue) => {
+    const start = parseDateTime(startValue);
+    const end = parseDateTime(endValue);
+    if (!start || !end) return null;
+    return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
   };
 
   const patchRepairInfo = async (recordId, payload) => {
@@ -312,10 +324,13 @@
   };
 
   const buildUpdatePayload = () => {
+    const reportedAt = getDateTimeInputValue("editReportedDate", "editReportedTime");
+    const repairedAt = getDateTimeInputValue("editRepairedDate", "editRepairedTime");
     const formData = {
-      reportedAt: getDateTimeInputValue("editReportedDate", "editReportedTime"),
+      reportedAt,
       repairStartedAt: getDateTimeInputValue("editStartedDate", "editStartedTime"),
-      repairedAt: getDateTimeInputValue("editRepairedDate", "editRepairedTime"),
+      repairedAt,
+      totalDowntime: getDowntimeMinutes(reportedAt, repairedAt),
       issue: document.getElementById("editIssue")?.value.trim() || null,
       other: document.getElementById("editOther")?.value.trim() || null,
       reason: document.getElementById("editReason")?.value.trim() || null,
@@ -346,6 +361,15 @@
       const detail = await response.text();
       throw new Error(detail || `Delete failed (${response.status}).`);
     }
+  };
+
+  const updateDowntimePreview = () => {
+    const element = document.getElementById("editDowntime");
+    if (!element) return;
+    const reportedAt = getDateTimeInputValue("editReportedDate", "editReportedTime");
+    const repairedAt = getDateTimeInputValue("editRepairedDate", "editRepairedTime");
+    const minutes = getDowntimeMinutes(reportedAt, repairedAt);
+    element.textContent = minutes == null ? "Down time: —" : `Down time: ${minutes} min`;
   };
 
   const ensureEditModal = () => {
@@ -419,6 +443,7 @@
             <input id="editRepairedTime" type="time" />
           </label>
         </div>
+        <p class="repair-modal-downtime" id="editDowntime"></p>
         <footer class="repair-modal-footer">
           <p class="repair-modal-status" id="repairEditStatus" aria-live="polite"></p>
           <button class="btn muted" type="button" data-close-edit>Cancel</button>
@@ -430,6 +455,9 @@
     document.body.appendChild(modal);
     modal.querySelectorAll("[data-close-edit]").forEach((button) => {
       button.addEventListener("click", () => modal.classList.remove("active"));
+    });
+    ["editReportedDate", "editReportedTime", "editStartedDate", "editStartedTime", "editRepairedDate", "editRepairedTime"].forEach((id) => {
+      modal.querySelector(`#${id}`)?.addEventListener("input", updateDowntimePreview);
     });
     modal.querySelector("#repairEditForm").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -476,6 +504,7 @@
     modal.querySelector("#editRepairedDate").value = toDateValue(repairedAt);
     modal.querySelector("#editRepairedTime").value = toTimeValue(repairedAt);
     modal.querySelector("#repairEditStatus").textContent = "";
+    updateDowntimePreview();
     modal.classList.add("active");
   };
 
