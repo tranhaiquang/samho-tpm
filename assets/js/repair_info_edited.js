@@ -570,7 +570,8 @@
       const reasonValue = getRecordValue(record, ["reason", "reason_nm_vn"]);
       const solveValue = getRecordValue(record, ["solve", "solve_nm_en"]);
       const row = document.createElement("tr");
-      row.dataset.recordId = record.id || "";
+      const recordId = getRecordValue(record, ["id", "ID"]);
+      row.dataset.recordId = recordId || "";
       row.innerHTML = `
         <td>${rowNumber}</td>
         <td><strong>${itemCode || "-"}</strong></td>
@@ -589,10 +590,10 @@
         <td>${record.technician || "-"}</td>
         <td>
           <div class="repair-row-actions">
-            <button class="repair-edit" type="button" data-record-id="${record.id || ""}" aria-label="Edit repair record" title="Edit">
+            <button class="repair-edit" type="button" data-record-id="${recordId || ""}" aria-label="Edit repair record" title="Edit">
               <i data-lucide="square-pen"></i>
             </button>
-            <button class="repair-delete" type="button" data-record-id="${record.id || ""}" aria-label="Delete repair record" title="Delete">
+            <button class="repair-delete" type="button" data-record-id="${recordId || ""}" aria-label="Delete repair record" title="Delete">
               <i data-lucide="trash-2"></i>
             </button>
           </div>
@@ -604,14 +605,15 @@
       });
 
       row.querySelector(".repair-delete")?.addEventListener("click", async () => {
-        if (!record.id || !window.confirm(`Delete repair record ${record.id}?`)) return;
+        const recordId = getRecordValue(record, ["id", "ID"]);
+        if (!recordId || !window.confirm("Delete this repair record?")) return;
 
         try {
-          await deleteRepairInfo(record.id);
-          currentRecords = currentRecords.filter((current) => String(current.id) !== String(record.id));
+          await deleteRepairInfo(recordId);
+          currentRecords = currentRecords.filter((current) => String(getRecordValue(current, ["id", "ID"])) !== String(recordId));
           renderRecords(currentRecords, currentMachineMap, currentPage);
           updateExportState();
-          setStatus(`Deleted repair record ${record.id}.`, "success");
+          setStatus("Repair record deleted.", "success");
           if (window.lucide) window.lucide.createIcons();
         } catch (error) {
           setStatus(window.SAMHO_ERRORS.message(error, "delete this repair record"), "error");
