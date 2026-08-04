@@ -2,38 +2,19 @@
   const config = window.SAMHO_SUPABASE.pm;
   if (!config) return;
 
-  const supabase = window.SAMHO_SUPABASE;
+  const db = window.SAMHO_DB;
+  if (!db) return;
+
   const recordsConfig = config.recordsTable || {};
   const recordsTable = recordsConfig.table || "pm_records";
   const recCol = recordsConfig.fieldMap || {};
   const col = (key, fallback) => recCol[key] || fallback;
 
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
 
-  const addDays = (date, days) => {
-    const d = new Date(date);
-    d.setDate(d.getDate() + days);
-    return d.toISOString().slice(0, 10);
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const [y, m, d] = String(dateStr).slice(0, 10).split("-");
-    return `${m}/${d}/${y}`;
-  };
-
-  const parseDate = (value) => {
-    if (!value) return null;
-    const parts = value.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})/);
-    if (parts) {
-      const [, dd, mm, yyyy] = parts;
-      const year = yyyy.length === 2 ? 2000 + Number(yyyy) : Number(yyyy);
-      return new Date(year, Number(mm) - 1, Number(dd));
-    }
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d;
-  };
+  const addDays = (date, days) => window.SAMHO_DATETIME.addDays(date, days);
+  const formatDate = (value) => window.SAMHO_DATETIME.formatDate(value);
+  const parseDate = (value) => window.SAMHO_DATETIME.parse(value);
 
   const machineMap = {};
   config.machines.forEach((m) => { machineMap[m.itemCode] = m; });
@@ -55,69 +36,16 @@
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
-  const apiRequest = async (path, options = {}) => {
-    const response = await fetch(`${supabase.url}/${path}`, {
-      ...options,
-      headers: {
-        apikey: supabase.anonKey,
-        Authorization: `Bearer ${supabase.anonKey}`,
-        ...(window.SAMHO_AUTH?.authHeaders?.() || {}),
-        ...(options.headers || {})
-      }
+  const apiInsert = (payload) => db.insert(recordsTable, payload);
+  const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
+  const apiDelete = (id) => db.remove(recordsTable, { id });
+  const apiFindByCodeAndDate = (itemCode, dueDate) =>
+    db.select(recordsTable, {
+      columns: "id",
+      where: { [col("itemCode", "item_code")]: itemCode, [col("dueDate", "due_date")]: dueDate }
     });
-    if (!response.ok) {
-      const detail = await response.text();
-      let message = detail || `Request failed (${response.status}).`;
-      try { message = JSON.parse(detail).message || message; } catch { /* Use the response text when it is not JSON. */ }
-      throw new Error(message);
-    }
-    return response;
-  };
 
-  const apiGet = async (params) => {
-    const response = await apiRequest(`${encodeURIComponent(recordsTable)}?${params}`);
-    return response.json();
-  };
-
-  const apiInsert = async (payload) => {
-    await apiRequest(encodeURIComponent(recordsTable), {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify(payload)
-    });
-  };
-
-  const apiUpdate = async (id, payload) => {
-    await apiRequest(`${encodeURIComponent(recordsTable)}?id=eq.${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify(payload)
-    });
-  };
-
-  const apiDelete = async (id) => {
-    await apiRequest(`${encodeURIComponent(recordsTable)}?id=eq.${encodeURIComponent(id)}`, {
-      method: "DELETE",
-      headers: { Prefer: "return=minimal" }
-    });
-  };
-
-  const apiFindByCodeAndDate = async (itemCode, dueDate) => {
-    const params = new URLSearchParams({
-      select: "id",
-      [col("itemCode", "item_code")]: `eq.${itemCode}`,
-      [col("dueDate", "due_date")]: `eq.${dueDate}`
-    });
-    return apiGet(params.toString());
-  };
-
-  const friendlyError = (error, action) => {
-    const message = String(error?.message || error || "").toLowerCase();
-    if (message.includes("duplicate key") || message.includes("unique constraint")) return "A record already exists for this machine and date.";
-    if (message.includes("row-level security") || message.includes("permission denied")) return `You do not have permission to ${action}.`;
-    if (message.includes("failed to fetch") || message.includes("networkerror")) return "Unable to connect. Please check your network and try again.";
-    return `Unable to ${action}. Please try again.`;
-  };
+  const friendlyError = (error, action) => db.friendly(error, action);
 
   const loadMasterData = () => {
     if (window.PM_MASTER_DATA) {
@@ -289,22 +217,12 @@
   };
 
   const fetchTasks = async (equipmentName) => {
-    const supabaseCfg = window.SAMHO_SUPABASE;
-    const pmConfig = supabaseCfg?.pm || {};
+    const pmConfig = window.SAMHO_SUPABASE?.pm || {};
     const table = pmConfig.tasksTable || "pm_tasks";
     const fields = pmConfig.taskFields || {};
     const equipmentCol = fields.equipment || "equipment";
-    if (!supabaseCfg?.url || !supabaseCfg?.anonKey) return null;
-    const params = new URLSearchParams({
-      select: "*",
-      [equipmentCol]: `eq.${equipmentName}`,
-      order: fields.taskNo || "task_no"
-    });
-    const response = await fetch(`${supabaseCfg.url}/${encodeURIComponent(table)}?${params}`, {
-      headers: { apikey: supabaseCfg.anonKey, Authorization: `Bearer ${supabaseCfg.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
-    });
-    if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
-    const rows = await response.json();
+    if (!db) return null;
+    const rows = await db.select(table, { where: { [equipmentCol]: equipmentName }, order: fields.taskNo || "task_no" });
     if (!rows || !rows.length) return null;
     return rows.map((row) => ({
       taskNo: row[fields.taskNo] || row.task_no,
@@ -387,19 +305,13 @@
     return result;
   };
 
-  const monthParams = () => {
+  const loadMonthRecords = async () => {
+    const dueDateCol = col("dueDate", "due_date");
     const first = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-01`;
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const last = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`;
-    const params = new URLSearchParams({ select: "*" });
-    params.append(col("dueDate", "due_date"), `gte.${first}`);
-    params.append(col("dueDate", "due_date"), `lte.${last}`);
-    return params;
-  };
-
-  const loadMonthRecords = async () => {
-    const params = monthParams();
-    let rows = await apiGet(params.toString());
+    const monthWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
+    let rows = await db.select(recordsTable, { where: monthWhere });
     const existing = new Set(rows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
     let inserted = 0;
     for (const g of computeGeneratedRows()) {
@@ -416,7 +328,7 @@
       existing.add(key);
       inserted++;
     }
-    if (inserted) rows = await apiGet(params.toString());
+    if (inserted) rows = await db.select(recordsTable, { where: monthWhere });
     currentRecords = rows.map(rowToRecord);
     return currentRecords;
   };

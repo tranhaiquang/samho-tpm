@@ -40,25 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const redTagField = (row, key) => readField(row, [].concat(redTagConfig.fieldMap?.[key] || []));
   const itemCodeColumn = [].concat(redTagConfig.fieldMap?.itemCode || "item_code")[0];
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
-  const formatDate = (value) => {
-    const raw = String(value ?? "").trim();
-    const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (iso) return `${iso[2]}/${iso[3]}/${iso[1]}`;
-    const dmy = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})/);
-    if (dmy) {
-      const year = dmy[3].length === 2 ? 2000 + Number(dmy[3]) : dmy[3];
-      return `${dmy[2]}/${dmy[1]}/${year}`;
-    }
-    return raw;
-  };
+  const formatDate = (value) => window.SAMHO_DATETIME.formatDate(value);
   const setStatus = (message, type = "idle") => { status.textContent = message; status.dataset.type = type; };
-  const friendlyError = (error, action) => {
-    const message = String(error?.message || error || "").toLowerCase();
-    if (message.includes("duplicate key") || message.includes("unique constraint")) return "This Item Code already exists. Please use a different Item Code.";
-    if (message.includes("row-level security") || message.includes("permission denied")) return `You do not have permission to ${action}.`;
-    if (message.includes("failed to fetch") || message.includes("networkerror")) return "Unable to connect. Please check your network and try again.";
-    return `Unable to ${action}. Please try again.`;
-  };
+  const friendlyError = (error, action) => window.SAMHO_DB?.friendly(error, action) || window.SAMHO_ERRORS.message(error, action);
   const clearMachineName = () => {
     validatedMachineItemCode = "";
     addMachineNameInput.value = "";
@@ -79,12 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const machineConfig = config.machineInfo || {};
       const codeColumn = machineConfig.codeColumn || "ITEM_CODE";
-      const params = new URLSearchParams({ select: "*", [codeColumn]: `eq.${itemCode}`, limit: "1" });
-      const response = await fetch(`${config.url}/${encodeURIComponent(machineConfig.table || "machine_info")}?${params}`, {
-        headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
-      });
-      if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
-      const machine = (await response.json())[0];
+      const machine = await window.SAMHO_DB.getOne(machineConfig.table || "machine_info", { where: { [codeColumn]: itemCode } });
       const machineName = String(machine?.name_en || machine?.NAME_EN || "").trim();
       if (!machineName) {
         addStatus.textContent = "No machine was found for this Item Code. Please check the barcode and try again.";
@@ -180,22 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const fetchRedTagRecords = async () => {
-    const records = [];
-    const pageSize = 1000;
-    let offset = 0;
-    while (true) {
-      const params = new URLSearchParams({ select: "*", limit: String(pageSize), offset: String(offset) });
-      const response = await fetch(`${config.url}/${encodeURIComponent(redTagConfig.table || "redtag_records")}?${params}`, {
-        headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) }
-      });
-      if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
-      const page = await response.json();
-      records.push(...page);
-      if (page.length < pageSize) return records;
-      offset += pageSize;
-    }
-  };
+  const fetchRedTagRecords = () =>
+    window.SAMHO_DB.select(redTagConfig.table || "redtag_records");
 
   const loadRecords = async () => {
     setStatus("Loading Red Tag records...", "idle");
@@ -279,12 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!itemCode || !window.confirm(`Remove Red Tag record ${itemCode}?`)) return;
     button.disabled = true;
     try {
-      const params = new URLSearchParams({ [itemCodeColumn]: `eq.${itemCode}` });
-      const response = await fetch(`${config.url}/${encodeURIComponent(redTagConfig.table || "redtag_records")}?${params}`, {
-        method: "DELETE",
-        headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}), Prefer: "return=minimal" }
-      });
-      if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
+      await window.SAMHO_DB.remove(redTagConfig.table || "redtag_records", { [itemCodeColumn]: itemCode });
       closeModal();
       await loadRecords();
       setStatus(`Removed Red Tag record ${itemCode}.`, "success");
@@ -310,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-close-red-tag-add]").forEach((button) => button.addEventListener("click", closeAddModal));
   addButton.addEventListener("click", () => {
     addForm.reset();
-    addForm.elements.date.value = new Date().toISOString().slice(0, 10);
+    addForm.elements.date.value = window.SAMHO_DATETIME.now().date;
     clearMachineName();
     updateIssueField();
     addStatus.textContent = "";
@@ -352,17 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addSaveButton.disabled = true;
     try {
       window.SAMHO_LOADING.show("Saving Red Tag record...");
-      const response = await fetch(`${config.url}/${encodeURIComponent(redTagConfig.table || "redtag_records")}`, {
-        method: "POST",
-        headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}), "Content-Type": "application/json", Prefer: "return=minimal" },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) {
-        const detail = await response.text();
-        let message = detail || `Request failed (${response.status}).`;
-        try { message = JSON.parse(detail).message || message; } catch { /* Use the response text when it is not JSON. */ }
-        throw new Error(message);
-      }
+      await window.SAMHO_DB.insert(redTagConfig.table || "redtag_records", payload);
       const itemCode = String(payload[itemCodeColumn] || "").trim();
       plantFilter.value = values.plant;
       currentPage = 1;
