@@ -37,24 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return Number.isFinite(number) ? number : 0;
   };
 
-  const parseDateTime = (value) => {
-    if (!value) return null;
-    const str = String(value).trim();
-
-    let match = str.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
-    if (match) {
-      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
-    }
-
-    match = str.match(/^(\d{2})-(\d{2})-(\d{2,4})(?:\s+(\d{2}):(\d{2}))?/);
-    if (match) {
-      let year = Number(match[3]);
-      if (year < 100) year += 2000;
-      return new Date(year, Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0));
-    }
-
-    return null;
-  };
+  const parseDateTime = (value) => window.SAMHO_DATETIME.parse(value);
 
   const configuredColumn = (field) => downtimeConfig?.fieldMap?.[field] || "";
 
@@ -140,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  const monthKeyFromDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  const monthKeyFromDate = (date) => window.SAMHO_DATETIME.monthKey(date);
 
   const rowMonth = (row) => {
     const rawMonth = readField(row, "month") || row[configuredColumn("month")];
@@ -189,21 +172,17 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedColumns.push(dateColumn);
     }
 
-    const params = new URLSearchParams({
-      select: selectedColumns.join(",") || "*",
-      limit: "5000"
-    });
+    const where = {};
     const plantColumn = configuredColumn("plant");
     if (plantColumn && plantValue) {
       const mappedPlants = plantFilterMap[plantValue];
-      if (mappedPlants) {
-        params.set(plantColumn, `in.(${mappedPlants.join(",")})`);
-      } else {
-        params.set(plantColumn, `eq.${plantValue}`);
-      }
+      where[plantColumn] = mappedPlants || plantValue;
     }
 
-    const allRows = await fetchPagedDowntime(params);
+    const allRows = await window.SAMHO_DB.select(downtimeConfig.table, {
+      columns: selectedColumns.join(",") || "*",
+      where
+    });
     const dateRangeActive = Boolean(activeFromDate || activeToDate);
     if (monthColumn && monthValue && !dateRangeActive) {
       return allRows.filter((row) => rowMonth(row).key === monthValue);
@@ -211,43 +190,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return allRows;
   };
 
-  const fetchPagedDowntime = async (params, pageSize = 1000) => {
-    const allRows = [];
-    let offset = 0;
-
-    while (true) {
-      const pageParams = new URLSearchParams(params);
-      pageParams.set("limit", String(pageSize));
-      pageParams.set("offset", String(offset));
-
-      const response = await fetch(`${config.url}/${downtimeConfig.table}?${pageParams}`, {
-        headers: {
-          apikey: config.anonKey,
-          Authorization: `Bearer ${config.anonKey}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
-
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || `Downtime fetch failed (${response.status}).`);
-      }
-
-      const rows = await response.json();
-      allRows.push(...rows);
-      if (rows.length < pageSize) return allRows;
-      offset += pageSize;
-    }
-  };
-
   const getAvailableMonths = async () => {
-    const params = new URLSearchParams({
-      select: "start_datetime",
-      limit: "5000"
+    const rows = await window.SAMHO_DB.select(downtimeConfig.table, {
+      columns: "start_datetime",
+      where: { start_datetime: "not.is.null" }
     });
-    params.set("start_datetime", "not.is.null");
-
-    const rows = await fetchPagedDowntime(params);
     const months = new Map();
     rows.forEach((row) => {
       const month = rowMonth(row);
@@ -719,14 +666,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const today = new Date();
     const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const fmt = (d) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
-    fromInput.value = fmt(firstOfMonth);
-    toInput.value = fmt(today);
+    fromInput.value = window.SAMHO_DATETIME.toInputDate(firstOfMonth);
+    toInput.value = window.SAMHO_DATETIME.toInputDate(today);
     activeFromDate = fromInput.value;
     activeToDate = toInput.value;
 

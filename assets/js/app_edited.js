@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const supabaseConfig = window.SAMHO_SUPABASE;
+  const db = window.SAMHO_DB;
   let searchedItemCode = "";
 
   const setSearchStatus = (message, type = "idle") => {
@@ -131,56 +132,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!options) return;
 
     try {
-      const response = await fetch(`${supabaseConfig.url}/rpc/list_user_display_names`, {
-        headers: {
-          apikey: supabaseConfig.anonKey,
-          Authorization: `Bearer ${supabaseConfig.anonKey}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
-
-      if (!response.ok) throw new Error(`Could not load mechanic names (${response.status}).`);
-
-      const names = await response.json();
-      mechanicNames = [...new Set(names.map(({ display_name }) => display_name).filter(Boolean))];
+      const names = await db.rpc("list_user_display_names");
+      mechanicNames = [...new Set((names || []).map(({ display_name }) => display_name).filter(Boolean))];
       renderMechanicOptions();
     } catch (error) {
       console.warn("Could not load mechanic name suggestions.", error);
     }
   };
 
-  const parseSimpleDateTime = (value) => {
-    if (!value) return null;
+  const parseSimpleDateTime = (value) => window.SAMHO_DATETIME.parse(value);
 
-    const isoParts = value.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
-    if (isoParts) {
-      return new Date(Number(isoParts[1]), Number(isoParts[2]) - 1, Number(isoParts[3]), Number(isoParts[4]), Number(isoParts[5]));
-    }
+  const getDateTimeValue = (dateId, timeId) => window.SAMHO_DATETIME.readInput(dateId, timeId);
 
-    const parts = value.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
-    if (parts) {
-      const [, dd, mm, yyyy, hh = "0", min = "0"] = parts;
-      const year = yyyy.length === 2 ? 2000 + Number(yyyy) : Number(yyyy);
-      return new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min));
-    }
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  };
-
-  const getDateTimeValue = (dateId, timeId) => {
-    const date = getValue(dateId);
-    const time = getValue(timeId);
-    if (!date || !time) return "";
-    const [yyyy, mm, dd] = date.split("-");
-    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
-  };
-
-  const getDowntimeMinutes = (startValue, endValue) => {
-    const start = parseSimpleDateTime(startValue);
-    const end = parseSimpleDateTime(endValue);
-    if (!start || !end) return "";
-    return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
-  };
+  const getDowntimeMinutes = (startValue, endValue) => window.SAMHO_DATETIME.downtimeMinutes(startValue, endValue);
 
   const getFieldLabel = (field) => {
     const columns = [].concat(supabaseConfig.fieldMap[field] || []);
@@ -223,11 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const timeInput = document.getElementById(timeId);
     if (!dateInput || !timeInput || !value) return;
 
-    const date = parseSimpleDateTime(value);
-    if (!date) return;
-
-    dateInput.value = date.toISOString().slice(0, 10);
-    timeInput.value = date.toTimeString().slice(0, 5);
+    window.SAMHO_DATETIME.setInputs(value, dateId, timeId);
   };
 
   if (document.getElementById("noteGrid")) renderNoteGrid();
@@ -236,33 +196,12 @@ document.addEventListener("DOMContentLoaded", () => {
   loadMechanicOptions();
 
   const fetchRowByCode = async ({ table, codeColumn, selectColumns }, code) => {
-    const requestRow = async (operator, value) => {
-      const params = new URLSearchParams({
-        select: (selectColumns || ["*"]).join(","),
-        [codeColumn]: `${operator}.${value}`,
-        limit: "1"
-      });
+    const columns = (selectColumns || ["*"]).join(",");
 
-      const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
-        headers: {
-          apikey: supabaseConfig.anonKey,
-          Authorization: `Bearer ${supabaseConfig.anonKey}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
+    const exact = await window.SAMHO_DB.getOne(table, { columns, where: { [codeColumn]: code } });
+    if (exact) return exact;
 
-      if (!response.ok) {
-        throw new Error(`Supabase search failed for ${table} (${response.status}).`);
-      }
-
-      return response.json();
-    };
-
-    const exactRows = await requestRow("eq", code);
-    if (exactRows[0]) return exactRows[0];
-
-    const fuzzyRows = await requestRow("ilike", `*${code}*`);
-    return fuzzyRows[0] || null;
+    return window.SAMHO_DB.getOne(table, { columns, where: { [codeColumn]: { op: "ilike", value: `*${code}*` } } });
   };
 
   const fetchMachineByCode = async (code) => {
@@ -295,47 +234,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (seen.has(key)) continue;
       seen.add(key);
 
-      const params = new URLSearchParams({
-        select: codeColumn,
-        [codeColumn]: `eq.${code}`,
-        limit: "1"
-      });
-
-      const response = await fetch(`${supabaseConfig.url}/${table}?${params}`, {
-        headers: {
-          apikey: supabaseConfig.anonKey,
-          Authorization: `Bearer ${supabaseConfig.anonKey}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Machine validation failed (${response.status}).`);
-      }
-
-      const rows = await response.json();
-      if (rows.length > 0) return true;
+      const row = await window.SAMHO_DB.getOne(table, { columns: codeColumn, where: { [codeColumn]: code } });
+      if (row) return true;
     }
 
     return false;
   };
 
   const fetchVisibleMachineCount = async () => {
-    const params = new URLSearchParams({
-      select: supabaseConfig.codeColumn,
-      limit: "1"
-    });
-
-    const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.table}?${params}`, {
-      headers: {
-        apikey: supabaseConfig.anonKey,
-        Authorization: `Bearer ${supabaseConfig.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders(),
-        Prefer: "count=exact"
-      }
-    });
-
-    return response.headers.get("content-range") || "";
+    const total = await window.SAMHO_DB.count(supabaseConfig.table);
+    return `*/${total}`;
   };
 
   const runSearch = async () => {
@@ -610,25 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const submitRepairRecord = async (payload) => {
-    const response = await fetch(`${supabaseConfig.url}/${supabaseConfig.repairRecords.table}`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseConfig.anonKey,
-        Authorization: `Bearer ${supabaseConfig.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders(),
-        "Content-Type": "application/json",
-        Prefer: "return=minimal"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Repair record save failed (${response.status}).`);
-    }
-
-    const text = await response.text();
-    return text ? JSON.parse(text) : null;
+    await window.SAMHO_DB.insert(supabaseConfig.repairRecords.table, payload);
   };
 
   const resetRepairInputs = () => {

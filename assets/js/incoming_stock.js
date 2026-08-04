@@ -72,17 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const fetchParts = async () => {
     const tableNames = [...new Set([spareConfig.table, ...(spareConfig.tableCandidates || [])].filter(Boolean))];
-    const errors = [];
-    for (const tableName of tableNames) {
-      try {
-        const params = new URLSearchParams({ select: "*", limit: String(spareConfig.pageSize || 1000) });
-        const response = await fetch(`${config.url}/${encodeURIComponent(tableName)}?${params}`, { headers: { apikey: config.anonKey, Authorization: `Bearer ${config.anonKey}`, ...(window.SAMHO_AUTH?.authHeaders?.() || {}) } });
-        if (!response.ok) throw new Error(await response.text() || `Request failed (${response.status}).`);
-        const rows = await response.json();
-        return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
-      } catch (error) { errors.push(`${tableName}: ${error.message}`); }
-    }
-    throw new Error(`Could not load spare parts. ${errors.join(" | ")}`);
+    if (!tableNames.length) throw new Error("No spare parts table configured in supabase/config.js.");
+
+    const { rows } = await window.SAMHO_DB.discover(tableNames, {
+      columns: "*",
+      limit: spareConfig.pageSize || 1000
+    });
+    return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
   };
 
   const renderParts = (rows) => {
@@ -190,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     worksheet["!cols"] = [{ wch: 7 }, { wch: 18 }, { wch: 34 }, { wch: 16 }, { wch: 12 }];
     const workbook = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(workbook, worksheet, "Order Summary");
-    const date = new Date().toISOString().slice(0, 10);
+    const date = window.SAMHO_DATETIME.now().date;
     window.XLSX.writeFile(workbook, `incoming-stock-order_${date}.xlsx`);
   };
 

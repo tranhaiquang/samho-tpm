@@ -37,71 +37,11 @@
     return name ? record[name] : "";
   };
 
-  const formatDateInput = (date) => {
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  };
+  const formatDateInput = (date) => window.SAMHO_DATETIME.toInputDate(date);
 
-  const normalizeYear = (value) => {
-    const year = Number(value);
-    if (value.length === 2) return 2000 + year;
-    return year;
-  };
+  const parseDateTime = (value) => window.SAMHO_DATETIME.parse(value);
 
-  const parseDateTime = (value) => {
-    if (!value) return null;
-    const text = String(value).trim();
-
-    const isoDate = text.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
-    if (isoDate) {
-      return new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]), Number(isoDate[4]), Number(isoDate[5]));
-    }
-
-    const supabaseTextDate = text.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+(\d{1,2}):(\d{2}))?/);
-    if (supabaseTextDate) {
-      const [, dd, mm, yy, hh = "0", min = "0"] = supabaseTextDate;
-      return new Date(normalizeYear(yy), Number(mm) - 1, Number(dd), Number(hh), Number(min));
-    }
-
-    const compactDate = text.match(/^(\d{4})(\d{2})(\d{2})$/);
-    if (compactDate) {
-      return new Date(Number(compactDate[1]), Number(compactDate[2]) - 1, Number(compactDate[3]));
-    }
-
-    const parsed = new Date(text);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  };
-
-  const formatDateTime = (value) => {
-    const date = parseDateTime(value);
-    if (!date) return String(value || "").replace("T", " ").slice(0, 16);
-
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const hh = String(date.getHours()).padStart(2, "0");
-    const min = String(date.getMinutes()).padStart(2, "0");
-    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-  };
-
-  const fetchJson = async (url) => {
-    const response = await fetch(url, {
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders()
-      }
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Request failed (${response.status}).`);
-    }
-
-    return response.json();
-  };
+  const formatDateTime = (value) => window.SAMHO_DATETIME.toDisplay(value);
 
   const normalizeSearch = (value) => String(value || "").trim().toLowerCase();
   const allPlantLabel = "ALL PLANT";
@@ -183,58 +123,15 @@
   };
 
   const loadPlantOptions = async () => {
-    const pageSize = 1000;
-    const rows = [];
-
-    for (let from = 0; ; from += pageSize) {
-      const params = new URLSearchParams({
-        select: "plant",
-        order: "plant.asc"
-      });
-      const response = await fetch(`${config.url}/${config.repairInfo.table}?${params}`, {
-        headers: {
-          apikey: config.anonKey,
-          Authorization: `Bearer ${config.anonKey}`,
-          Range: `${from}-${from + pageSize - 1}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
-
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || `Request failed (${response.status}).`);
-      }
-
-      const pageRows = await response.json();
-      rows.push(...pageRows);
-      if (pageRows.length < pageSize) break;
-    }
-
+    const rows = await window.SAMHO_DB.select(config.repairInfo.table, { columns: "plant", order: "plant.asc" });
     populatePlantOptions(rows.map((record) => getRecordValue(record, ["plant", "PLANT"])));
   };
 
   const fetchRepairRecords = async (fromDate, toDate) => {
     const dateColumn = config.repairInfo.dateColumn;
-    const pageSize = 1000;
-    const rows = [];
-
-    for (let from = 0; ; from += pageSize) {
-      const url = `${config.url}/${config.repairInfo.table}?select=*&order=${config.repairInfo.idColumn || "id"}.desc&limit=${pageSize}&offset=${from}`;
-      const response = await fetch(url, {
-        headers: {
-          apikey: config.anonKey,
-          Authorization: `Bearer ${config.anonKey}`,
-          ...window.SAMHO_AUTH.authHeaders()
-        }
-      });
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || `Request failed (${response.status}).`);
-      }
-      const pageRows = await response.json();
-      rows.push(...pageRows);
-      if (pageRows.length < pageSize) break;
-    }
+    const rows = await window.SAMHO_DB.select(config.repairInfo.table, {
+      order: `${config.repairInfo.idColumn || "id"}.desc`
+    });
 
     const fromTime = new Date(`${fromDate}T00:00:00`).getTime();
     const toTime = new Date(`${toDate}T23:59:59`).getTime();
@@ -258,12 +155,7 @@
     if (!uniqueCodes.length) return new Map();
 
     const machineInfo = config.machineInfo || { table: config.table, codeColumn: config.codeColumn };
-    const inList = uniqueCodes.map((code) => `"${code}"`).join(",");
-    const params = new URLSearchParams({
-      select: "*",
-      [machineInfo.codeColumn]: `in.(${inList})`
-    });
-    const rows = await fetchJson(`${config.url}/${machineInfo.table}?${params}`);
+    const rows = await window.SAMHO_DB.select(machineInfo.table, { where: { [machineInfo.codeColumn]: uniqueCodes } });
     return new Map(rows.map((row) => [row[machineInfo.codeColumn], row]));
   };
 
@@ -275,52 +167,22 @@
     );
   };
 
-  const toDateValue = (value) => {
-    if (!value) return "";
-    const date = parseDateTime(value);
-    return date ? formatDateInput(date) : "";
-  };
+  const toDateValue = (value) => window.SAMHO_DATETIME.toInput(value).date;
 
-  const toTimeValue = (value) => {
-    if (!value) return "";
-    const date = parseDateTime(value);
-    return date ? date.toTimeString().slice(0, 5) : "";
-  };
+  const toTimeValue = (value) => window.SAMHO_DATETIME.toInput(value).time;
 
   const getDateTimeInputValue = (dateId, timeId) => {
     const date = document.getElementById(dateId)?.value || "";
     const time = document.getElementById(timeId)?.value || "";
     if (!date || !time) return null;
-    const [yyyy, mm, dd] = date.split("-");
-    return `${dd}-${mm}-${yyyy.slice(-2)} ${time}`;
+    return window.SAMHO_DATETIME.fromInput(date, time);
   };
 
-  const getDowntimeMinutes = (startValue, endValue) => {
-    const start = parseDateTime(startValue);
-    const end = parseDateTime(endValue);
-    if (!start || !end) return null;
-    return Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
-  };
+  const getDowntimeMinutes = (startValue, endValue) => window.SAMHO_DATETIME.downtimeMinutes(startValue, endValue);
 
   const patchRepairInfo = async (recordId, payload) => {
     const idColumn = config.repairInfo.idColumn || "id";
-    const params = new URLSearchParams({ [idColumn]: `eq.${recordId}` });
-    const response = await fetch(`${config.url}/${config.repairInfo.table}?${params}`, {
-      method: "PATCH",
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders(),
-        "Content-Type": "application/json",
-        Prefer: "return=minimal"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Update failed (${response.status}).`);
-    }
+    await window.SAMHO_DB.update(config.repairInfo.table, { [idColumn]: recordId }, payload);
   };
 
   const buildUpdatePayload = () => {
@@ -346,21 +208,7 @@
   };
 
   const deleteRepairInfo = async (recordId) => {
-    const params = new URLSearchParams({ [config.repairInfo.idColumn]: `eq.${recordId}` });
-    const response = await fetch(`${config.url}/${config.repairInfo.table}?${params}`, {
-      method: "DELETE",
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders(),
-        Prefer: "return=minimal"
-      }
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Delete failed (${response.status}).`);
-    }
+    await window.SAMHO_DB.remove(config.repairInfo.table, { [config.repairInfo.idColumn]: recordId });
   };
 
   const updateDowntimePreview = () => {
@@ -747,9 +595,9 @@
     }
   };
 
-  const today = new Date();
-  document.getElementById("fromDate").value = formatDateInput(today);
-  document.getElementById("toDate").value = formatDateInput(today);
+  const today = window.SAMHO_DATETIME.now().date;
+  document.getElementById("fromDate").value = today;
+  document.getElementById("toDate").value = today;
   loadPlantOptions().catch((error) => {
     setStatus(window.SAMHO_ERRORS.message(error, "load the plant list"), "warning");
   });

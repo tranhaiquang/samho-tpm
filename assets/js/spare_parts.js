@@ -19,6 +19,7 @@
   let currentPage = 1;
   let activeRecord = null;
   let userCanEdit = false;
+  let activeSpareTable = null;
 
   const setStatus = (message, type = "idle") => {
     status.textContent = message;
@@ -134,44 +135,6 @@
     return cell;
   };
 
-  const fetchJson = async (url) => {
-    const response = await fetch(url, {
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders()
-      }
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Request failed (${response.status}).`);
-    }
-
-    return response.json();
-  };
-
-  const requestSupabase = async (url, options = {}) => {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        apikey: config.anonKey,
-        Authorization: `Bearer ${config.anonKey}`,
-        ...window.SAMHO_AUTH.authHeaders(),
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
-        ...(options.headers || {})
-      }
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Request failed (${response.status}).`);
-    }
-
-    const body = await response.text();
-    return body ? JSON.parse(body) : null;
-  };
-
   const canEditFromPermissionRow = (row) => {
     if (!row) return false;
     const column = spareConfig.permissions?.canEditColumn;
@@ -197,15 +160,13 @@
 
     try {
       for (const check of checks) {
-        const params = new URLSearchParams({
-          select: permission.canEditColumn || "*",
-          [check.column]: `eq.${check.value}`,
-          limit: "1"
+        const row = await window.SAMHO_DB.getOne(table, {
+          columns: permission.canEditColumn || "*",
+          where: { [check.column]: check.value }
         });
-        const rows = await fetchJson(`${config.url}/${encodeURIComponent(table)}?${params}`);
-        const hasMatchingPermission = rows.some(
-          (row) => normalizeUserValue(row?.[check.column]) === normalizeUserValue(check.value) && canEditFromPermissionRow(row)
-        );
+        const hasMatchingPermission = row
+          ? normalizeUserValue(row?.[check.column]) === normalizeUserValue(check.value) && canEditFromPermissionRow(row)
+          : false;
         if (hasMatchingPermission) {
           userCanEdit = true;
           break;
@@ -219,38 +180,23 @@
     }
   };
 
-  const patchSparePart = async (params, payload) => {
-    return requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
-      method: "PATCH",
-      headers: { Prefer: "return=minimal" },
-      body: JSON.stringify(payload)
-    });
+  const patchSparePart = async (where, payload) => {
+    await window.SAMHO_DB.update(activeSpareTable || spareConfig.table, where, payload);
   };
 
   const fetchSpareParts = async () => {
     const tableNames = [...new Set([spareConfig.table, ...(spareConfig.tableCandidates || [])].filter(Boolean))];
-    const errors = [];
+    if (!tableNames.length) throw new Error("No spare parts table configured in supabase/config.js.");
 
-    for (const tableName of tableNames) {
-      const params = new URLSearchParams({
-        select: "*",
-        limit: String(spareConfig.pageSize || 1000)
-      });
-      const url = `${config.url}/${encodeURIComponent(tableName)}?${params}`;
-
-      try {
-        const rows = await fetchJson(url);
-        spareConfig.activeTable = tableName;
-        if (rows.length) {
-          console.log("spare_parts columns:", Object.keys(rows[0]));
-        }
-        return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
-      } catch (error) {
-        errors.push(`${tableName}: ${error.message}`);
-      }
+    const { table, rows } = await window.SAMHO_DB.discover(tableNames, {
+      columns: "*",
+      limit: spareConfig.pageSize || 1000
+    });
+    activeSpareTable = table;
+    if (rows.length) {
+      console.log("spare_parts columns:", Object.keys(rows[0]));
     }
-
-    throw new Error(`Could not fetch spare parts. Checked tables: ${errors.join(" | ")}`);
+    return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
   };
 
   const populatePlants = (rows) => {
@@ -393,11 +339,11 @@
         const idValue = readField(activeRecord, "id");
         if (!idValue) throw new Error("Missing spare part ID.");
 
-        await patchSparePart(new URLSearchParams({ [idColumn]: `eq.${idValue}` }), payload);
+        await patchSparePart({ [idColumn]: idValue }, payload);
         const itemCodeColumn = getColumnName(activeRecord, "itemCode");
         const itemCodeValue = readField(activeRecord, "itemCode");
         if (itemCodeColumn && itemCodeValue) {
-          await patchSparePart(new URLSearchParams({ [itemCodeColumn]: `eq.${itemCodeValue}` }), payload);
+          await patchSparePart({ [itemCodeColumn]: itemCodeValue }, payload);
         }
         if (imageFile) {
           modalStatus.textContent = "Uploading image...";
@@ -412,11 +358,7 @@
         modalStatus.textContent = "Uploading image...";
         await uploadSparePartImage(itemCode, imageFile);
         modalStatus.textContent = "Saving...";
-        await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}`, {
-          method: "POST",
-          headers: { Prefer: "return=minimal" },
-          body: JSON.stringify(payload)
-        });
+        await window.SAMHO_DB.insert(activeSpareTable || spareConfig.table, payload);
       }
 
       modalStatus.textContent = "Saved.";
@@ -565,11 +507,7 @@
     setStatus("Deleting spare part...", "loading");
     window.SAMHO_LOADING.show("Deleting spare part...");
     try {
-      const params = new URLSearchParams({ [idColumn]: `eq.${idValue}` });
-      await requestSupabase(`${config.url}/${encodeURIComponent(spareConfig.activeTable || spareConfig.table)}?${params}`, {
-        method: "DELETE",
-        headers: { Prefer: "return=minimal" }
-      });
+      await window.SAMHO_DB.remove(activeSpareTable || spareConfig.table, { [idColumn]: idValue });
 
       let imageDeleted = true;
       try {
@@ -635,7 +573,7 @@
 
     if (!rows.length) {
       list.innerHTML = `<article class="repair-empty">No spare parts found for the selected plant.</article>`;
-      setStatus(`No spare parts found${spareConfig.activeTable ? ` in ${spareConfig.activeTable}` : ""}.`, "warning");
+      setStatus(`No spare parts found${activeSpareTable ? ` in ${activeSpareTable}` : ""}.`, "warning");
       return;
     }
 
