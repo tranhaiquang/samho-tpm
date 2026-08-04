@@ -38,6 +38,7 @@ window.SAMHO_SUPABASE = {
       reportedAt: "start_datetime",
       repairStartedAt: "fix_datetime",
       repairedAt: "end_datetime",
+      totalDowntime: "total_downtime",
       issue: "issue",
       other: "other_issue",
       reason: "reason",
