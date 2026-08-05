@@ -10,14 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles.css?v=2" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
-    <script src="supabase/config.js" defer></script>
+    <script src="supabase/config.js?v=20260805-1" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="data/pm_master_data_edited.js" defer></script>
-    <script src="assets/js/pm_edited.js" defer></script>
+    <script src="assets/js/pm_edited.js?v=20260805-2" defer></script>
   </head>
   <body class="dashboard-app app-standard pm-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -117,6 +117,7 @@
               </table>
             </div>
             <p class="pm-summary" id="pmScheduleSummary"></p>
+            <p class="info-status pm-schedule-status" id="pmScheduleStatus" aria-live="polite"></p>
             <div class="repair-pagination" id="pmSchedulePagination">
               <span id="pmSchedulePageInfo"></span>
               <div class="repair-pagination-actions">

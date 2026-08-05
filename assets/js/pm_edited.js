@@ -216,18 +216,18 @@
     });
   };
 
-  const fetchTasks = async (equipmentName) => {
+  const fetchTasks = async (nameEn) => {
     const pmConfig = window.SAMHO_SUPABASE?.pm || {};
     const table = pmConfig.tasksTable || "pm_tasks";
     const fields = pmConfig.taskFields || {};
-    const equipmentCol = fields.equipment || "equipment";
-    if (!db) return null;
-    const rows = await db.select(table, { where: { [equipmentCol]: equipmentName }, order: fields.taskNo || "task_no" });
+    const filterCol = fields.filterColumn || fields.nameEn || "name_en";
+    if (!db || !nameEn) return null;
+    const rows = await db.select(table, { where: { [filterCol]: nameEn }, order: fields.taskNo || "task_no" });
     if (!rows || !rows.length) return null;
     return rows.map((row) => ({
       taskNo: row[fields.taskNo] || row.task_no,
       taskName: row[fields.taskName] || row.task_name,
-      equipmentName: row[fields.equipment] || row.equipment || equipmentName,
+      equipmentName: row[fields.nameEn] || row.name_en || nameEn,
       itemGroup: row[fields.itemGroup] || row.item_group,
       itemTask: row[fields.itemTask] || row.item_task,
       frequency: row[fields.frequency] || row.frequency,
@@ -240,14 +240,16 @@
     const recordType = row[col("recordType", "record_type")] || "generated";
     const itemCode = row[col("itemCode", "item_code")] || "";
     const machine = getMachineByCode(itemCode) || {};
-    let taskProgress = {};
-    let taskValidation = {};
-    try { taskProgress = JSON.parse(row[col("taskProgress", "task_progress")] || "{}"); } catch (e) {}
-    try { taskValidation = JSON.parse(row[col("taskValidation", "task_validation")] || "{}"); } catch (e) {}
+    const parseList = (value) => {
+      let parsed;
+      try { parsed = JSON.parse(value || "[]"); } catch (e) { return []; }
+      return Array.isArray(parsed) ? parsed : [];
+    };
     return {
       id: row[col("id", "id")],
       _type: recordType === "manual" ? "manual" : "generated",
       itemCode,
+      nameEn: row[col("nameEn", "name_en")] || "",
       equipment: machine.equipment || itemCode,
       plant: row[col("plant", "plant")] || machine.plant || "",
       section: machine.section || "",
@@ -257,8 +259,8 @@
       technician: row[col("technician", "technician")] || [],
       notes: row[col("notes", "notes")] || "",
       assignedTeam: row[col("pic", "pic")] || [],
-      taskProgress,
-      taskValidation
+      taskProgress: parseList(row[col("taskProgress", "task_progress")]),
+      taskValidation: parseList(row[col("taskValidation", "task_validation")])
     };
   };
 
@@ -313,12 +315,22 @@
     const monthWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
     let rows = await db.select(recordsTable, { where: monthWhere });
     const existing = new Set(rows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
+    const supabaseConfig = window.SAMHO_SUPABASE || {};
+    const mi = supabaseConfig.machineInfo || {};
+    const generatedRows = computeGeneratedRows();
+    const miCodes = [...new Set(generatedRows.map((g) => g.itemCode))];
+    let miRows = [];
+    try {
+      miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
+    } catch (e) {}
+    const miNameByCode = new Map(miRows.map((r) => [r[mi.codeColumn || "ITEM_CODE"], r.name_en || r.NAME_EN || ""]));
     let inserted = 0;
-    for (const g of computeGeneratedRows()) {
+    for (const g of generatedRows) {
       const key = `${g.itemCode}::${g.dueDate}`;
       if (existing.has(key)) continue;
       await apiInsert({
         [col("itemCode", "item_code")]: g.itemCode,
+        [col("nameEn", "name_en")]: miNameByCode.get(g.itemCode) || "",
         [col("plant", "plant")]: g.plant,
         [col("pic", "pic")]: [...config.defaultTeam],
         [col("status", "status")]: "pending",
@@ -329,23 +341,34 @@
       inserted++;
     }
     if (inserted) rows = await db.select(recordsTable, { where: monthWhere });
+    for (const r of rows) {
+      const code = r[col("itemCode", "item_code")] || "";
+      if (code && !(r[col("nameEn", "name_en")] || "")) {
+        const nameEn = miNameByCode.get(code) || "";
+        if (nameEn) {
+          await apiUpdate(r[col("id", "id")], { [col("nameEn", "name_en")]: nameEn });
+          r[col("nameEn", "name_en")] = nameEn;
+        }
+      }
+    }
     currentRecords = rows.map(rowToRecord);
     return currentRecords;
   };
 
   const openTaskModal = async (record) => {
-    const equipmentName = record?.equipmentName || "";
+    const nameEn = record?.nameEn || "";
     let tasks = null;
-    if (equipmentName) {
+    if (nameEn) {
       try {
-        tasks = await fetchTasks(equipmentName);
+        tasks = await fetchTasks(nameEn);
       } catch (e) {
+        console.error("fetchTasks failed:", e);
         setStatusMsg("pmScheduleStatus", "Could not load the task checklist from pm_tasks.", "error");
       }
     }
-    if (!tasks || !tasks.length) tasks = taskCatalog[equipmentName] || null;
     if (!tasks || !tasks.length) {
-      setStatusMsg("pmScheduleStatus", "No task catalog found for this equipment.", "warning");
+      console.warn("No task catalog for name_en:", nameEn);
+      setStatusMsg("pmScheduleStatus", "No task catalog found for this machine.", "warning");
       return;
     }
     const container = document.getElementById("pmTaskChecklist");
@@ -353,12 +376,12 @@
     const progressEl = document.getElementById("pmTaskProgress");
 
     if (!container || !title || !progressEl) return;
-    const prog = record?.taskProgress || {};
-    const val = record?.taskValidation || {};
+    const prog = record?.taskProgress || [];
+    const val = record?.taskValidation || [];
     title.textContent = `Task Checklist - ${tasks[0].equipmentName}`;
     container.innerHTML = tasks.map((t) => {
-      const doneChecked = prog[t.taskNo] || false;
-      const valChecked = val[t.taskNo] || false;
+      const doneChecked = prog.includes(t.taskNo);
+      const valChecked = val.includes(t.taskNo);
       const steps = (t.taskDetail || "").split("\n").filter(Boolean);
       const doneCls = doneChecked ? " done" : "";
       const valCls = valChecked ? " validated" : "";
@@ -400,12 +423,13 @@
       cb.addEventListener("change", async () => {
         const tn = cb.dataset.taskNo;
         if (!tn || !record) return;
-        const next = { ...record.taskProgress };
-        if (cb.checked) next[tn] = true; else delete next[tn];
+        const next = new Set(record.taskProgress || []);
+        if (cb.checked) next.add(tn); else next.delete(tn);
+        const arr = [...next];
         cb.disabled = true;
         try {
-          await apiUpdate(record.id, { [col("taskProgress", "task_progress")]: JSON.stringify(next) });
-          record.taskProgress = next;
+          await apiUpdate(record.id, { [col("taskProgress", "task_progress")]: JSON.stringify(arr) });
+          record.taskProgress = arr;
           cb.closest(".task-card").classList.toggle("done", cb.checked);
         } catch (e) {
           cb.checked = !cb.checked;
@@ -421,12 +445,13 @@
       cb.addEventListener("change", async () => {
         const tn = cb.dataset.taskNo;
         if (!tn || !record) return;
-        const next = { ...record.taskValidation };
-        if (cb.checked) next[tn] = true; else delete next[tn];
+        const next = new Set(record.taskValidation || []);
+        if (cb.checked) next.add(tn); else next.delete(tn);
+        const arr = [...next];
         cb.disabled = true;
         try {
-          await apiUpdate(record.id, { [col("taskValidation", "task_validation")]: JSON.stringify(next) });
-          record.taskValidation = next;
+          await apiUpdate(record.id, { [col("taskValidation", "task_validation")]: JSON.stringify(arr) });
+          record.taskValidation = arr;
           cb.closest(".task-val-check").classList.toggle("checked", cb.checked);
           const total = container.querySelectorAll(".val-cb").length;
           const checked = container.querySelectorAll(".val-cb:checked").length;
@@ -628,8 +653,12 @@
         setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
         return false;
       }
+      const supabaseConfig = window.SAMHO_SUPABASE || {};
+      const mi = supabaseConfig.machineInfo || {};
+      const machineRow = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: itemCode } });
       await apiInsert({
         [col("itemCode", "item_code")]: machine.itemCode,
+        [col("nameEn", "name_en")]: (machineRow && (machineRow.name_en || machineRow.NAME_EN)) || machine.equipment,
         [col("equipment", "equipment")]: machine.equipment,
         [col("plant", "plant")]: machine.plant,
         [col("section", "section")]: machine.section,
@@ -674,7 +703,11 @@
         [col("pic", "pic")]: team
       };
       if (machine) {
+        const supabaseConfig = window.SAMHO_SUPABASE || {};
+        const mi = supabaseConfig.machineInfo || {};
+        const machineRow = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: itemCode } });
         payload[col("itemCode", "item_code")] = machine.itemCode;
+        payload[col("nameEn", "name_en")] = (machineRow && (machineRow.name_en || machineRow.NAME_EN)) || machine.equipment;
         payload[col("equipment", "equipment")] = machine.equipment;
         payload[col("plant", "plant")] = machine.plant;
         payload[col("section", "section")] = machine.section;
