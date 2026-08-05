@@ -139,7 +139,8 @@ window.SAMHO_SUPABASE = {
     tasksTable: "pm_tasks",
     taskFields: {
       equipment: "equipment",
-      machineName: "machine_name",
+      nameEn: "name_en",
+      filterColumn: "name_en",
       taskNo: "task_no",
       taskName: "task_name",
       itemGroup: "item_group",
@@ -152,6 +153,7 @@ window.SAMHO_SUPABASE = {
       fieldMap: {
         id: "id",
         itemCode: "item_code",
+        nameEn: "name_en",
         plant: "plant",
         pic: "pic",
         status: "status",
