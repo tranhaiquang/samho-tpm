@@ -75,6 +75,7 @@
               <i data-lucide="calendar-check"></i>
               <h1>Lịch Bảo Trì / PM Schedule</h1>
             </div>
+            <button class="btn primary" id="pmAddButton" type="button"><i data-lucide="plus"></i>New PM</button>
           </div>
         </div>
 
@@ -108,9 +109,9 @@
                       <th>ITEM CODE</th>
                       <th>Plant</th>
                       <th>Due Date</th>
-                      <th>Team</th>
+                      <th>PIC</th>
                       <th>Status</th>
-                      <th></th>
+                      <th>Checklist</th>
                     </tr>
                   </thead>
                   <tbody id="pmScheduleList"><tr><td colspan="7">Loading PM schedule...</td></tr></tbody>
@@ -169,13 +170,17 @@
           <button class="repair-modal-close" type="button" data-close-pm-form aria-label="Close"><i data-lucide="x"></i></button>
         </header>
         <div class="repair-modal-grid">
-          <label><span>Machine</span>
-            <select id="pmFormMachine" required>
-              <option value="">-- Select machine --</option>
-            </select>
+          <label><span>Item Code</span>
+            <div class="pm-code-search">
+              <input id="pmFormItemCode" type="text" placeholder="Enter item code" required />
+              <button class="btn success" id="pmFormSearchBtn" type="button"><i data-lucide="search"></i>Search</button>
+            </div>
+            <p class="search-status pm-form-search-status" id="pmFormSearchStatus" aria-live="polite"></p>
           </label>
+          <label><span>Machine Name</span><input id="pmFormNameEn" type="text" disabled /></label>
+          <label><span>Plant</span><input id="pmFormPlant" type="text" disabled /></label>
           <label><span>Due Date</span><input id="pmFormDueDate" type="date" required /></label>
-          <label><span>Assigned Team</span>
+          <label><span>PIC / Assigned Team</span>
             <div class="mechanic-picker" id="pmFormTeamPicker">
               <div class="mechanic-chip-list" id="pmFormTeamChips"></div>
               <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" />
@@ -205,8 +210,7 @@
         </header>
         <div class="task-checklist" id="pmTaskChecklist"></div>
         <footer class="repair-modal-footer">
-          <button class="btn primary" id="pmApproveBtn" type="button" hidden>Xác Nhận</button>
-          <button class="btn muted" type="button" data-close-pm-task>Close</button>
+          <button class="btn primary" id="pmApproveBtn" type="button" disabled>Xác Nhận</button>
         </footer>
       </div>
     </div>

@@ -65,6 +65,21 @@
     return "ĐANG CHỜ";
   };
   const statusClass = { pending: "status-pending", completed: "status-completed", validated: "status-validated" };
+
+  const syncStatusView = (rec) => {
+    const st = getStatus(rec);
+    const cls = statusClass[st];
+    const lbl = statusLabel(st);
+    const btn = document.querySelector(`.pm-viewtask-btn[data-id="${rec.id}"]`);
+    if (btn) {
+      const row = btn.closest("tr");
+      const cell = row && row.querySelector(".pm-status-select");
+      if (cell) { cell.className = `pm-status-select ${cls}`; cell.textContent = lbl; }
+    }
+    renderStats(currentRecords);
+    renderCalendar(currentRecords);
+  };
+
   const freqLabel = (f) => {
     if (f === "Tháng") return "M";
     if (f === "Tuần") return "W";
@@ -431,6 +446,18 @@
           await apiUpdate(record.id, { [col("taskProgress", "task_progress")]: JSON.stringify(arr) });
           record.taskProgress = arr;
           cb.closest(".task-card").classList.toggle("done", cb.checked);
+          const total = container.querySelectorAll(".done-cb").length;
+          const done = container.querySelectorAll(".done-cb:checked").length;
+          if (total && done === total) {
+            if (record.status !== "completed") {
+              await apiUpdate(record.id, { [col("status", "status")]: "completed" });
+              record.status = "completed";
+            }
+          } else if (record.status !== "pending") {
+            await apiUpdate(record.id, { [col("status", "status")]: "pending" });
+            record.status = "pending";
+          }
+          syncStatusView(record);
         } catch (e) {
           cb.checked = !cb.checked;
           setStatusMsg("pmScheduleStatus", friendlyError(e, "save task progress"), "error");
@@ -455,10 +482,16 @@
           cb.closest(".task-val-check").classList.toggle("checked", cb.checked);
           const total = container.querySelectorAll(".val-cb").length;
           const checked = container.querySelectorAll(".val-cb:checked").length;
-          if (total && checked === total && record.status !== "validated") {
-            await apiUpdate(record.id, { [col("status", "status")]: "validated" });
-            record.status = "validated";
+          if (total && checked === total) {
+            if (record.status !== "validated") {
+              await apiUpdate(record.id, { [col("status", "status")]: "validated" });
+              record.status = "validated";
+            }
+          } else if (record.status !== "pending") {
+            await apiUpdate(record.id, { [col("status", "status")]: "pending" });
+            record.status = "pending";
           }
+          syncStatusView(record);
         } catch (e) {
           cb.checked = !cb.checked;
           setStatusMsg("pmScheduleStatus", friendlyError(e, "save validation"), "error");
@@ -475,9 +508,15 @@
     const approveBtn = document.getElementById("pmApproveBtn");
     if (approveBtn) {
       const st = record ? getStatus(record) : "pending";
-      approveBtn.hidden = !(isValidator && st !== "validated");
+      approveBtn.disabled = !(isValidator && st !== "validated");
       approveBtn.onclick = async () => {
         try {
+          const allVal = container.querySelectorAll(".val-cb");
+          const checkedVal = container.querySelectorAll(".val-cb:checked");
+          if (!allVal.length || checkedVal.length !== allVal.length) {
+            setStatusMsg("pmScheduleStatus", "Check all tasks before confirming.", "warning");
+            return;
+          }
           await apiUpdate(record.id, { [col("status", "status")]: "validated" });
           record.status = "validated";
           modal.classList.remove("active");
@@ -551,18 +590,15 @@
       const lbl = statusLabel(st);
       return `<tr class="${cls}">
         <td>${start + i + 1}</td>
-        <td><strong>${r.itemCode}</strong><br /><small>${r.section}</small></td>
+        <td><strong>${r.itemCode}</strong><br />${r.nameEn || ""}<br /><small>${r.section}</small></td>
         <td>${r.plant}</td>
         <td>${formatDate(r.dueDate)}</td>
         <td>${r.assignedTeam?.join(", ") || ""}</td>
-        <td>${st === "validated" ? `<span class="pm-status-text ${cls}">${lbl}</span>` : `<select class="pm-status-select ${cls}" data-id="${r.id}">
-          <option value="pending" ${st === "pending" ? "selected" : ""}>ĐANG CHỜ</option>
-          <option value="completed" ${st === "completed" ? "selected" : ""}>HOÀN THÀNH</option>
-        </select>`}</td>
+        <td><span class="pm-status-select ${cls}">${lbl}</span></td>
         <td class="pm-actions">
           <button class="info-search control-icon-button pm-viewtask-btn" data-id="${r.id}" type="button" title="View Task"><i data-lucide="clipboard-list"></i></button>
-          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="Edit"><i data-lucide="pencil"></i></button>
-          <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="Delete"><i data-lucide="trash-2"></i></button>` : ""}
+          <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="Delete"><i data-lucide="trash-2"></i></button>
+          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="Edit"><i data-lucide="pencil"></i></button>` : ""}
         </td>
       </tr>`;
     }).join("");
@@ -570,9 +606,6 @@
     summary.textContent = `${filtered.length} schedule(s)`;
     renderSchedulePagination(totalPages);
 
-    tbody.querySelectorAll(".pm-status-select").forEach((sel) => {
-      sel.addEventListener("change", () => updateStatus(sel.dataset.id, sel.value));
-    });
     tbody.querySelectorAll(".pm-viewtask-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const rec = currentRecords.find((r) => r.id === btn.dataset.id);
@@ -588,18 +621,6 @@
 
     lucideIcons();
     window.SAMHO_LOADING?.hide();
-  };
-
-  const updateStatus = async (id, value) => {
-    const record = currentRecords.find((r) => r.id === id);
-    if (!record) return;
-    try {
-      await apiUpdate(id, { [col("status", "status")]: value });
-    } catch (e) {
-      setStatusMsg("pmScheduleStatus", friendlyError(e, "update this record"), "error");
-      return;
-    }
-    await renderScheduleTab();
   };
 
   const openCompleteModal = (id) => {
@@ -632,36 +653,80 @@
     }
   };
 
+  const setCurrentUserName = () => {
+    const user = window.SAMHO_AUTH?.currentUser?.();
+    return String(user?.user_metadata?.display_name || "").trim() ||
+      String(window.SAMHO_AUTH?.currentUserId?.() || "").trim();
+  };
+
   const openCreateModal = () => {
     document.getElementById("pmFormTitle").textContent = "Thêm PM / Create PM";
-    const select = document.getElementById("pmFormMachine");
-    select.innerHTML = '<option value="">-- Select machine --</option>' +
-      config.machines.map((m) => `<option value="${m.itemCode}">${m.equipment} (${m.itemCode})</option>`).join("");
-    select.value = "";
+    setValue("pmFormItemCode", "");
+    setValue("pmFormNameEn", "");
+    setValue("pmFormPlant", "");
+    setStatusMsg("pmFormSearchStatus", "", "idle");
     setValue("pmFormDueDate", addDays(today, config.defaultIntervalDays));
-    renderMechanicSelection("pmFormTeam", "pmFormTeamChips", [...config.defaultTeam]);
+    const name = setCurrentUserName();
+    renderMechanicSelection("pmFormTeam", "pmFormTeamChips", name ? [name] : [...config.defaultTeam]);
     document.getElementById("pmForm").dataset.editId = "";
     document.getElementById("pmFormModal").classList.add("active");
   };
 
-  const createPM = async (itemCode, dueDate, team) => {
-    const machine = getMachineByCode(itemCode);
-    if (!machine) return false;
+  const clearPmCodeSearch = () => {
+    document.getElementById("pmForm").dataset.codeData = "";
+    setValue("pmFormNameEn", "");
+    setValue("pmFormPlant", "");
+    setStatusMsg("pmFormSearchStatus", "", "idle");
+  };
+
+  const searchPmCode = async () => {
+    const code = getValue("pmFormItemCode").toUpperCase();
+    const btn = document.getElementById("pmFormSearchBtn");
+    if (!code) { setStatusMsg("pmFormSearchStatus", "Enter an item code first.", "warning"); return; }
+    btn.disabled = true;
     try {
-      const existing = await apiFindByCodeAndDate(itemCode, dueDate);
+      const supabaseConfig = window.SAMHO_SUPABASE || {};
+      const mi = supabaseConfig.machineInfo || {};
+      const table = mi.table || "machine_info";
+      const codeCol = mi.codeColumn || "ITEM_CODE";
+      let row = await db.getOne(table, { where: { [codeCol]: code } });
+      if (!row) row = await db.getOne(table, { where: { [codeCol]: { op: "ilike", value: `*${code}*` } } });
+      if (!row) {
+        clearPmCodeSearch();
+        setStatusMsg("pmFormSearchStatus", "No machine found for this code.", "warning");
+        return;
+      }
+      document.getElementById("pmForm").dataset.searchData = JSON.stringify({
+        itemCode: row[codeCol] || code,
+        nameEn: row.name_en || row.NAME_EN || "",
+        plant: row.plant || row.PLANT || ""
+      });
+      setValue("pmFormNameEn", row.name_en || row.NAME_EN || "");
+      setValue("pmFormPlant", row.plant || row.PLANT || "");
+      setStatusMsg("pmFormSearchStatus", "Machine loaded.", "success");
+    } catch (e) {
+      setStatusMsg("pmFormSearchStatus", db.friendly(e, "search this code"), "error");
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  const createPM = async (itemCode, dueDate, team) => {
+    const searchData = JSON.parse((document.getElementById("pmForm").dataset.searchData || "{}"));
+    const code = itemCode || searchData.itemCode;
+    if (!code) { setStatusMsg("pmFormStatus", "Search and load a machine first.", "warning"); return false; }
+    try {
+      const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length) {
         setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
         return false;
       }
-      const supabaseConfig = window.SAMHO_SUPABASE || {};
-      const mi = supabaseConfig.machineInfo || {};
-      const machineRow = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: itemCode } });
       await apiInsert({
-        [col("itemCode", "item_code")]: machine.itemCode,
-        [col("nameEn", "name_en")]: (machineRow && (machineRow.name_en || machineRow.NAME_EN)) || machine.equipment,
-        [col("equipment", "equipment")]: machine.equipment,
-        [col("plant", "plant")]: machine.plant,
-        [col("section", "section")]: machine.section,
+        [col("itemCode", "item_code")]: code,
+        [col("nameEn", "name_en")]: searchData.nameEn || "",
+        [col("equipment", "equipment")]: searchData.nameEn || "",
+        [col("plant", "plant")]: searchData.plant || "",
+        [col("section", "section")]: "",
         [col("pic", "pic")]: team,
         [col("status", "status")]: "pending",
         [col("dueDate", "due_date")]: dueDate,
@@ -678,10 +743,15 @@
     const rec = currentRecords.find((r) => r.id === id);
     if (!rec || rec.status === "completed" || rec.status === "validated") return;
     document.getElementById("pmFormTitle").textContent = "Sửa PM / Edit PM";
-    const select = document.getElementById("pmFormMachine");
-    select.innerHTML = '<option value="">-- Select machine --</option>' +
-      config.machines.map((m) => `<option value="${m.itemCode}">${m.equipment} (${m.itemCode})</option>`).join("");
-    select.value = rec.itemCode;
+    setValue("pmFormItemCode", rec.itemCode);
+    document.getElementById("pmForm").dataset.searchData = JSON.stringify({
+      itemCode: rec.itemCode,
+      nameEn: rec.nameEn || "",
+      plant: rec.plant || ""
+    });
+    setValue("pmFormNameEn", rec.nameEn || "");
+    setValue("pmFormPlant", rec.plant || "");
+    setStatusMsg("pmFormSearchStatus", "Machine loaded.", "success");
     setValue("pmFormDueDate", rec.dueDate);
     renderMechanicSelection("pmFormTeam", "pmFormTeamChips", rec.assignedTeam || []);
     document.getElementById("pmForm").dataset.editId = id;
@@ -691,9 +761,10 @@
   const editPM = async (id, itemCode, dueDate, team) => {
     const rec = currentRecords.find((r) => r.id === id);
     if (!rec) return false;
-    const machine = getMachineByCode(itemCode);
+    const searchData = JSON.parse((document.getElementById("pmForm").dataset.searchData || "{}"));
+    const code = itemCode || searchData.itemCode || rec.itemCode;
     try {
-      const existing = await apiFindByCodeAndDate(itemCode, dueDate);
+      const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length && existing[0].id !== id) {
         setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
         return false;
@@ -702,15 +773,11 @@
         [col("dueDate", "due_date")]: dueDate,
         [col("pic", "pic")]: team
       };
-      if (machine) {
-        const supabaseConfig = window.SAMHO_SUPABASE || {};
-        const mi = supabaseConfig.machineInfo || {};
-        const machineRow = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: itemCode } });
-        payload[col("itemCode", "item_code")] = machine.itemCode;
-        payload[col("nameEn", "name_en")] = (machineRow && (machineRow.name_en || machineRow.NAME_EN)) || machine.equipment;
-        payload[col("equipment", "equipment")] = machine.equipment;
-        payload[col("plant", "plant")] = machine.plant;
-        payload[col("section", "section")] = machine.section;
+      if (code && searchData.itemCode) {
+        payload[col("itemCode", "item_code")] = code;
+        payload[col("nameEn", "name_en")] = searchData.nameEn || "";
+        payload[col("equipment", "equipment")] = searchData.nameEn || "";
+        payload[col("plant", "plant")] = searchData.plant || "";
       }
       await apiUpdate(id, payload);
       return true;
@@ -745,12 +812,6 @@
 
     await checkUserRole();
 
-    const machineSelect = document.getElementById("pmFormMachine");
-    if (machineSelect) {
-      machineSelect.innerHTML = '<option value="">-- Select machine --</option>' +
-        config.machines.map((m) => `<option value="${m.itemCode}">${m.equipment} (${m.itemCode})</option>`).join("");
-    }
-
     await renderScheduleTab();
 
     initMechanicPicker("pmCompleteTechnician", "pmCompleteChips", "pmCompleteMechanicSearch", "pmCompleteOptions");
@@ -771,13 +832,21 @@
 
     document.getElementById("pmAddButton")?.addEventListener("click", openCreateModal);
 
+    document.getElementById("pmFormSearchBtn")?.addEventListener("click", searchPmCode);
+    document.getElementById("pmFormItemCode")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); searchPmCode(); }
+    });
+    document.getElementById("pmFormItemCode")?.addEventListener("input", clearPmCodeSearch);
+
     document.getElementById("pmForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const editId = e.target.dataset.editId;
-      const itemCode = getValue("pmFormMachine");
+      const itemCode = getValue("pmFormItemCode");
       const dueDate = getValue("pmFormDueDate");
       const team = getSelectedMechanics("pmFormTeam");
       if (!itemCode || !dueDate) { setStatusMsg("pmFormStatus", "Please fill all fields.", "warning"); return; }
+      const searchData = JSON.parse((e.target.dataset.searchData || "{}"));
+      if (!searchData.itemCode) { setStatusMsg("pmFormStatus", "Search and load the machine first.", "warning"); return; }
       const ok = editId ? await editPM(editId, itemCode, dueDate, team) : await createPM(itemCode, dueDate, team);
       if (ok) {
         document.getElementById("pmFormModal").classList.remove("active");
