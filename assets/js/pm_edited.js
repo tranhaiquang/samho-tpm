@@ -420,7 +420,7 @@
             </div>
             <div class="task-card-sub">${t.itemGroup}${t.itemTask ? " / " + t.itemTask : ""}</div>
             <div class="task-card-steps">
-              <ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
+              <ol>${steps.map((s) => `<li>${s.replace(/^\s*\d+[)\.、]\s*/, "")}</li>`).join("")}</ol>
             </div>
           </div>
         </label>
