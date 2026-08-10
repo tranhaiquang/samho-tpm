@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/styles.css?v=2" />
+    <link rel="stylesheet" href="assets/css/styles_edited.css?v=20260810-1" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js?v=20260805-1" defer></script>
     <script src="assets/js/auth.js" defer></script>
@@ -164,32 +164,63 @@
     <!-- Create/Edit Modal (PID only) -->
     <div class="repair-modal" id="pmFormModal" aria-hidden="true">
       <div class="repair-modal-backdrop" data-close-pm-form></div>
-      <form class="repair-modal-dialog" id="pmForm">
-        <header class="repair-modal-header">
-          <h2 id="pmFormTitle">Thêm PM / Create PM</h2>
+      <form class="repair-modal-dialog pm-form-dialog" id="pmForm">
+        <header class="repair-modal-header pm-form-header">
+          <div class="pm-form-title-wrap">
+            <span class="pm-form-eyebrow"><i data-lucide="calendar-check"></i>PM Maintenance</span>
+            <h2 id="pmFormTitle">Thêm PM / Create PM</h2>
+          </div>
           <button class="repair-modal-close" type="button" data-close-pm-form aria-label="Close"><i data-lucide="x"></i></button>
         </header>
-        <div class="repair-modal-grid">
-          <label><span>Item Code</span>
-            <div class="pm-code-search">
-              <input id="pmFormItemCode" type="text" placeholder="Enter item code" required />
-              <button class="btn success" id="pmFormSearchBtn" type="button"><i data-lucide="search"></i>Search</button>
+
+        <div class="pm-form-sections">
+          <section class="pm-form-section" aria-label="Machine">
+            <div class="pm-form-section-head">
+              <span class="pm-form-step"><i data-lucide="factory"></i></span>
+              <div class="pm-form-section-title"><strong>Máy móc / Machine</strong><small>Search the item code to auto-fill machine info</small></div>
             </div>
-            <p class="search-status pm-form-search-status" id="pmFormSearchStatus" aria-live="polite"></p>
-          </label>
-          <label><span>Machine Name</span><input id="pmFormNameEn" type="text" disabled /></label>
-          <label><span>Plant</span><input id="pmFormPlant" type="text" disabled /></label>
-          <label><span>Due Date</span><input id="pmFormDueDate" type="date" required /></label>
-          <label><span>PIC / Assigned Team</span>
-            <div class="mechanic-picker" id="pmFormTeamPicker">
-              <div class="mechanic-chip-list" id="pmFormTeamChips"></div>
-              <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" />
-              <div class="mechanic-options" id="pmFormTeamOptions" role="listbox" hidden></div>
+            <div class="repair-modal-grid pm-form-grid">
+              <label class="pm-form-span2"><span>Item Code</span>
+                <div class="pm-code-search">
+                  <input id="pmFormItemCode" type="text" placeholder="Enter item code" required />
+                  <button class="btn success" id="pmFormSearchBtn" type="button"><i data-lucide="search"></i>Search</button>
+                </div>
+                <p class="search-status pm-form-search-status" id="pmFormSearchStatus" aria-live="polite"></p>
+              </label>
+              <label><span>Machine Name</span><input id="pmFormNameEn" type="text" disabled /></label>
+              <label><span>Plant</span><input id="pmFormPlant" type="text" disabled /></label>
             </div>
-            <input id="pmFormTeam" type="hidden" />
-          </label>
+          </section>
+
+          <section class="pm-form-section" aria-label="Schedule">
+            <div class="pm-form-section-head">
+              <span class="pm-form-step"><i data-lucide="calendar-days"></i></span>
+              <div class="pm-form-section-title"><strong>Lịch / Schedule</strong><small>Pick the maintenance due date</small></div>
+            </div>
+            <div class="repair-modal-grid pm-form-grid">
+              <label><span>Due Date</span><input id="pmFormDueDate" type="date" required /></label>
+            </div>
+          </section>
+
+          <section class="pm-form-section" aria-label="Team">
+            <div class="pm-form-section-head">
+              <span class="pm-form-step"><i data-lucide="users"></i></span>
+              <div class="pm-form-section-title"><strong>Đội ngũ / Team</strong><small>Assigned PIC who will carry out the PM</small></div>
+            </div>
+            <div class="repair-modal-grid pm-form-grid">
+              <label class="pm-form-span2"><span>PIC / Assigned Team</span>
+                <div class="mechanic-picker" id="pmFormTeamPicker">
+                  <div class="mechanic-chip-list" id="pmFormTeamChips"></div>
+                  <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" />
+                  <div class="mechanic-options" id="pmFormTeamOptions" role="listbox" hidden></div>
+                </div>
+                <input id="pmFormTeam" type="hidden" />
+              </label>
+            </div>
+          </section>
         </div>
-        <footer class="repair-modal-footer">
+
+        <footer class="repair-modal-footer pm-form-footer">
           <p class="repair-modal-status" id="pmFormStatus" aria-live="polite"></p>
           <button class="btn muted" type="button" data-close-pm-form>Cancel</button>
           <button class="save" id="pmFormSave" type="submit"><i data-lucide="save"></i>Save</button>
