@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activePlant = "";
   let activeFromDate = "";
   let activeToDate = "";
+  let lastRows = [];
   const plantFilterMap = { C2B: ["PLANT A", "PLANT B"], OS: ["PLANT H"], SF: ["PLANT E"], Treatment: ["PLANT D", "PLANT I"] };
 
   const text = (id, value) => {
@@ -240,6 +241,161 @@ document.addEventListener("DOMContentLoaded", () => {
     return Array.from(groups.values()).sort((a, b) => b.total - a.total);
   };
 
+  const escapeHtml = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+
+  const closeParetoModal = () => {
+    document.getElementById("paretoModal")?.classList.remove("active");
+  };
+
+  const openParetoModal = (section) => {
+    const modal = ensureParetoModal();
+    const sectionRows = lastRows.filter((row) => row.section === section);
+    const reasons = buildReasonBuckets(sectionRows);
+    const total = reasons.reduce((sum, bucket) => sum + bucket.total, 0);
+    const count = reasons.reduce((sum, bucket) => sum + bucket.count, 0);
+
+    modal.querySelector("#paretoTitle").textContent = `${section} — Pareto nguyên nhân / Reason Pareto`;
+    modal.querySelector("#paretoSubtitle").textContent = `${formatNumber(total)} min · ${formatNumber(count)} sự cố / failures`;
+    renderParetoChart(modal, reasons);
+    if (window.lucide) window.lucide.createIcons();
+    modal.classList.add("active");
+    modal.querySelector(".repair-modal-close")?.focus();
+  };
+
+  const buildReasonBuckets = (rows) => {
+    const groups = new Map();
+    rows.forEach((row) => {
+      const raw = String(readField(row.raw, "reason") || "").trim();
+      if (!raw) return;
+      const key = raw.toLowerCase().replace(/\s+/g, " ");
+      const group = groups.get(key) || { key, total: 0, count: 0, variants: new Map() };
+      group.total += row.downtime;
+      group.count += 1;
+      group.variants.set(raw, (group.variants.get(raw) || 0) + 1);
+      groups.set(key, group);
+    });
+
+    return Array.from(groups.values())
+      .map((group) => {
+        let label = group.raw;
+        let best = 0;
+        group.variants.forEach((count, text) => {
+          if (count > best) {
+            best = count;
+            label = text;
+          }
+        });
+        return { label, total: group.total, count: group.count };
+      })
+      .sort((a, b) => b.total - a.total);
+  };
+
+  const FULL_PARETO_BARS = 8;
+
+  const renderParetoChart = (modal, buckets) => {
+    const container = modal.querySelector("#paretoChart");
+    if (!container) return;
+
+    if (!buckets.length) {
+      container.innerHTML = `<p class="kpi-empty">Không có dữ liệu nguyên nhân / No reason data.</p>`;
+      return;
+    }
+
+    const top = buckets.slice(0, FULL_PARETO_BARS);
+    const rest = buckets.slice(FULL_PARETO_BARS);
+    if (rest.length) {
+      top.push({
+        label: "Khác / Others",
+        total: rest.reduce((sum, bucket) => sum + bucket.total, 0),
+        count: rest.reduce((sum, bucket) => sum + bucket.count, 0),
+        others: true
+      });
+    }
+
+    const total = top.reduce((sum, bucket) => sum + bucket.total, 0) || 1;
+    const max = Math.max(...top.map((bucket) => bucket.total), 1);
+
+    let running = 0;
+    const plotted = top.map((bucket) => {
+      running += bucket.total / total;
+      return {
+        ...bucket,
+        height: Math.max((bucket.total / max) * 100, bucket.total > 0 ? 4 : 0),
+        sharePct: Math.min(running * 100, 100)
+      };
+    });
+
+    const barCount = plotted.length;
+    const linePoints = plotted.map((bucket, index) => `${((index + 0.5) / barCount) * 100},${100 - bucket.sharePct}`).join(" ");
+
+    const bars = plotted
+      .map(
+        (bucket) => `
+          <div class="pareto-bar${bucket.others ? " others" : ""}" style="--h:${bucket.height}%">
+            <b title="${escapeHtml(bucket.label)} · ${formatNumber(bucket.count)} failures"></b>
+            <span class="pareto-value">${formatNumber(bucket.total)}</span>
+            <label>${escapeHtml(bucket.label.length > 28 ? `${bucket.label.slice(0, 28)}…` : bucket.label)}</label>
+          </div>
+        `
+      )
+      .join("");
+
+    container.innerHTML = `
+      <div class="pareto-layout">
+        <div class="pareto-plot">
+          <div class="pareto-bars" style="--cols:${barCount}">${bars}</div>
+          <svg class="pareto-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <line class="pareto-ref" x1="0" y1="20" x2="100" y2="20"></line>
+            <polyline class="pareto-cumline" points="${linePoints}"></polyline>
+          </svg>
+        </div>
+        <div class="pareto-axis">
+          <span>100%</span>
+          <span>75%</span>
+          <span>50%</span>
+          <span>25%</span>
+          <span>0%</span>
+        </div>
+      </div>
+    `;
+  };
+
+  const ensureParetoModal = () => {
+    let modal = document.getElementById("paretoModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.className = "repair-modal pareto-modal";
+    modal.id = "paretoModal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.innerHTML = `
+      <div class="repair-modal-backdrop" data-close-pareto></div>
+      <div class="repair-modal-dialog repair-modal-dialog-wide" aria-labelledby="paretoTitle">
+        <header class="repair-modal-header">
+          <div>
+            <span id="paretoEyebrow">Phân tích downtime / Downtime analysis</span>
+            <h2 id="paretoTitle"></h2>
+          </div>
+          <button class="repair-modal-close" type="button" data-close-pareto aria-label="Close">
+            <i data-lucide="x"></i>
+          </button>
+        </header>
+        <p class="repair-modal-note pareto-subtitle" id="paretoSubtitle"></p>
+        <div id="paretoChart"></div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.querySelectorAll("[data-close-pareto]").forEach((button) => {
+      button.addEventListener("click", () => modal.classList.remove("active"));
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+    return modal;
+  };
+
   const renderRankList = (items) => {
     const container = document.getElementById("sectionRankList");
     if (!container) return;
@@ -250,18 +406,30 @@ document.addEventListener("DOMContentLoaded", () => {
       top
         .map(
           (item, index) => `
-            <div class="rank-row">
+            <div class="rank-row" data-section="${escapeHtml(item.label)}" role="button" tabindex="0" aria-label="View reason Pareto for ${escapeHtml(item.label)}">
               <span>${index + 1}</span>
               <div>
-                <strong>${item.label}</strong>
+                <strong>${escapeHtml(item.label)}</strong>
                 <small>${item.count} failures</small>
                 <b style="--w: ${Math.max((item.total / max) * 100, 4)}%"></b>
               </div>
               <em>${formatNumber(item.total)} min</em>
+              <i data-lucide="chevron-right" class="rank-hint"></i>
             </div>
           `
         )
         .join("") || `<p class="kpi-empty">No downtime records found.</p>`;
+
+    container.querySelectorAll(".rank-row").forEach((row) => {
+      row.addEventListener("click", () => openParetoModal(row.dataset.section));
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openParetoModal(row.dataset.section);
+        }
+      });
+    });
+    if (window.lucide) window.lucide.createIcons();
   };
 
   const renderMachineBars = (items) => {
@@ -395,12 +563,14 @@ document.addEventListener("DOMContentLoaded", () => {
           mtbf: toNumber(readField(row, "mtbf")),
           itemCode: readField(row, "itemCode") || "Unknown machine",
           machineName: readField(row, "machineName") || readField(row, "itemCode") || "Unknown machine",
-          section: readField(row, "section") || "Unknown section",
+          section: readField(row, "section") || "Unknown",
           plant: readField(row, "plant") || "Unknown plant",
           month
         };
       })
       .sort((a, b) => a.month.order - b.month.order || b.downtime - a.downtime);
+
+    lastRows = rows;
 
     const totalDowntime = rows.reduce((sum, row) => sum + row.downtime, 0);
     const rowCount = rows.length;
@@ -478,6 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      closeParetoModal();
       setStatus("Loading downtime data...", "idle");
       window.SAMHO_LOADING.show("Loading dashboard data...");
       const rows = await getRows(monthValue, plantValue);
@@ -683,5 +854,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initDateFilter();
   initPlantFilter();
   initMonthFilter();
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    closeParetoModal();
+  });
+
   fetchAndRender(activeMonth, activePlant);
 });

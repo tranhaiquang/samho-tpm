@@ -3895,9 +3895,37 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 
 .rank-row {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
+}
+
+.rank-row[role="button"] {
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  transition: background-color 0.15s;
+}
+
+.rank-row[role="button"]:hover {
+  background: #eef4ff;
+}
+
+.rank-row[role="button"]:focus-visible {
+  outline: 2px solid #1769ff;
+  outline-offset: 2px;
+}
+
+.rank-row .rank-hint {
+  width: 16px;
+  height: 16px;
+  color: #1769ff;
+  transition: translate 0.15s;
+}
+
+.rank-row[role="button"]:hover .rank-hint {
+  translate: 2px 0;
 }
 
 .rank-row > span {
@@ -5112,4 +5140,128 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   .pm-form-grid .pm-form-span2 {
     grid-column: auto;
   }
+}
+
+/* Pareto reason drill-down modal */
+.pareto-modal .repair-modal-dialog-wide {
+  width: 95%;
+  max-width: 860px;
+}
+
+.pareto-subtitle {
+  margin: 6px 0 0;
+  color: #667085;
+  font-weight: 700;
+}
+
+.pareto-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pareto-plot {
+  position: relative;
+  min-height: 250px;
+  padding: 26px 8px 34px;
+  background-image: repeating-linear-gradient(to bottom, #e7edf6 0 1px, transparent 1px 25%);
+}
+
+.pareto-bars {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  height: 190px;
+}
+
+.pareto-bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 190px;
+}
+
+.pareto-bar b {
+  display: block;
+  flex: 0 0 auto;
+  width: min(36px, 70%);
+  height: var(--h);
+  min-height: 4px;
+  background: linear-gradient(180deg, #1769ff, #9bc7ff);
+  border-radius: 6px 6px 2px 2px;
+}
+
+.pareto-bar.others b {
+  background: linear-gradient(180deg, #98a2b3, #cbd5e1);
+}
+
+.pareto-value {
+  position: absolute;
+  bottom: calc(var(--h) + 6px);
+  left: 50%;
+  translate: -50% 0;
+  color: #1d2939;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pareto-bar label {
+  position: absolute;
+  top: 100%;
+  margin-top: 6px;
+  left: 0;
+  right: 0;
+  color: #344054;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  word-break: break-word;
+}
+
+.pareto-lines {
+  position: absolute;
+  inset: 26px 8px 34px;
+  z-index: 3;
+  width: calc(100% - 16px);
+  height: calc(100% - 60px);
+  pointer-events: none;
+}
+
+.pareto-lines line,
+.pareto-lines polyline {
+  fill: none;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.pareto-lines .pareto-ref {
+  stroke: #d9364f;
+  stroke-dasharray: 5 4;
+  opacity: 0.6;
+}
+
+.pareto-lines .pareto-cumline {
+  stroke: #ff8a2a;
+}
+
+.pareto-axis {
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  align-items: start;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+  padding-bottom: 34px;
+}
+
+.pareto-axis span {
+  text-align: left;
 }
