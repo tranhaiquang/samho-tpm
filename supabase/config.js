@@ -57,6 +57,7 @@ window.SAMHO_SUPABASE = {
       section: "section",
       plant: "plant",
       totalDowntime: "total_downtime",
+      reason: "reason",
       month: "",
       errorCount: "",
       mttr: "",
