@@ -1,4 +1,111 @@
 (function () {
+  if (window.SAMHO_LANG) {
+    window.SAMHO_LANG.register({
+      "pm.page.title": { vi: "Lịch Bảo Trì", en: "PM Schedule" },
+      "pm.addButton": { vi: "Thêm PM", en: "New PM" },
+      "pm.status.pending": { vi: "ĐANG CHỜ", en: "PENDING" },
+      "pm.status.completed": { vi: "HOÀN THÀNH", en: "COMPLETED" },
+      "pm.status.validated": { vi: "ĐÃ XÁC NHẬN", en: "VALIDATED" },
+      "pm.month.jan": { vi: "Tháng 1", en: "Jan" },
+      "pm.month.feb": { vi: "Tháng 2", en: "Feb" },
+      "pm.month.mar": { vi: "Tháng 3", en: "Mar" },
+      "pm.month.apr": { vi: "Tháng 4", en: "Apr" },
+      "pm.month.may": { vi: "Tháng 5", en: "May" },
+      "pm.month.jun": { vi: "Tháng 6", en: "Jun" },
+      "pm.month.jul": { vi: "Tháng 7", en: "Jul" },
+      "pm.month.aug": { vi: "Tháng 8", en: "Aug" },
+      "pm.month.sep": { vi: "Tháng 9", en: "Sep" },
+      "pm.month.oct": { vi: "Tháng 10", en: "Oct" },
+      "pm.month.nov": { vi: "Tháng 11", en: "Nov" },
+      "pm.month.dec": { vi: "Tháng 12", en: "Dec" },
+      "pm.day.sun": { vi: "CN", en: "Sun" },
+      "pm.day.mon": { vi: "T2", en: "Mon" },
+      "pm.day.tue": { vi: "T3", en: "Tue" },
+      "pm.day.wed": { vi: "T4", en: "Wed" },
+      "pm.day.thu": { vi: "T5", en: "Thu" },
+      "pm.day.fri": { vi: "T6", en: "Fri" },
+      "pm.day.sat": { vi: "T7", en: "Sat" },
+      "pm.calendar.machines": { vi: "{count} máy", en: "{count} machines" },
+      "pm.column.no": { vi: "STT", en: "No." },
+      "pm.column.itemCode": { vi: "MÃ MÁY", en: "ITEM CODE" },
+      "pm.column.plant": { vi: "Nhà máy", en: "Plant" },
+      "pm.column.dueDate": { vi: "Ngày đến hạn", en: "Due Date" },
+      "pm.column.pic": { vi: "PIC", en: "PIC" },
+      "pm.column.status": { vi: "Trạng thái", en: "Status" },
+      "pm.column.checklist": { vi: "Checklist", en: "Checklist" },
+      "pm.loading.schedule": { vi: "Đang tải lịch PM...", en: "Loading PM schedule..." },
+      "pm.schedule.listAria": { vi: "Danh sách lịch PM", en: "PM schedule list" },
+      "pm.pagination.prev": { vi: "Trước", en: "Prev" },
+      "pm.pagination.next": { vi: "Sau", en: "Next" },
+      "pm.pagination.pageInfo": { vi: "Trang {current} / {total}", en: "Page {current} / {total}" },
+      "pm.summary.count": { vi: "{count} lịch", en: "{count} schedule(s)" },
+      "pm.summary.zero": { vi: "0 lịch", en: "0 schedules" },
+      "pm.error.loadSchedules": { vi: "Không thể tải lịch PM.", en: "Unable to load PM schedules." },
+      "pm.error.loadRecords": { vi: "Không thể tải bản ghi PM. {detail}", en: "Unable to load PM records. {detail}" },
+      "pm.empty.noSchedules": { vi: "Không có lịch PM trong tháng này.", en: "No PM schedules found for this month." },
+      "pm.common.close": { vi: "Đóng", en: "Close" },
+      "pm.common.cancel": { vi: "Hủy", en: "Cancel" },
+      "pm.complete.title": { vi: "Xác Nhận PM", en: "Complete PM" },
+      "pm.complete.submit": { vi: "Hoàn thành", en: "Complete" },
+      "pm.complete.selectTechnician": { vi: "Vui lòng chọn thợ sửa chữa.", en: "Please select a technician." },
+      "pm.complete.success": { vi: "Đã hoàn thành PM.", en: "PM completed successfully." },
+      "pm.field.machine": { vi: "Máy", en: "Machine" },
+      "pm.field.dueDate": { vi: "Ngày đến hạn", en: "Due Date" },
+      "pm.field.technician": { vi: "Người sửa chữa", en: "Technician" },
+      "pm.field.notes": { vi: "Ghi chú", en: "Notes" },
+      "pm.field.itemCode": { vi: "Mã máy", en: "Item Code" },
+      "pm.field.machineName": { vi: "Tên máy", en: "Machine Name" },
+      "pm.field.plant": { vi: "Nhà máy", en: "Plant" },
+      "pm.mechanic.placeholder": { vi: "Nhập tên", en: "Type a name" },
+      "pm.mechanic.searchAria": { vi: "Tìm tên thợ", en: "Search mechanic names" },
+      "pm.mechanic.remove": { vi: "Loại bỏ {name}", en: "Remove {name}" },
+      "pm.form.eyebrow": { vi: "Bảo Trì PM", en: "PM Maintenance" },
+      "pm.form.title.create": { vi: "Thêm PM", en: "Create PM" },
+      "pm.form.title.edit": { vi: "Sửa PM", en: "Edit PM" },
+      "pm.form.section.machine": { vi: "Máy móc", en: "Machine" },
+      "pm.form.section.machineTitle": { vi: "Máy móc", en: "Machine" },
+      "pm.form.section.machineHint": { vi: "Tìm mã máy để tự động điền thông tin", en: "Search the item code to auto-fill machine info" },
+      "pm.form.section.schedule": { vi: "Lịch", en: "Schedule" },
+      "pm.form.section.scheduleTitle": { vi: "Lịch", en: "Schedule" },
+      "pm.form.section.scheduleHint": { vi: "Chọn ngày bảo trì đến hạn", en: "Pick the maintenance due date" },
+      "pm.form.section.team": { vi: "Đội ngũ", en: "Team" },
+      "pm.form.section.teamTitle": { vi: "Đội ngũ", en: "Team" },
+      "pm.form.section.teamHint": { vi: "PIC được phân công thực hiện PM", en: "Assigned PIC who will carry out the PM" },
+      "pm.form.itemCodePh": { vi: "Nhập mã máy", en: "Enter item code" },
+      "pm.form.picLabel": { vi: "PIC / Đội ngũ phân công", en: "PIC / Assigned Team" },
+      "pm.form.teamSearchAria": { vi: "Tìm tên thành viên", en: "Search team names" },
+      "pm.form.searchFirst": { vi: "Vui lòng tìm và tải máy trước.", en: "Search and load a machine first." },
+      "pm.form.duplicate": { vi: "Đã tồn tại bản ghi PM cho máy này vào ngày này.", en: "A PM record already exists for this machine on this date." },
+      "pm.form.fillFields": { vi: "Vui lòng điền tất cả các trường.", en: "Please fill all fields." },
+      "pm.search.enterCode": { vi: "Vui lòng nhập mã máy trước.", en: "Enter an item code first." },
+      "pm.search.notFound": { vi: "Không tìm thấy máy với mã này.", en: "No machine found for this code." },
+      "pm.search.loaded": { vi: "Đã tải thông tin máy.", en: "Machine loaded." },
+      "pm.action.searchCode": { vi: "tìm kiếm mã này", en: "search this code" },
+      "pm.action.create": { vi: "tạo bản ghi này", en: "create this record" },
+      "pm.action.update": { vi: "cập nhật bản ghi này", en: "update this record" },
+      "pm.action.deleteRecord": { vi: "xóa bản ghi này", en: "delete this record" },
+      "pm.action.complete": { vi: "hoàn tất bản ghi này", en: "complete this record" },
+      "pm.action.saveTaskProgress": { vi: "lưu tiến độ công việc", en: "save task progress" },
+      "pm.action.saveValidation": { vi: "lưu xác nhận", en: "save validation" },
+      "pm.action.validate": { vi: "xác nhận bản ghi này", en: "validate this record" },
+      "pm.action.viewTask": { vi: "Xem công việc", en: "View Task" },
+      "pm.action.delete": { vi: "Xóa", en: "Delete" },
+      "pm.action.edit": { vi: "Sửa", en: "Edit" },
+      "pm.task.title": { vi: "Checklist công việc", en: "Task Checklist" },
+      "pm.task.titleWith": { vi: "Checklist công việc - {equipment}", en: "Task Checklist - {equipment}" },
+      "pm.task.confirm": { vi: "Xác Nhận", en: "Confirm" },
+      "pm.task.progress": { vi: "Hoàn thành: 0/0", en: "Completed: 0/0" },
+      "pm.task.progressFull": { vi: "Hoàn thành: {done}/{total} • Đã xác nhận: {validated}/{total}", en: "Completed: {done}/{total} • Validated: {validated}/{total}" },
+      "pm.task.loadError": { vi: "Không thể tải checklist công việc từ pm_tasks.", en: "Could not load the task checklist from pm_tasks." },
+      "pm.task.noCatalog": { vi: "Không tìm thấy danh mục công việc cho máy này.", en: "No task catalog found for this machine." },
+      "pm.task.checkAll": { vi: "Vui lòng đánh dấu tất cả công việc trước khi xác nhận.", en: "Check all tasks before confirming." },
+      "pm.task.approveBtn": { vi: "Xác Nhận", en: "Confirm" },
+      "pm.confirm.delete": { vi: "Xóa PM cho {equipment}?", en: "Delete PM for {equipment}?" },
+    });
+  }
+
+  const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
+
   const config = window.SAMHO_SUPABASE.pm;
   if (!config) return;
 
@@ -30,6 +137,7 @@
   let currentRecords = [];
   let isValidator = false;
   let currentUserRole = "viewer";
+  let lastLoadOk = false;
   let calMonth = today.getMonth();
   let calYear = today.getFullYear();
   const scheduleFilter = { plant: "", search: "", status: "" };
@@ -60,9 +168,9 @@
     return "pending";
   };
   const statusLabel = (st) => {
-    if (st === "validated") return "ĐÃ XÁC NHẬN";
-    if (st === "completed") return "HOÀN THÀNH";
-    return "ĐANG CHỜ";
+    if (st === "validated") return t("pm.status.validated");
+    if (st === "completed") return t("pm.status.completed");
+    return t("pm.status.pending");
   };
   const statusClass = { pending: "status-pending", completed: "status-completed", validated: "status-validated" };
 
@@ -104,12 +212,12 @@
     const grid = document.getElementById("pmCalendarGrid");
     const label = document.getElementById("calMonthLabel");
     if (!grid || !label) return;
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    label.textContent = `${months[calMonth]} ${calYear}`;
+    const months = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    label.textContent = `${t(`pm.month.${months[calMonth]}`)} ${calYear}`;
     const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const headerDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-    let html = headerDays.map((d) => `<div class="cal-day-header">${d}</div>`).join("");
+    const headerDays = ["sun","mon","tue","wed","thu","fri","sat"];
+    let html = headerDays.map((d) => `<div class="cal-day-header">${t(`pm.day.${d}`)}</div>`).join("");
     for (let i = 0; i < firstDay; i++) { html += '<div class="cal-day empty"></div>'; }
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
@@ -130,7 +238,7 @@
         label = codes.map((c) => `<span>${c}</span>`).join("");
       } else {
         const sections = [...new Set(dayRecords.map((r) => r.section))];
-        label = `<span class="cal-count-badge">${count} máy</span>`;
+        label = `<span class="cal-count-badge">${t("pm.calendar.machines", { count })}</span>`;
         if (sections.length <= 2) label += sections.map((s) => `<small>${s}</small>`).join("");
       }
       html += `<div class="${cls}"><strong>${d}</strong>${label}</div>`;
@@ -146,7 +254,7 @@
     if (!info || !prevBtn || !nextBtn || !pagination) return;
     if (totalPages <= 1) { pagination.classList.add("sr-only"); return; }
     pagination.classList.remove("sr-only");
-    info.textContent = `Page ${schedulePage + 1} / ${totalPages}`;
+    info.textContent = t("pm.pagination.pageInfo", { current: schedulePage + 1, total: totalPages });
     prevBtn.disabled = schedulePage === 0;
     nextBtn.disabled = schedulePage >= totalPages - 1;
   };
@@ -180,7 +288,7 @@
       rm.className = "mechanic-remove";
       rm.type = "button";
       rm.textContent = "×";
-      rm.setAttribute("aria-label", `Remove ${name}`);
+      rm.setAttribute("aria-label", t("pm.mechanic.remove", { name }));
       rm.addEventListener("click", (e) => { e.stopPropagation(); renderMechanicSelection(hiddenId, chipsId, names.filter((n) => n !== name)); renderMechanicOptions(hiddenId, chipsId); });
       chip.addEventListener("click", (e) => { if (e.target !== rm) { e.preventDefault(); e.stopPropagation(); } }, true);
       chip.append(label, rm);
@@ -378,12 +486,12 @@
         tasks = await fetchTasks(nameEn);
       } catch (e) {
         console.error("fetchTasks failed:", e);
-        setStatusMsg("pmScheduleStatus", "Could not load the task checklist from pm_tasks.", "error");
+        setStatusMsg("pmScheduleStatus", t("pm.task.loadError"), "error");
       }
     }
     if (!tasks || !tasks.length) {
       console.warn("No task catalog for name_en:", nameEn);
-      setStatusMsg("pmScheduleStatus", "No task catalog found for this machine.", "warning");
+      setStatusMsg("pmScheduleStatus", t("pm.task.noCatalog"), "warning");
       return;
     }
     const container = document.getElementById("pmTaskChecklist");
@@ -393,7 +501,7 @@
     if (!container || !title || !progressEl) return;
     const prog = record?.taskProgress || [];
     const val = record?.taskValidation || [];
-    title.textContent = `Task Checklist - ${tasks[0].equipmentName}`;
+    title.textContent = t("pm.task.titleWith", { equipment: tasks[0].equipmentName });
     container.innerHTML = tasks.map((t) => {
       const doneChecked = prog.includes(t.taskNo);
       const valChecked = val.includes(t.taskNo);
@@ -402,7 +510,7 @@
       const valCls = valChecked ? " validated" : "";
       const valCb = isValidator ? `<label class="task-val-check${valChecked ? ' checked' : ''}">
         <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${t.taskNo}" />
-        <span>Xác Nhận</span>
+        <span>${t("pm.task.confirm")}</span>
       </label>` : "";
       return `<div class="task-card${doneCls}${valCls}">
         <label class="task-card-check">
@@ -431,7 +539,7 @@
       const total = tasks.length;
       const done = container.querySelectorAll(".done-cb:checked").length;
       const validated = container.querySelectorAll(".val-cb:checked").length;
-      progressEl.textContent = `Hoàn thành: ${done}/${total}  •  Đã xác nhận: ${validated}/${total}`;
+      progressEl.textContent = t("pm.task.progressFull", { done, total, validated });
     };
 
     container.querySelectorAll(".done-cb").forEach((cb) => {
@@ -460,7 +568,7 @@
           syncStatusView(record);
         } catch (e) {
           cb.checked = !cb.checked;
-          setStatusMsg("pmScheduleStatus", friendlyError(e, "save task progress"), "error");
+          setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.saveTaskProgress")), "error");
         } finally {
           cb.disabled = false;
           updateProgress();
@@ -494,7 +602,7 @@
           syncStatusView(record);
         } catch (e) {
           cb.checked = !cb.checked;
-          setStatusMsg("pmScheduleStatus", friendlyError(e, "save validation"), "error");
+          setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.saveValidation")), "error");
         } finally {
           cb.disabled = false;
           updateProgress();
@@ -514,7 +622,7 @@
           const allVal = container.querySelectorAll(".val-cb");
           const checkedVal = container.querySelectorAll(".val-cb:checked");
           if (!allVal.length || checkedVal.length !== allVal.length) {
-            setStatusMsg("pmScheduleStatus", "Check all tasks before confirming.", "warning");
+            setStatusMsg("pmScheduleStatus", t("pm.task.checkAll"), "warning");
             return;
           }
           await apiUpdate(record.id, { [col("status", "status")]: "validated" });
@@ -522,7 +630,7 @@
           modal.classList.remove("active");
           await renderScheduleTab();
         } catch (e) {
-          setStatusMsg("pmScheduleStatus", friendlyError(e, "validate this record"), "error");
+          setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.validate")), "error");
         }
       };
     }
@@ -530,36 +638,12 @@
     lucideIcons();
   };
 
-  const renderScheduleTab = async () => {
-    window.SAMHO_LOADING?.show("Loading PM schedule...");
-    let allRecords = [];
-    let loadError = null;
-    try {
-      allRecords = await loadMonthRecords();
-    } catch (e) {
-      loadError = e;
-      allRecords = [];
-    }
-
-    renderStats(allRecords);
-    renderCalendar(allRecords);
-
+  const renderScheduleList = () => {
     const tbody = document.getElementById("pmScheduleList");
+    if (!tbody) return;
     const summary = document.getElementById("pmScheduleSummary");
-    if (tbody) {
-      if (loadError) {
-        tbody.innerHTML = '<tr><td colspan="7">Unable to load PM schedules.</td></tr>';
-        if (summary) summary.textContent = "";
-        document.getElementById("pmSchedulePagination")?.classList.add("sr-only");
-        const raw = String(loadError?.message || loadError || "").slice(0, 300);
-        setStatusMsg("pmScheduleStatus", `Unable to load PM records. ${raw}`, "error");
-        window.SAMHO_LOADING?.hide();
-        return;
-      }
-    }
-    if (!tbody) { window.SAMHO_LOADING?.hide(); return; }
 
-    let filtered = [...allRecords];
+    let filtered = [...currentRecords];
     if (scheduleFilter.plant) filtered = filtered.filter((r) => r.plant === scheduleFilter.plant);
     if (scheduleFilter.search) {
       const q = normalizeSearch(scheduleFilter.search);
@@ -575,10 +659,9 @@
     const pageItems = filtered.slice(start, start + SCHEDULE_PAGE_SIZE);
 
     if (!pageItems.length) {
-      tbody.innerHTML = '<tr><td colspan="7">No PM schedules found for this month.</td></tr>';
-      summary.textContent = "0 schedules";
+      tbody.innerHTML = `<tr><td colspan="7">${t("pm.empty.noSchedules")}</td></tr>`;
+      summary.textContent = t("pm.summary.zero");
       document.getElementById("pmSchedulePagination")?.classList.add("sr-only");
-      window.SAMHO_LOADING?.hide();
       return;
     }
 
@@ -596,14 +679,14 @@
         <td>${r.assignedTeam?.join(", ") || ""}</td>
         <td><span class="pm-status-select ${cls}">${lbl}</span></td>
         <td class="pm-actions">
-          <button class="info-search control-icon-button pm-viewtask-btn" data-id="${r.id}" type="button" title="View Task"><i data-lucide="clipboard-list"></i></button>
-          <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="Delete"><i data-lucide="trash-2"></i></button>
-          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="Edit"><i data-lucide="pencil"></i></button>` : ""}
+          <button class="info-search control-icon-button pm-viewtask-btn" data-id="${r.id}" type="button" title="${t("pm.action.viewTask")}"><i data-lucide="clipboard-list"></i></button>
+          <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>
+          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="${t("pm.action.edit")}"><i data-lucide="pencil"></i></button>` : ""}
         </td>
       </tr>`;
     }).join("");
 
-    summary.textContent = `${filtered.length} schedule(s)`;
+    summary.textContent = t("pm.summary.count", { count: filtered.length });
     renderSchedulePagination(totalPages);
 
     tbody.querySelectorAll(".pm-viewtask-btn").forEach((btn) => {
@@ -618,6 +701,40 @@
     tbody.querySelectorAll(".pm-delete-btn").forEach((btn) => {
       btn.addEventListener("click", () => deletePM(btn.dataset.id));
     });
+  };
+
+  const renderScheduleTab = async () => {
+    window.SAMHO_LOADING?.show(t("pm.loading.schedule"));
+    let allRecords = [];
+    let loadError = null;
+    try {
+      allRecords = await loadMonthRecords();
+    } catch (e) {
+      loadError = e;
+      allRecords = [];
+    }
+
+    lastLoadOk = !loadError;
+
+    renderStats(allRecords);
+    renderCalendar(allRecords);
+
+    const tbody = document.getElementById("pmScheduleList");
+    const summary = document.getElementById("pmScheduleSummary");
+    if (tbody) {
+      if (loadError) {
+        tbody.innerHTML = `<tr><td colspan="7">${t("pm.error.loadSchedules")}</td></tr>`;
+        if (summary) summary.textContent = "";
+        document.getElementById("pmSchedulePagination")?.classList.add("sr-only");
+        const raw = String(loadError?.message || loadError || "").slice(0, 300);
+        setStatusMsg("pmScheduleStatus", t("pm.error.loadRecords", { detail: raw }), "error");
+        window.SAMHO_LOADING?.hide();
+        return;
+      }
+    }
+    if (!tbody) { window.SAMHO_LOADING?.hide(); return; }
+
+    renderScheduleList();
 
     lucideIcons();
     window.SAMHO_LOADING?.hide();
@@ -648,7 +765,7 @@
       });
       return true;
     } catch (e) {
-      setStatusMsg("pmCompleteStatus", friendlyError(e, "complete this record"), "error");
+      setStatusMsg("pmCompleteStatus", friendlyError(e, t("pm.action.complete")), "error");
       return false;
     }
   };
@@ -660,7 +777,7 @@
   };
 
   const openCreateModal = () => {
-    document.getElementById("pmFormTitle").textContent = "Thêm PM / Create PM";
+    document.getElementById("pmFormTitle").textContent = t("pm.form.title.create");
     setValue("pmFormItemCode", "");
     setValue("pmFormNameEn", "");
     setValue("pmFormPlant", "");
@@ -682,7 +799,7 @@
   const searchPmCode = async () => {
     const code = getValue("pmFormItemCode").toUpperCase();
     const btn = document.getElementById("pmFormSearchBtn");
-    if (!code) { setStatusMsg("pmFormSearchStatus", "Enter an item code first.", "warning"); return; }
+    if (!code) { setStatusMsg("pmFormSearchStatus", t("pm.search.enterCode"), "warning"); return; }
     btn.disabled = true;
     try {
       const supabaseConfig = window.SAMHO_SUPABASE || {};
@@ -693,7 +810,7 @@
       if (!row) row = await db.getOne(table, { where: { [codeCol]: { op: "ilike", value: `*${code}*` } } });
       if (!row) {
         clearPmCodeSearch();
-        setStatusMsg("pmFormSearchStatus", "No machine found for this code.", "warning");
+        setStatusMsg("pmFormSearchStatus", t("pm.search.notFound"), "warning");
         return;
       }
       document.getElementById("pmForm").dataset.searchData = JSON.stringify({
@@ -703,9 +820,9 @@
       });
       setValue("pmFormNameEn", row.name_en || row.NAME_EN || "");
       setValue("pmFormPlant", row.plant || row.PLANT || "");
-      setStatusMsg("pmFormSearchStatus", "Machine loaded.", "success");
+      setStatusMsg("pmFormSearchStatus", t("pm.search.loaded"), "success");
     } catch (e) {
-      setStatusMsg("pmFormSearchStatus", db.friendly(e, "search this code"), "error");
+      setStatusMsg("pmFormSearchStatus", db.friendly(e, t("pm.action.searchCode")), "error");
     } finally {
       btn.disabled = false;
     }
@@ -714,11 +831,11 @@
   const createPM = async (itemCode, dueDate, team) => {
     const searchData = JSON.parse((document.getElementById("pmForm").dataset.searchData || "{}"));
     const code = itemCode || searchData.itemCode;
-    if (!code) { setStatusMsg("pmFormStatus", "Search and load a machine first.", "warning"); return false; }
+    if (!code) { setStatusMsg("pmFormStatus", t("pm.form.searchFirst"), "warning"); return false; }
     try {
       const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length) {
-        setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
+        setStatusMsg("pmFormStatus", t("pm.form.duplicate"), "warning");
         return false;
       }
       await apiInsert({
@@ -734,7 +851,7 @@
       });
       return true;
     } catch (e) {
-      setStatusMsg("pmFormStatus", friendlyError(e, "create this record"), "error");
+      setStatusMsg("pmFormStatus", friendlyError(e, t("pm.action.create")), "error");
       return false;
     }
   };
@@ -742,7 +859,7 @@
   const openEditModal = (id) => {
     const rec = currentRecords.find((r) => r.id === id);
     if (!rec || rec.status === "completed" || rec.status === "validated") return;
-    document.getElementById("pmFormTitle").textContent = "Sửa PM / Edit PM";
+    document.getElementById("pmFormTitle").textContent = t("pm.form.title.edit");
     setValue("pmFormItemCode", rec.itemCode);
     document.getElementById("pmForm").dataset.searchData = JSON.stringify({
       itemCode: rec.itemCode,
@@ -751,7 +868,7 @@
     });
     setValue("pmFormNameEn", rec.nameEn || "");
     setValue("pmFormPlant", rec.plant || "");
-    setStatusMsg("pmFormSearchStatus", "Machine loaded.", "success");
+    setStatusMsg("pmFormSearchStatus", t("pm.search.loaded"), "success");
     setValue("pmFormDueDate", rec.dueDate);
     renderMechanicSelection("pmFormTeam", "pmFormTeamChips", rec.assignedTeam || []);
     document.getElementById("pmForm").dataset.editId = id;
@@ -766,7 +883,7 @@
     try {
       const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length && existing[0].id !== id) {
-        setStatusMsg("pmFormStatus", "A PM record already exists for this machine on this date.", "warning");
+        setStatusMsg("pmFormStatus", t("pm.form.duplicate"), "warning");
         return false;
       }
       const payload = {
@@ -782,7 +899,7 @@
       await apiUpdate(id, payload);
       return true;
     } catch (e) {
-      setStatusMsg("pmFormStatus", friendlyError(e, "update this record"), "error");
+      setStatusMsg("pmFormStatus", friendlyError(e, t("pm.action.update")), "error");
       return false;
     }
   };
@@ -790,12 +907,12 @@
   const deletePM = async (id) => {
     const rec = currentRecords.find((r) => r.id === id);
     if (!rec || rec.status === "completed" || rec.status === "validated") return;
-    if (!confirm(`Delete PM for ${rec.equipment}?`)) return;
+    if (!confirm(t("pm.confirm.delete", { equipment: rec.equipment }))) return;
     try {
       await apiDelete(id);
       await renderScheduleTab();
     } catch (e) {
-      setStatusMsg("pmScheduleStatus", friendlyError(e, "delete this record"), "error");
+      setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.deleteRecord")), "error");
     }
   };
 
@@ -821,11 +938,11 @@
       e.preventDefault();
       const id = e.target.dataset.recordId;
       const technician = getSelectedMechanics("pmCompleteTechnician");
-      if (!technician.length) { setStatusMsg("pmCompleteStatus", "Please select a technician.", "warning"); return; }
+      if (!technician.length) { setStatusMsg("pmCompleteStatus", t("pm.complete.selectTechnician"), "warning"); return; }
       const notes = getValue("pmCompleteNotes");
       if (await completePM(id, technician, notes)) {
         document.getElementById("pmCompleteModal").classList.remove("active");
-        setStatusMsg("pmScheduleStatus", "PM completed successfully.", "success");
+        setStatusMsg("pmScheduleStatus", t("pm.complete.success"), "success");
         await renderScheduleTab();
       }
     });
@@ -844,9 +961,9 @@
       const itemCode = getValue("pmFormItemCode");
       const dueDate = getValue("pmFormDueDate");
       const team = getSelectedMechanics("pmFormTeam");
-      if (!itemCode || !dueDate) { setStatusMsg("pmFormStatus", "Please fill all fields.", "warning"); return; }
+      if (!itemCode || !dueDate) { setStatusMsg("pmFormStatus", t("pm.form.fillFields"), "warning"); return; }
       const searchData = JSON.parse((e.target.dataset.searchData || "{}"));
-      if (!searchData.itemCode) { setStatusMsg("pmFormStatus", "Search and load the machine first.", "warning"); return; }
+      if (!searchData.itemCode) { setStatusMsg("pmFormStatus", t("pm.form.searchFirst"), "warning"); return; }
       const ok = editId ? await editPM(editId, itemCode, dueDate, team) : await createPM(itemCode, dueDate, team);
       if (ok) {
         document.getElementById("pmFormModal").classList.remove("active");
@@ -892,6 +1009,26 @@
       if (calMonth > 11) { calMonth = 0; calYear++; }
       schedulePage = 0;
       await renderScheduleTab();
+    });
+
+    document.addEventListener("samho:langchange", () => {
+      if (lastLoadOk) {
+        renderStats(currentRecords);
+        renderCalendar(currentRecords);
+        renderScheduleList();
+        lucideIcons();
+      }
+      const taskModal = document.getElementById("pmTaskModal");
+      if (taskModal?.classList.contains("active")) {
+        const rec = currentRecords.find((r) => r.id === taskModal.dataset.activeRecordId);
+        if (rec) openTaskModal(rec);
+      }
+      const formTitle = document.getElementById("pmFormTitle");
+      if (document.getElementById("pmFormModal")?.classList.contains("active") && formTitle) {
+        formTitle.textContent = document.getElementById("pmForm")?.dataset.editId
+          ? t("pm.form.title.edit")
+          : t("pm.form.title.create");
+      }
     });
 
     lucideIcons();

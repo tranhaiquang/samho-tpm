@@ -7,13 +7,14 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/styles_edited.css?v=20260810-1" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles_edited.css?v=20260815-1" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
@@ -31,7 +32,7 @@
         <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>Vietnam Samho</strong>
-          <span>Factory System</span>
+          <span data-i18n="brand.tagline"></span>
         </div>
       </div>
 
@@ -39,163 +40,167 @@
         <section class="nav-group active">
           <button class="nav-head selected" type="button" aria-expanded="true">
             <i data-lucide="wrench"></i>
-            Maintenance
+            <span data-i18n="nav.maintenance"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
-          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+          <a class="current" href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i><span data-i18n="nav.bm"></span></a>
+          <a href="repair_info.html"><i data-lucide="file-text"></i><span data-i18n="nav.repairInfo"></span></a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i><span data-i18n="nav.kpi"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i>
+            <i data-lucide="settings-2"></i><span data-i18n="nav.tpm"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a href="pm.html"><i data-lucide="calendar-check"></i>PM</a>
+          <a href="pm.html"><i data-lucide="calendar-check"></i><span data-i18n="nav.pm"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
             <i data-lucide="package-search"></i>
-            Spare Part Management
+            <span data-i18n="nav.sparepart"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a>
-          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
-          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+          <a href="red_tag.html"><i data-lucide="tag"></i><span data-i18n="nav.redTag"></span></a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i><span data-i18n="nav.sparepartItem"></span></a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i><span data-i18n="nav.incoming"></span></a>
         </section>
       </nav>
 
       <div class="sidebar-footer">
         <button class="logout sidebar-logout" type="button">
           <i data-lucide="log-out"></i>
-          Logout
+          <span data-i18n="nav.logout"></span>
         </button>
-        <small class="app-copyright">© 2026 LEAN Department, Vietnam Samho</small>
+        <small class="app-copyright" data-i18n="app.copyright"></small>
       </div>
     </aside>
 
     <div class="shell">
       <main class="content">
-        <div class="mode-tabs" aria-label="Maintenance type">
-          <div class="mode-main" role="tablist">
-            <button class="mode active" data-mode="BM" type="button"><i data-lucide="wrench"></i>BM</button>
-            <button disabled class="mode rm" data-mode="RM" type="button"><i data-lucide="calendar-check"></i>RM</button>
-            <button disabled class="mode pm" data-mode="PM" type="button"><i data-lucide="settings"></i>PM</button>
-            <button disabled class="mode cm" data-mode="CM" type="button"><i data-lucide="file-warning"></i>CM</button>
-          </div>
-          <div class="mode-sub-buttons" id="modeSubButtons" aria-label="Maintenance actions"></div>
-        </div>
-
         <section class="panel page-view active" id="repairSubmitView">
-          <div class="panel-title">
-            <i data-lucide="plus"></i>
-            <h1>Nhập máy hư</h1>
-          </div>
+          <header class="panel-title">
+            <i data-lucide="wrench"></i>
+            <h1><span data-i18n="bm.page.title">Nhập máy hư</span> <span class="title-tag" data-i18n="bm.page.tag">BM / Breakdown</span></h1>
+          </header>
 
           <div class="action-row">
             <label class="scan-field">
-              <span class="sr-only">Nhập code hoặc scan</span>
-              <input id="codeSearch" type="text" placeholder="NHẬP CODE HOẶC SCAN" />
+              <span class="sr-only" data-i18n="bm.scan.srOnly">Nhập code hoặc scan</span>
+              <input id="codeSearch" type="text" placeholder="NHẬP CODE HOẶC SCAN" data-i18n-ph="bm.scan.placeholder" />
             </label>
-            <button class="btn success" id="searchButton" type="button"><i data-lucide="search"></i>Search</button>
-            <button class="btn primary scan-button" type="button"><i data-lucide="scan-line"></i>Scan</button>
+            <button class="btn success" id="searchButton" type="button"><i data-lucide="search"></i><span data-i18n="common.search">Search</span></button>
+            <button class="btn primary scan-button" type="button"><i data-lucide="scan-line"></i><span data-i18n="bm.scan.button">Scan</span></button>
             <p class="search-status" id="searchStatus" aria-live="polite"></p>
           </div>
 
           <form class="maintenance-form" id="repairForm">
-            <div class="machine-grid">
-              <label class="field">
-                <span>Machine Name</span>
-                <input id="machineName" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Specification</span>
-                <input id="specification" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Made By</span>
-                <input id="madeBy" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Status</span>
-                <input id="machineStatus" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Place</span>
-                <input id="machinePlace" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Plant</span>
-                <input id="machinePlant" type="text" disabled />
-              </label>
-              <label class="field">
-                <span>Section</span>
-                <input id="machineSection" type="text" disabled />
-              </label>
-            </div>
-
-            <div class="time-grid">
-              <fieldset>
-                <legend>Báo hư</legend>
-                <input type="date" id="brokenDate" required />
-                <input type="text" id="brokenTime" placeholder="HH:mm" aria-label="Báo hư - giờ 24h" required />
-              </fieldset>
-              <fieldset>
-                <legend>Bắt đầu sửa</legend>
-                <input type="date" id="startDate" required />
-                <input type="text" id="startTime" placeholder="HH:mm" aria-label="Bắt đầu sửa - giờ 24h" required />
-              </fieldset>
-              <fieldset>
-                <legend>Sửa xong</legend>
-                <input type="date" id="doneDate" required />
-                <input type="text" id="doneTime" placeholder="HH:mm" aria-label="Sửa xong - giờ 24h" required />
-              </fieldset>
-            </div>
-
-            <div class="detail-grid">
-              <label class="field">
-                <span>Vấn Đề / Issue</span>
-                <select id="issue" required>
-                  <option>Điện</option>
-                  <option>Cơ khí</option>
-                  <option>Áp suất</option>
-                  <option>Khác</option>
-                </select>
-              </label>
-              <label class="field">
-                <span>Khác / Other</span>
-                <input id="other" type="text" required />
-              </label>
-              <label class="field">
-                <span>Nguyên nhân / Reason</span>
-                <input id="reason" type="text" required />
-              </label>
-              <label class="field">
-                <span>Cách kh.phục / Solve</span>
-                <select id="solve" required>
-                  <option>SỬA CHỮA</option>
-                  <option>THAY THẾ</option>
-                  <option>VỆ SINH</option>
-                </select>
-              </label>
-              <div class="field">
-                <span>Người sửa chữa / Mechanic</span>
-                <div class="mechanic-picker" id="mechanicPicker">
-                  <div class="mechanic-chip-list" id="mechanicChips"></div>
-                  <input id="mechanicSearch" type="text" autocomplete="off" placeholder="Type a mechanic name" aria-label="Search mechanic names" />
-                  <div class="mechanic-options" id="mechanicOptions" role="listbox" hidden></div>
-                </div>
-                <input id="mechanic" type="hidden" required />
+            <section class="machine-plate" aria-labelledby="machinePlateTitle">
+              <h2 class="plate-title" id="machinePlateTitle" data-i18n="bm.plate.title">Thông tin máy</h2>
+              <div class="machine-grid">
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.machineName">Machine Name</span>
+                  <input id="machineName" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.specification">Specification</span>
+                  <input id="specification" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.madeBy">Made By</span>
+                  <input id="madeBy" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.status">Status</span>
+                  <input id="machineStatus" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.place">Place</span>
+                  <input id="machinePlace" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.plant">Plant</span>
+                  <input id="machinePlant" type="text" disabled />
+                </label>
+                <label class="field field-mono">
+                  <span data-i18n="bm.field.section">Section</span>
+                  <input id="machineSection" type="text" disabled />
+                </label>
               </div>
+            </section>
+
+            <div class="form-split">
+              <section class="timeline-block" aria-labelledby="timelineTitle">
+                <h2 class="plate-title" id="timelineTitle" data-i18n="bm.timeline.title">Thời gian</h2>
+                <div class="time-grid">
+                  <fieldset class="time-step">
+                    <legend><span data-i18n="bm.field.brokenAt">Báo hư</span> <span class="step-no">1</span></legend>
+                    <input type="date" id="brokenDate" required />
+                    <input type="text" id="brokenTime" placeholder="HH:mm" aria-label="Báo hư - giờ 24h" data-i18n-title="bm.timeline.brokenTime" required />
+                  </fieldset>
+                  <fieldset class="time-step">
+                    <legend><span data-i18n="bm.field.repairStartedAt">Bắt đầu sửa</span> <span class="step-no">2</span></legend>
+                    <input type="date" id="startDate" required />
+                    <input type="text" id="startTime" placeholder="HH:mm" aria-label="Bắt đầu sửa - giờ 24h" data-i18n-title="bm.timeline.startTime" required />
+                  </fieldset>
+                  <fieldset class="time-step">
+                    <legend><span data-i18n="bm.field.repairFinishedAt">Sửa xong</span> <span class="step-no">3</span></legend>
+                    <input type="date" id="doneDate" required />
+                    <input type="text" id="doneTime" placeholder="HH:mm" aria-label="Sửa xong - giờ 24h" data-i18n-title="bm.timeline.doneTime" required />
+                  </fieldset>
+                </div>
+              </section>
+
+              <section class="detail-block" aria-labelledby="detailTitle">
+                <h2 class="plate-title" id="detailTitle" data-i18n="bm.detail.title">Chi tiết sửa chữa</h2>
+                <div class="detail-grid">
+                  <label class="field">
+                    <span data-i18n="bm.field.issue">Vấn Đề</span>
+                    <select id="issue" required>
+                      <option value="Điện" data-i18n="bm.issue.electric">Điện</option>
+                      <option value="Cơ khí" data-i18n="bm.issue.mechanical">Cơ khí</option>
+                      <option value="Áp suất" data-i18n="bm.issue.pressure">Áp suất</option>
+                      <option value="Khác" data-i18n="bm.issue.other">Khác</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span data-i18n="bm.field.other">Khác</span>
+                    <input id="other" type="text" required />
+                  </label>
+                  <label class="field field-wide">
+                    <span data-i18n="bm.field.reason">Nguyên nhân</span>
+                    <input id="reason" type="text" required />
+                  </label>
+                  <label class="field">
+                    <span data-i18n="bm.field.solve">Cách kh.phục</span>
+                    <select id="solve" required>
+                      <option value="SỬA CHỮA" data-i18n="bm.solve.repair">SỬA CHỮA</option>
+                      <option value="THAY THẾ" data-i18n="bm.solve.replace">THAY THẾ</option>
+                      <option value="VỆ SINH" data-i18n="bm.solve.clean">VỆ SINH</option>
+                    </select>
+                  </label>
+                  <div class="field field-wide">
+                    <span data-i18n="bm.field.mechanic">Người sửa chữa</span>
+                    <div class="mechanic-picker" id="mechanicPicker">
+                      <div class="mechanic-chip-list" id="mechanicChips"></div>
+                      <input id="mechanicSearch" type="text" autocomplete="off" placeholder="Type a mechanic name" aria-label="Search mechanic names" data-i18n-ph="bm.mechanic.placeholder" data-i18n-title="bm.mechanic.searchAria" />
+                      <div class="mechanic-options" id="mechanicOptions" role="listbox" hidden></div>
+                    </div>
+                    <input id="mechanic" type="hidden" required />
+                  </div>
+                </div>
+              </section>
             </div>
 
-            <button class="save" id="saveButton" type="submit"><i data-lucide="save"></i>SAVE</button>
-            <p class="save-status" id="saveStatus" aria-live="polite"></p>
+            <footer class="form-foot">
+              <p class="save-status" id="saveStatus" aria-live="polite"></p>
+              <button class="save" id="saveButton" type="submit"><i data-lucide="save"></i><span data-i18n="common.save">SAVE</span></button>
+            </footer>
           </form>
         </section>
 
         <section class="page-view" id="summaryReportView">
-          <iframe class="pbi-frame" id="powerBiFrame" title="Summary Report"></iframe>
+          <iframe class="pbi-frame" id="powerBiFrame" title="Summary Report" data-i18n-title="bm.summary.title"></iframe>
         </section>
       </main>
     </div>

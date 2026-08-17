@@ -7,12 +7,13 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
@@ -28,7 +29,7 @@
         <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>Vietnam Samho</strong>
-          <span>Factory System</span>
+          <span data-i18n="brand.tagline"></span>
         </div>
       </div>
 
@@ -36,38 +37,39 @@
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
             <i data-lucide="wrench"></i>
-            Maintenance
+            <span data-i18n="nav.maintenance"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
-          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i><span data-i18n="nav.bm"></span></a>
+          <a href="repair_info.html"><i data-lucide="file-text"></i><span data-i18n="nav.repairInfo"></span></a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i><span data-i18n="nav.kpi"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i>
+            <i data-lucide="settings-2"></i><span data-i18n="nav.tpm"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a href="pm.html"><i data-lucide="calendar-check"></i>PM</a>
+          <a href="pm.html"><i data-lucide="calendar-check"></i><span data-i18n="nav.pm"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head selected" type="button" aria-expanded="true">
             <i data-lucide="package-search"></i>
-            Spare Part Management
+            <span data-i18n="nav.sparepart"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a>
-          <a class="current" href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
-          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+          <a href="red_tag.html"><i data-lucide="tag"></i><span data-i18n="nav.redTag"></span></a>
+          <a class="current" href="spare_parts.html"><i data-lucide="boxes"></i><span data-i18n="nav.sparepartItem"></span></a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i><span data-i18n="nav.incoming"></span></a>
         </section>
       </nav>
 
       <div class="sidebar-footer">
         <button class="logout sidebar-logout" type="button">
           <i data-lucide="log-out"></i>
-          Logout
+          <span data-i18n="nav.logout"></span>
         </button>
-        <small class="app-copyright">© 2026 LEAN Department, Vietnam Samho</small>
+        <small class="app-copyright" data-i18n="app.copyright"></small>
       </div>
     </aside>
 
@@ -76,33 +78,33 @@
         <section class="info-panel spare-panel">
           <div class="info-title">
             <i data-lucide="boxes"></i>
-            <h1>Spare Parts</h1>
+            <h1 data-i18n="spare.title">Spare Parts</h1>
           </div>
 
           <form class="info-filter spare-filter catalog-filter" id="sparePartsFilter">
             <label>
-              <span><i data-lucide="factory"></i>Plant</span>
+              <span><i data-lucide="factory"></i><span data-i18n="spare.plant">Plant</span></span>
               <select id="sparePlantSelect">
-                <option value="">All plants</option>
+                <option value="" data-i18n="spare.allPlants">All plants</option>
               </select>
             </label>
             <label>
-              <span><i data-lucide="search"></i>Search</span>
-              <input id="spareSearchInput" type="search" placeholder="Item code or name" />
+              <span><i data-lucide="search"></i><span data-i18n="common.search">Search</span></span>
+              <input id="spareSearchInput" type="search" placeholder="Item code or name" data-i18n-ph="spare.searchPlaceholder" />
             </label>
             <label>
-              <span><i data-lucide="list-filter"></i>Status</span>
+              <span><i data-lucide="list-filter"></i><span data-i18n="spare.status">Status</span></span>
               <select id="spareStatusSelect">
-                <option value="">All status</option>
-                <option value="low">Low stock</option>
-                <option value="ok">OK</option>
+                <option value="" data-i18n="spare.allStatus">All status</option>
+                <option value="low" data-i18n="spare.lowStock">Low stock</option>
+                <option value="ok" data-i18n="spare.ok">OK</option>
               </select>
             </label>
             <div class="spare-filter-actions">
-              <button class="info-search control-icon-button" id="spareRefreshButton" type="submit" aria-label="Refresh spare parts" title="Refresh">
+              <button class="info-search control-icon-button" id="spareRefreshButton" type="submit" aria-label="Refresh spare parts" title="Refresh" data-i18n-title="spare.refresh">
                 <i data-lucide="refresh-cw"></i>
               </button>
-              <button class="info-search spare-add-button control-icon-button" id="spareAddButton" type="button" aria-label="Add spare part" title="Add spare part" hidden>
+              <button class="info-search spare-add-button control-icon-button" id="spareAddButton" type="button" aria-label="Add spare part" title="Add spare part" hidden data-i18n-title="spare.addNew">
                 <i data-lucide="plus"></i>
               </button>
             </div>
@@ -110,22 +112,22 @@
           </form>
         </section>
 
-        <section class="spare-summary-grid" aria-label="Spare part summary">
+        <section class="spare-summary-grid" aria-label="Spare part summary" data-i18n-title="spare.summaryAria">
           <article class="spare-stat">
-            <span>Total Items</span>
+            <span data-i18n="spare.totalItems">Total Items</span>
             <strong id="spareTotalItems">--</strong>
           </article>
           <article class="spare-stat">
-            <span>Total On Hand</span>
+            <span data-i18n="spare.totalOnHand">Total On Hand</span>
             <strong id="spareTotalOnHand">--</strong>
           </article>
           <article class="spare-stat">
-            <span>Below Safety</span>
+            <span data-i18n="spare.belowSafety">Below Safety</span>
             <strong id="spareBelowSafety">--</strong>
           </article>
         </section>
 
-        <section class="repair-list" id="sparePartsList" aria-label="Spare parts by plant"></section>
+        <section class="repair-list" id="sparePartsList" aria-label="Spare parts by plant" data-i18n-title="spare.listAria"></section>
       </main>
     </div>
   </body>

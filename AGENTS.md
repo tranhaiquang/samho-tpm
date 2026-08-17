@@ -4,7 +4,7 @@
 
 - **Frontend:** Vanilla HTML5 + CSS3 + ES6 — no frameworks, no bundler, no build step.
 - **Backend:** Supabase (PostgreSQL + Auth + Storage), accessed directly from the browser via REST.
-- **Dependencies (all CDN):** Lucide icons, SheetJS/xlsx, ZXing barcode, Google Fonts (Inter).
+- **Dependencies (all CDN):** Lucide icons, SheetJS/xlsx, ZXing barcode, Google Fonts (**Be Vietnam Pro** — the only font loaded on every page; Vietnamese-correct, replaces Inter).
 - **Config:** All Supabase URL/keys, table/column mappings, and Power BI embed URL live in `supabase/config.js`.
 - **Auth:** Supabase email/password; session persisted in `localStorage` under key `samho.auth.session`. Users log in with a short ID — it gets `@email.com` appended automatically (`auth.js:toAuthEmail`).
 
@@ -35,7 +35,7 @@ incoming_stock.html       → reorder workflow → Excel export
 pm.html                   → PM schedule calendar, task catalog, CRUD (new)
 assets/css/styles.css     → original monolithic stylesheet (untouched)
 assets/css/styles_edited.css → active stylesheet (copy with appended Unified Button System; all HTML pages reference this)
-assets/js/{app_edited,repair_info_edited,kpi_dashboard_edited,red_tag_edited,spare_parts,incoming_stock,auth,errors_edited,sidebar,pm_edited,pm_edited_backup,datetime,db_client}.js
+assets/js/{app_edited,repair_info_edited,kpi_dashboard_edited,red_tag_edited,spare_parts,incoming_stock,auth,errors_edited,i18n,sidebar,pm_edited,pm_edited_backup,datetime,db_client}.js
 supabase/config.js        → **central config** (tables, columns, keys, URLs)
 supabase/policies/        → RLS SQL policies (list_user_display_names, pm_rls, spare_part_edit_permissions, pm_records_migration, pm_records_setup, pm_records_live_schema_fix)
 scripts/convert-pm-excel.js → Node build script: Excel → data/pm_master_data.js
@@ -45,9 +45,11 @@ data/pm_master_data_edited.js → active copy of PM master data with an appended
 
 ## Key Conventions & Gotchas
 
-- **Script loading order (all pages use `defer`):** `config.js` → `auth.js` → `errors_edited.js` → `datetime.js` → `db_client.js` → `sidebar.js` → (CDN deps if needed: `@zxing/browser` on `repair_submit` & `red_tag`; `xlsx` on `repair_info` & `incoming_stock`) → page-specific JS. `repair_submit` uses `app_edited.js`; `repair_info` uses `app_edited.js` + `repair_info_edited.js`. The `_edited` suffix indicates the file has been modified from the original. The original un-edited forks (`app.js`, `repair_info.js`, `red_tag.js`, `kpi_dashboard.js`, `pm.js`, `errors.js`) were deleted — only `_edited`/module files exist now.
+- **Script loading order (all pages use `defer`):** `config.js` → `auth.js` → `errors_edited.js` → `i18n.js` → `datetime.js` → `db_client.js` → `sidebar.js` → (CDN deps if needed: `@zxing/browser` on `repair_submit` & `red_tag`; `xlsx` on `repair_info` & `incoming_stock`) → page-specific JS. `repair_submit` uses `app_edited.js`; `repair_info` uses `app_edited.js` + `repair_info_edited.js`. The `_edited` suffix indicates the file has been modified from the original. The original un-edited forks (`app.js`, `repair_info.js`, `red_tag.js`, `kpi_dashboard.js`, `pm.js`, `errors.js`) were deleted — only `_edited`/module files exist now.
 - **No cache-busting standard** — some pages use `?v=YYYYMMDD-N`, most do not.
-- **Bilingual UI** — labels mix Vietnamese and English (e.g. "Vấn Đề / Issue", "Người sửa chữa / Mechanic"). Match existing patterns.
+- **Bilingual UI** — full VI/EN toggle across all pages via `window.SAMHO_LANG` (`assets/js/i18n.js`), loaded after `errors_edited.js`. Static text uses `data-i18n`/`data-i18n-ph`/`data-i18n-title` attributes; JS-generated strings use `SAMHO_LANG.t(id, {vars})`. Dictionary: shared base keys (nav.*, login.*, common.*, error.*, bm.*, repairInfo.*, greeting.*, app.*, loading.*) live in `i18n.js` via `SAMHO_LANG.register`; page-specific keys (kpi.*, redtag.*, spare.*, incoming.*, pm.*) are registered at the top of each page JS. Default `vi`; choice persisted in `localStorage` under `samho.lang`; a change dispatches a `samho:langchange` event (`detail: {lang}`) — every page JS adds a listener to re-render its data. `repair_submit` issue/solve `<select>` options keep Vietnamese `value` attributes so DB values + `syncOtherInputState`'s `"khac"` check still work; only the visible text is translated. The VI|EN toggle is pinned fixed (top-right; bottom-right on ≤980px), **bigger + draggable** (pointer events, position saved to `samho.lang.pos`).
+- **Font** — every page loads only `Be Vietnam Pro` (Google Fonts `family=Be+Vietnam+Pro:wght@400;500;600;700;800`). The `--rs-mono` token in `styles_edited.css` also resolves to Be Vietnam Pro (Vietnamese-correct for machine-plate inputs). Do NOT add JetBrains Mono or Inter back.
+- **Sidebar** — identical structure on all 7 dashboard pages: Maintenance group = BM → Repair Info → KPI Dashboard; TPM group = PM; Spare part group = Red Tag → Spare part → Incoming stock. The active page's link carries `class="current"`.
 - **Modal-based CRUD** — all create/edit/delete uses dynamically generated modal dialogs, not separate pages.
 - **Pagination** — handled by `db.select` (`db_client.js`): auto-paginates to completion at 1000 rows per page unless a `limit` cap is passed (which becomes a hard row cap).
 - **Excel export** — uses SheetJS (`XLSX`) from CDN; available on `repair_info` and `incoming_stock`.
@@ -57,7 +59,6 @@ data/pm_master_data_edited.js → active copy of PM master data with an appended
 - **Datetime format in DB** — `start_datetime`, `fix_datetime`, `end_datetime` stored as `dd-mm-yy hh:mm` (day-first, e.g. `13-07-26 02:53`). The `month` column stored as `mmm-yy` (e.g. `Jan-26`). All parsing/writing/display goes through the shared `window.SAMHO_DATETIME` module (`assets/js/datetime.js`): `fromInput`/`readInput` write the DB dialect from `<input type="date">`/`<input type="time">` values, `parse` reads it back (2/4-digit years, ISO `yyyy-mm-dd hh:mm`, compact `yyyymmdd`, or native Date strings), `toDisplay` renders `dd/mm/yyyy hh:mm`, `formatDate` renders date-only `mm/dd/yyyy` (PM due dates, red-tag dates), `downtimeMinutes` computes downtime, `monthKey` produces `yyyy-mm` KPI keys, `now()` returns local-time `{date, time}`, `addDays` shifts dates. **Local-time only** — `toISOString()`/`Date.UTC` are never used in the output path (avoids the DST/midnight day-shift bug).
 - **Machine search** — `fetchMachineByCode()` queries `repair_records` then `machine_info` and merges results. BM form requires the code to be searched and loaded before submission.
 - **Mechanic autocomplete** — calls Supabase RPC `list_user_display_names` (a `security definer` function exposing Auth user display names; SQL in `supabase/policies/`).
-- **Sidebar** — responsive: collapsed by default on desktop (>980px), toggles open on mobile. Standardized sidebar HTML is duplicated across every HTML page.
 - **RLS** — Row Level Security is enforced via Supabase policies in `supabase/policies/`; the anon key is publicly visible by design.
 - **RLS UPDATE silent no-op gotcha** — if a table's UPDATE policy has a `using`/`with check` expression that evaluates false, PostgREST applies the update to **0 rows** and returns success (`204`, or `200` with an empty `[[]]` body). The UI reports "Changes saved." but nothing persists. Symptom: edit button "works" but data never changes; delete still works (its policy is separate). This hit `repair_records` — the fix was SQL (run in the Supabase SQL Editor, not via REST): `drop policy ... for update ...; create policy ... for update to authenticated using (true) with check (true);`. Always verify a write by reading the row back (e.g. via service_role), since a 2xx does not guarantee the row changed.
 - **No `.env`** — all config values are hardcoded in `supabase/config.js`.
