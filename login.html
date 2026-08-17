@@ -7,12 +7,13 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
   </head>
   <body class="login-page app-standard">
     <main class="login-shell">
@@ -21,33 +22,33 @@
           <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
           <div>
             <strong>Vietnam Samho</strong>
-            <span>Maintenance Operations</span>
+            <span data-i18n="login.subtitleTag"></span>
           </div>
         </div>
 
         <div class="login-card-head">
-          <span>Welcome back</span>
-          <h2>Login</h2>
-          <p>Use your employee ID and password to continue.</p>
+          <span data-i18n="login.welcome"></span>
+          <h2 data-i18n="login.title"></h2>
+          <p data-i18n="login.subtitle"></p>
         </div>
 
         <form id="loginForm" class="login-form">
           <label>
-            <span>User ID</span>
+            <span data-i18n="login.userId"></span>
             <input id="loginUserId" type="text" autocomplete="username" required />
           </label>
           <label>
-            <span>Password</span>
+            <span data-i18n="login.password"></span>
             <input id="loginPassword" type="password" autocomplete="current-password" required />
           </label>
           <button id="loginButton" type="submit">
             <i data-lucide="log-in"></i>
-            Sign in
+            <span data-i18n="login.signIn"></span>
           </button>
           <p id="loginStatus" class="login-status" aria-live="polite"></p>
         </form>
       </section>
-      <small class="login-copyright">© 2026 LEAN Department, Vietnam Samho. All rights reserved.</small>
+      <small class="login-copyright" data-i18n="login.copyright"></small>
     </main>
 
     <script>
@@ -67,7 +68,8 @@
         form.addEventListener("submit", async (event) => {
           event.preventDefault();
           button.disabled = true;
-          status.textContent = "Signing in...";
+          const t = (id) => window.SAMHO_LANG ? window.SAMHO_LANG.t(id) : "";
+          status.textContent = t("login.signingIn");
           status.dataset.type = "loading";
 
           try {
@@ -75,11 +77,11 @@
               document.getElementById("loginUserId").value.trim(),
               document.getElementById("loginPassword").value
             );
-            status.textContent = "Login successful. Redirecting...";
+            status.textContent = t("login.success");
             status.dataset.type = "success";
             location.replace(window.SAMHO_AUTH.homePage);
           } catch (error) {
-            status.textContent = window.SAMHO_ERRORS.message(error, "sign in");
+            status.textContent = window.SAMHO_ERRORS.message(error, t("login.signIn").toLowerCase());
             status.dataset.type = "error";
           } finally {
             button.disabled = false;

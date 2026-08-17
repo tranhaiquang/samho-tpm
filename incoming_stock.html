@@ -7,12 +7,13 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
@@ -22,44 +23,44 @@
   <body class="dashboard-app app-standard incoming-stock-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button"><i data-lucide="menu"></i></button>
     <aside class="sidebar" aria-label="Primary navigation">
-      <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span>Factory System</span></div></div>
+      <div class="brand"><img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" /><div><strong>Vietnam Samho</strong><span data-i18n="brand.tagline"></span></div></div>
       <nav class="nav-list">
-        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="wrench"></i>Maintenance<i data-lucide="chevron-down"></i></button><a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a><a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a></section>
-        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i></button><a href="pm.html"><i data-lucide="calendar-check"></i>PM</a></section>
-        <section class="nav-group active"><button class="nav-head selected" type="button" aria-expanded="true"><i data-lucide="package-search"></i>Spare Part Management<i data-lucide="chevron-down"></i></button><a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a><a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a><a class="current" href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a></section>
+        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="wrench"></i><span data-i18n="nav.maintenance"></span><i data-lucide="chevron-down"></i></button><a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i><span data-i18n="nav.bm"></span></a><a href="repair_info.html"><i data-lucide="file-text"></i><span data-i18n="nav.repairInfo"></span></a><a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i><span data-i18n="nav.kpi"></span></a></section>
+        <section class="nav-group active"><button class="nav-head" type="button" aria-expanded="true"><i data-lucide="settings-2"></i><span data-i18n="nav.tpm"></span><i data-lucide="chevron-down"></i></button><a href="pm.html"><i data-lucide="calendar-check"></i><span data-i18n="nav.pm"></span></a></section>
+        <section class="nav-group active"><button class="nav-head selected" type="button" aria-expanded="true"><i data-lucide="package-search"></i><span data-i18n="nav.sparepart"></span><i data-lucide="chevron-down"></i></button><a href="red_tag.html"><i data-lucide="tag"></i><span data-i18n="nav.redTag"></span></a><a href="spare_parts.html"><i data-lucide="boxes"></i><span data-i18n="nav.sparepartItem"></span></a><a class="current" href="incoming_stock.html"><i data-lucide="truck"></i><span data-i18n="nav.incoming"></span></a></section>
       </nav>
-      <div class="sidebar-footer"><button class="logout sidebar-logout" type="button"><i data-lucide="log-out"></i>Logout</button><small class="app-copyright">© 2026 LEAN Department, Vietnam Samho</small></div>
+      <div class="sidebar-footer"><button class="logout sidebar-logout" type="button"><i data-lucide="log-out"></i><span data-i18n="nav.logout"></span></button><small class="app-copyright" data-i18n="app.copyright"></small></div>
     </aside>
     <div class="shell"><main class="content">
       <section class="info-panel spare-panel">
-        <div class="info-title"><i data-lucide="truck"></i><h1>Incoming Stock</h1></div>
-        <p class="incoming-stock-note">Select spare parts and enter the quantity you want to order.</p>
-        <div class="info-filter spare-filter incoming-stock-filter catalog-filter" aria-label="Filter spare parts">
-          <label><span><i data-lucide="factory"></i>Plant</span><select id="incomingPlantFilter"><option value="">All plants</option></select></label>
-          <label><span><i data-lucide="search"></i>Search</span><input id="incomingSearchInput" type="search" placeholder="Item code or Vietnamese name" /></label>
-          <label><span><i data-lucide="list-filter"></i>Status</span><select id="incomingStatusFilter"><option value="">All status</option><option value="low">Low stock</option><option value="ok">OK</option></select></label>
+        <div class="info-title"><i data-lucide="truck"></i><h1 data-i18n="incoming.title">Incoming Stock</h1></div>
+        <p class="incoming-stock-note" data-i18n="incoming.note">Select spare parts and enter the quantity you want to order.</p>
+        <div class="info-filter spare-filter incoming-stock-filter catalog-filter" aria-label="Filter spare parts" data-i18n-title="incoming.filterAria">
+          <label><span><i data-lucide="factory"></i><span data-i18n="incoming.plant"></span></span><select id="incomingPlantFilter"><option value="" data-i18n="incoming.allPlants">All plants</option></select></label>
+          <label><span><i data-lucide="search"></i><span data-i18n="incoming.search"></span></span><input id="incomingSearchInput" type="search" placeholder="Item code or Vietnamese name" data-i18n-ph="incoming.searchPlaceholder" /></label>
+          <label><span><i data-lucide="list-filter"></i><span data-i18n="incoming.status"></span></span><select id="incomingStatusFilter"><option value="" data-i18n="incoming.allStatus">All status</option><option value="low" data-i18n="incoming.lowStock">Low stock</option><option value="ok" data-i18n="incoming.ok">OK</option></select></label>
         </div>
         <p class="info-status incoming-stock-status" id="incomingStockStatus" aria-live="polite"></p>
       </section>
-      <section class="repair-list" aria-label="Spare parts to order">
+      <section class="repair-list" aria-label="Spare parts to order" data-i18n-title="incoming.listAria">
         <form id="incomingStockForm">
           <div class="repair-table-wrap spare-table-wrap">
             <table class="repair-table spare-table incoming-stock-table">
-              <thead><tr><th>Item Code</th><th>Image</th><th>Name Vietnamese</th><th>Plant</th><th>Status</th><th>Quantity</th><th><span class="sr-only">Select item</span></th></tr></thead>
-              <tbody id="incomingStockList"><tr><td colspan="7">Loading spare parts…</td></tr></tbody>
+              <thead><tr><th data-i18n="incoming.itemCode">Item Code</th><th data-i18n="incoming.image">Image</th><th data-i18n="incoming.nameVn">Name Vietnamese</th><th data-i18n="incoming.plant">Plant</th><th data-i18n="incoming.status">Status</th><th data-i18n="incoming.quantity">Quantity</th><th><span class="sr-only" data-i18n="incoming.selectItem">Select item</span></th></tr></thead>
+              <tbody id="incomingStockList"><tr><td colspan="7" data-i18n="incoming.loading">Loading spare parts…</td></tr></tbody>
             </table>
           </div>
           <div class="repair-pagination" id="incomingStockPagination" hidden></div>
-          <div class="incoming-stock-actions"><button class="save" type="submit"><i data-lucide="clipboard-check"></i>Review Selected Items</button></div>
+          <div class="incoming-stock-actions"><button class="save" type="submit"><i data-lucide="clipboard-check"></i><span data-i18n="incoming.reviewSelected">Review Selected Items</span></button></div>
         </form>
       </section>
     </main></div>
     <div class="repair-modal incoming-stock-modal" id="incomingStockModal" aria-hidden="true">
       <div class="repair-modal-backdrop" data-close-incoming></div>
       <section class="repair-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="incomingStockModalTitle">
-        <header class="repair-modal-header"><h2 id="incomingStockModalTitle">Order Summary</h2><button class="repair-modal-close" type="button" data-close-incoming aria-label="Close"><i data-lucide="x"></i></button></header>
+        <header class="repair-modal-header"><h2 id="incomingStockModalTitle" data-i18n="incoming.orderSummary">Order Summary</h2><button class="repair-modal-close" type="button" data-close-incoming aria-label="Close" data-i18n-title="incoming.close"><i data-lucide="x"></i></button></header>
         <div class="incoming-stock-modal-list" id="incomingStockModalList"></div>
-        <footer class="repair-modal-footer"><div class="incoming-summary-actions"><button class="btn muted" type="button" data-close-incoming>Close</button><button class="save incoming-stock-export control-icon-button" id="incomingStockExport" type="button" aria-label="Export Excel" title="Export Excel"><i data-lucide="download"></i></button></div></footer>
+        <footer class="repair-modal-footer"><div class="incoming-summary-actions"><button class="btn muted" type="button" data-close-incoming data-i18n="incoming.close">Close</button><button class="save incoming-stock-export control-icon-button" id="incomingStockExport" type="button" aria-label="Export Excel" title="Export Excel" data-i18n-title="incoming.exportExcel"><i data-lucide="download"></i></button></div></footer>
       </section>
     </div>
   </body>

@@ -7,12 +7,13 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
@@ -28,7 +29,7 @@
         <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>Vietnam Samho</strong>
-          <span>Factory System</span>
+          <span data-i18n="brand.tagline"></span>
         </div>
       </div>
 
@@ -36,38 +37,39 @@
         <section class="nav-group active">
           <button class="nav-head selected" type="button" aria-expanded="true">
             <i data-lucide="wrench"></i>
-            Maintenance
+            <span data-i18n="nav.maintenance"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
-          <a class="current" href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i><span data-i18n="nav.bm"></span></a>
+          <a href="repair_info.html"><i data-lucide="file-text"></i><span data-i18n="nav.repairInfo"></span></a>
+          <a class="current" href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i><span data-i18n="nav.kpi"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i>
+            <i data-lucide="settings-2"></i><span data-i18n="nav.tpm"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a href="pm.html"><i data-lucide="calendar-check"></i>PM</a>
+          <a href="pm.html"><i data-lucide="calendar-check"></i><span data-i18n="nav.pm"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
             <i data-lucide="package-search"></i>
-            Spare Part Management
+            <span data-i18n="nav.sparepart"></span>
             <i data-lucide="chevron-down"></i>
           </button>
-          <a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a>
-          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
-          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+          <a href="red_tag.html"><i data-lucide="tag"></i><span data-i18n="nav.redTag"></span></a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i><span data-i18n="nav.sparepartItem"></span></a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i><span data-i18n="nav.incoming"></span></a>
         </section>
       </nav>
 
       <div class="sidebar-footer">
         <button class="logout sidebar-logout" type="button">
           <i data-lucide="log-out"></i>
-          Logout
+          <span data-i18n="nav.logout"></span>
         </button>
-        <small class="app-copyright">© 2026 LEAN Department, Vietnam Samho</small>
+        <small class="app-copyright" data-i18n="app.copyright"></small>
       </div>
     </aside>
 
@@ -75,31 +77,31 @@
       <main class="content kpi-content">
         <section class="kpi-monitor-head">
           <div>
-            <h1>KPI Monitoring Dashboard</h1>
-            <p id="kpiSubtitle">Real-time downtime analysis</p>
+            <h1 data-i18n="kpi.title">KPI Monitoring Dashboard</h1>
+            <p id="kpiSubtitle" data-i18n="kpi.subtitle">Real-time downtime analysis</p>
           </div>
           <div class="kpi-head-actions">
             <div class="date-range-filter">
               <label class="date-pill">
                 <i data-lucide="calendar"></i>
-                <span>From</span>
+                <span data-i18n="kpi.from">From</span>
                 <input type="date" id="kpiFromDate" />
               </label>
               <span class="date-sep">→</span>
               <label class="date-pill">
                 <i data-lucide="calendar"></i>
-                <span>To</span>
+                <span data-i18n="kpi.to">To</span>
                 <input type="date" id="kpiToDate" />
               </label>
             </div>
             <div class="plant-filter">
               <button class="quarter-pill" id="plantFilterButton" type="button" aria-expanded="false" aria-controls="plantFilterMenu">
                 <i data-lucide="building-2"></i>
-                <span id="plantFilterLabel">All Plants</span>
+                <span id="plantFilterLabel" data-i18n="kpi.allPlants">All Plants</span>
                 <i data-lucide="chevron-down"></i>
               </button>
               <div class="month-filter-menu" id="plantFilterMenu" hidden>
-                <button type="button" data-plant-value="" class="active">All Plants</button>
+                <button type="button" data-plant-value="" class="active" data-i18n="kpi.allPlants">All Plants</button>
                 <button type="button" data-plant-value="C2B">C2B</button>
                 <button type="button" data-plant-value="SF">SF</button>
                 <button type="button" data-plant-value="OS">OS</button>
@@ -108,58 +110,58 @@
             </div>
             <button class="quarter-pill" id="kpiDateSearch" type="button">
               <i data-lucide="search"></i>
-              Search
+              <span data-i18n="common.search">Search</span>
             </button>
           </div>
         </section>
 
-        <section class="kpi-summary-grid" aria-label="KPI summary">
+        <section class="kpi-summary-grid" aria-label="KPI summary" data-i18n-title="kpi.summaryAria">
           <article class="monitor-kpi-card blue">
             <i data-lucide="clock-3"></i>
             <div>
-              <span>Total Downtime</span>
+              <span data-i18n="kpi.totalDowntime">Total Downtime</span>
               <strong id="totalDowntime">--</strong>
-              <small>minutes</small>
+              <small data-i18n="kpi.minutes">minutes</small>
             </div>
-            <em class="positive" id="downtimePeriod">Loading</em>
+            <em class="positive" id="downtimePeriod" data-i18n="kpi.loading">Loading</em>
           </article>
           <article class="monitor-kpi-card green">
             <i data-lucide="check"></i>
             <div>
-              <span>Avg MTTR</span>
-              <strong><span id="avgMttr">--</span> <small>min</small></strong>
-              <small>Mean Time to Repair</small>
+              <span data-i18n="kpi.avgMttr">Avg MTTR</span>
+              <strong><span id="avgMttr">--</span> <small data-i18n="kpi.min">min</small></strong>
+              <small data-i18n="kpi.meanTimeToRepair">Mean Time to Repair</small>
             </div>
-            <em class="positive" id="mttrStatus">Calculated</em>
+            <em class="positive" id="mttrStatus" data-i18n="kpi.calculated">Calculated</em>
           </article>
           <article class="monitor-kpi-card purple">
             <i data-lucide="shield-check"></i>
             <div>
-              <span>Avg MTBF</span>
-              <strong><span id="avgMtbf">--</span> <small>min</small></strong>
-              <small>Mean Time Between Failures</small>
+              <span data-i18n="kpi.avgMtbf">Avg MTBF</span>
+              <strong><span id="avgMtbf">--</span> <small data-i18n="kpi.min">min</small></strong>
+              <small data-i18n="kpi.meanTimeBetweenFailures">Mean Time Between Failures</small>
             </div>
-            <em class="positive" id="mtbfStatus">Calculated</em>
+            <em class="positive" id="mtbfStatus" data-i18n="kpi.calculated">Calculated</em>
           </article>
           <article class="monitor-kpi-card orange">
             <i data-lucide="triangle-alert"></i>
             <div>
-              <span>Total Errors</span>
+              <span data-i18n="kpi.totalErrors">Total Errors</span>
               <strong id="totalErrors">--</strong>
-              <small>Error Events</small>
+              <small data-i18n="kpi.errorEvents">Error Events</small>
             </div>
-            <em class="negative" id="errorStatus">Loading</em>
+            <em class="negative" id="errorStatus" data-i18n="kpi.loading">Loading</em>
           </article>
         </section>
 
-        <p class="kpi-data-status" id="kpiDataStatus" aria-live="polite">Loading downtime data...</p>
+        <p class="kpi-data-status" id="kpiDataStatus" aria-live="polite" data-i18n="kpi.loadingDowntime">Loading downtime data...</p>
 
         <section class="kpi-board-grid">
           <article class="kpi-panel plant-downtime">
             <header>
-              <h2>Total Downtime by Plant</h2>
+              <h2 data-i18n="kpi.chartTotalDowntime">Total Downtime by Plant</h2>
             </header>
-            <div class="cluster-chart" aria-label="Total downtime by plant">
+            <div class="cluster-chart" aria-label="Total downtime by plant" data-i18n-title="kpi.chartPlantAria">
               <div class="axis">
                 <span>500k</span>
                 <span>400k</span>
@@ -171,42 +173,42 @@
               <div class="cluster-bars" id="monthlyDowntimeChart"></div>
             </div>
             <footer class="chart-legend" id="monthlyLegend">
-              <span><b class="jan"></b>Jan</span>
-              <span><b class="feb"></b>Feb</span>
-              <span><b class="mar"></b>Mar</span>
+              <span><b class="jan"></b><span data-i18n="kpi.month.jan">Jan</span></span>
+              <span><b class="feb"></b><span data-i18n="kpi.month.feb">Feb</span></span>
+              <span><b class="mar"></b><span data-i18n="kpi.month.mar">Mar</span></span>
             </footer>
           </article>
 
           <article class="kpi-panel ranking-panel">
             <header>
-              <h2>Top 3 Areas by Downtime</h2>
+              <h2 data-i18n="kpi.chartTop3">Top 3 Areas by Downtime</h2>
             </header>
             <div class="rank-list" id="sectionRankList"></div>
           </article>
 
           <article class="kpi-panel error-type-panel">
             <header>
-              <h2>Top 5 Downtime Error Counts by Machine Type</h2>
+              <h2 data-i18n="kpi.chartTop5">Top 5 Downtime Error Counts by Machine Type</h2>
             </header>
-            <div class="single-bars" id="machineDowntimeBars" aria-label="Machine downtime totals"></div>
+            <div class="single-bars" id="machineDowntimeBars" aria-label="Machine downtime totals" data-i18n-title="kpi.chartMachineAria"></div>
             <footer class="error-footer">
-              <strong id="machineFooterTotal">Total Downtime: --</strong>
-              <span id="machineFooterCount">-- machines</span>
+              <strong id="machineFooterTotal" data-i18n="kpi.totalDowntimeColon">Total Downtime: --</strong>
+              <span id="machineFooterCount" data-i18n="kpi.machines">-- machines</span>
             </footer>
           </article>
 
           <article class="kpi-panel trend-panel">
             <header>
-              <h2>MTTR &amp; MTBF Trends by Machine</h2>
+              <h2 data-i18n="kpi.chartMttrMtbf">MTTR &amp; MTBF Trends by Machine</h2>
             </header>
             <div class="combo-chart">
               <div class="combo-bars" id="monthlyTrendBars"></div>
               <svg class="combo-lines" id="comboLines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
             </div>
             <footer class="chart-legend">
-              <span><b class="jan"></b>Downtime (min)</span>
-              <span><b class="mar"></b>MTBF (min)</span>
-              <span><b class="feb"></b>MTTR (min)</span>
+              <span><b class="jan"></b><span data-i18n="kpi.legendDowntime">Downtime (min)</span></span>
+              <span><b class="mar"></b><span data-i18n="kpi.legendMtbf">MTBF (min)</span></span>
+              <span><b class="feb"></b><span data-i18n="kpi.legendMttr">MTTR (min)</span></span>
             </footer>
           </article>
         </section>

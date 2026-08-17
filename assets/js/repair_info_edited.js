@@ -1,5 +1,98 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+﻿if (window.SAMHO_LANG) {
+  window.SAMHO_LANG.register({
+    "repairInfo.title": { vi: "Thông tin máy hư", en: "Repair Information" },
+    "repairInfo.from": { vi: "Từ", en: "From" },
+    "repairInfo.to": { vi: "Đến", en: "To" },
+    "repairInfo.itemCode": { vi: "Mã máy", en: "Item Code" },
+    "repairInfo.itemCodePh": { vi: "MÃ MÁY", en: "ITEM CODE" },
+    "repairInfo.plant": { vi: "Nhà máy", en: "Plant" },
+    "repairInfo.plantOptions": { vi: "Tùy chọn nhà máy", en: "Plant options" },
+    "repairInfo.exportExcel": { vi: "Xuất dữ liệu hiện tại ra Excel", en: "Export current records to Excel" },
+    "repairInfo.listAria": { vi: "Danh sách máy hư", en: "Breakdown machine list" },
+    "repairInfo.allPlant": { vi: "TẤT CẢ NHÀ MÁY", en: "ALL PLANT" },
+    "repairInfo.table.no": { vi: "STT", en: "No." },
+    "repairInfo.table.itemCode": { vi: "mã máy", en: "item code" },
+    "repairInfo.table.name": { vi: "tên máy", en: "name" },
+    "repairInfo.table.plant": { vi: "nhà máy", en: "Plant" },
+    "repairInfo.table.section": { vi: "chuyền", en: "section" },
+    "repairInfo.table.place": { vi: "vị trí", en: "place" },
+    "repairInfo.table.reported": { vi: "Thời gian báo hư", en: "Report datetime" },
+    "repairInfo.table.startFixing": { vi: "Thời gian bắt đầu sửa", en: "Start fixing datetime" },
+    "repairInfo.table.doneFixing": { vi: "Thời gian sửa xong", en: "Done fixing datetime" },
+    "repairInfo.table.downtime": { vi: "thời gian dừng (Phút)", en: "downtime (Min)" },
+    "repairInfo.table.issue": { vi: "vấn đề", en: "issue" },
+    "repairInfo.table.otherIssue": { vi: "vấn đề khác", en: "Other issue" },
+    "repairInfo.table.reason": { vi: "nguyên nhân", en: "reason" },
+    "repairInfo.table.solve": { vi: "cách khắc phục", en: "Solve" },
+    "repairInfo.table.technician": { vi: "thợ sửa", en: "technician" },
+    "repairInfo.table.action": { vi: "Thao tác", en: "Action" },
+    "repairInfo.table.edit": { vi: "Sửa phiếu sửa chữa", en: "Edit repair record" },
+    "repairInfo.table.delete": { vi: "Xóa phiếu sửa chữa", en: "Delete repair record" },
+    "repairInfo.empty": { vi: "Không tìm thấy phiếu nào trong khoảng thời gian đã chọn.", en: "No records found for the selected date range." },
+    "repairInfo.confirmDelete": { vi: "Xóa phiếu sửa chữa này?", en: "Delete this repair record?" },
+    "repairInfo.deleted": { vi: "Đã xóa phiếu sửa chữa.", en: "Repair record deleted." },
+    "repairInfo.action.delete": { vi: "xóa phiếu sửa chữa này", en: "delete this repair record" },
+    "repairInfo.pagination.showing": { vi: "Hiển thị {start}-{end} trên {total}", en: "Showing {start}-{end} of {total}" },
+    "repairInfo.pagination.previous": { vi: "Trước", en: "Previous" },
+    "repairInfo.pagination.page": { vi: "Trang {current} / {total}", en: "Page {current} / {total}" },
+    "repairInfo.pagination.next": { vi: "Sau", en: "Next" },
+    "repairInfo.export.searchFirst": { vi: "Tìm phiếu sửa chữa trước khi xuất.", en: "Search for repair records before exporting." },
+    "repairInfo.export.unavailable": { vi: "Không thể xuất Excel. Vui lòng tải lại trang và thử lại.", en: "Excel export is unavailable. Please refresh the page and try again." },
+    "repairInfo.export.sheet": { vi: "Phiếu sửa chữa", en: "Repair Records" },
+    "repairInfo.export.itemCode": { vi: "Mã máy", en: "Item Code" },
+    "repairInfo.export.no": { vi: "STT", en: "No." },
+    "repairInfo.export.machineName": { vi: "Tên máy", en: "Machine Name" },
+    "repairInfo.export.plant": { vi: "Nhà máy", en: "Plant" },
+    "repairInfo.export.section": { vi: "Chuyền", en: "Section" },
+    "repairInfo.export.place": { vi: "Vị trí", en: "Place" },
+    "repairInfo.export.reportedAt": { vi: "Thời gian báo hư", en: "Reported At" },
+    "repairInfo.export.startedAt": { vi: "Thời gian bắt đầu sửa", en: "Repair Started At" },
+    "repairInfo.export.repairedAt": { vi: "Thời gian sửa xong", en: "Repaired At" },
+    "repairInfo.export.totalDowntime": { vi: "Tổng thời gian dừng", en: "Total Downtime" },
+    "repairInfo.export.issue": { vi: "Vấn đề", en: "Issue" },
+    "repairInfo.export.otherIssue": { vi: "Vấn đề khác", en: "Other Issue" },
+    "repairInfo.export.reason": { vi: "Nguyên nhân", en: "Reason" },
+    "repairInfo.export.solve": { vi: "Cách khắc phục", en: "Solve" },
+    "repairInfo.export.technician": { vi: "Thợ sửa", en: "Technician" },
+    "repairInfo.export.status": { vi: "Trạng thái", en: "Status" },
+    "repairInfo.export.completed": { vi: "Hoàn thành", en: "Completed" },
+    "repairInfo.export.pending": { vi: "Chờ xử lý", en: "Pending" },
+    "repairInfo.search.bothDates": { vi: "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.", en: "Please select both from and to dates." },
+    "repairInfo.search.dateRange": { vi: "Ngày bắt đầu không được sau ngày kết thúc.", en: "From date cannot be later than to date." },
+    "repairInfo.search.searching": { vi: "Đang tìm kiếm...", en: "Searching..." },
+    "repairInfo.search.loading": { vi: "Đang tải phiếu sửa chữa...", en: "Loading repair records..." },
+    "repairInfo.search.found": { vi: "Tìm thấy {count} phiếu sửa chữa.", en: "Found {count} repair records." },
+    "repairInfo.action.loadRecords": { vi: "tải phiếu sửa chữa", en: "load repair records" },
+    "repairInfo.action.loadPlants": { vi: "tải danh sách nhà máy", en: "load the plant list" },
+    "repairInfo.edit.eyebrow": { vi: "Phiếu sửa chữa", en: "Repair record" },
+    "repairInfo.edit.title": { vi: "Điền thông tin sửa chữa", en: "Fill in repair information" },
+    "repairInfo.edit.close": { vi: "Đóng", en: "Close" },
+    "repairInfo.edit.note": { vi: "Dữ liệu phiếu hiện tại đã được nạp vào các ô. Xem lại và cập nhật các trường bên dưới.", en: "Current record data is loaded into the inputs. Review and update the fields below." },
+    "repairInfo.edit.itemCode": { vi: "Mã máy", en: "Item Code" },
+    "repairInfo.edit.machineName": { vi: "Tên máy", en: "Machine Name" },
+    "repairInfo.edit.issue": { vi: "Vấn đề", en: "Issue" },
+    "repairInfo.edit.other": { vi: "Khác", en: "Other" },
+    "repairInfo.edit.reason": { vi: "Nguyên nhân", en: "Reason" },
+    "repairInfo.edit.solve": { vi: "Cách khắc phục", en: "Solve" },
+    "repairInfo.edit.mechanic": { vi: "Thợ sửa", en: "Mechanic" },
+    "repairInfo.edit.reportDatetime": { vi: "Thời gian báo hư", en: "Report datetime" },
+    "repairInfo.edit.startDatetime": { vi: "Thời gian bắt đầu sửa", en: "Start fixing datetime" },
+    "repairInfo.edit.doneDatetime": { vi: "Thời gian sửa xong", en: "Done fixing datetime" },
+    "repairInfo.edit.downtime": { vi: "Thời gian dừng: {minutes} phút", en: "Down time: {minutes} min" },
+    "repairInfo.edit.downtimeNone": { vi: "Thời gian dừng: —", en: "Down time: —" },
+    "repairInfo.edit.cancel": { vi: "Hủy", en: "Cancel" },
+    "repairInfo.edit.save": { vi: "Lưu", en: "Save" },
+    "repairInfo.edit.missingId": { vi: "Thiếu mã phiếu.", en: "Missing record ID." },
+    "repairInfo.edit.saving": { vi: "Đang lưu thay đổi...", en: "Saving changes..." },
+    "repairInfo.edit.saved": { vi: "Đã lưu thay đổi.", en: "Changes saved." },
+    "repairInfo.action.saveChanges": { vi: "lưu các thay đổi này", en: "save these changes" },
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
+
+  const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
 
   const config = window.SAMHO_SUPABASE;
   const filterForm = document.getElementById("repairInfoFilter");
@@ -11,6 +104,7 @@
   let currentRecords = [];
   let currentMachineMap = new Map();
   let currentPage = 1;
+  let currentPlants = [];
 
   if (!filterForm || !list || !status || !searchButton) return;
 
@@ -44,7 +138,7 @@
   const formatDateTime = (value) => window.SAMHO_DATETIME.toDisplay(value);
 
   const normalizeSearch = (value) => String(value || "").trim().toLowerCase();
-  const allPlantLabel = "ALL PLANT";
+  const allPlantLabel = t("repairInfo.allPlant");
 
   const plantSortRank = (plant) => {
     const value = normalizeSearch(plant);
@@ -124,7 +218,8 @@
 
   const loadPlantOptions = async () => {
     const rows = await window.SAMHO_DB.select(config.repairInfo.table, { columns: "plant", order: "plant.asc" });
-    populatePlantOptions(rows.map((record) => getRecordValue(record, ["plant", "PLANT"])));
+    currentPlants = rows.map((record) => getRecordValue(record, ["plant", "PLANT"]));
+    populatePlantOptions(currentPlants);
   };
 
   const fetchRepairRecords = async (fromDate, toDate) => {
@@ -217,7 +312,7 @@
     const reportedAt = getDateTimeInputValue("editReportedDate", "editReportedTime");
     const repairedAt = getDateTimeInputValue("editRepairedDate", "editRepairedTime");
     const minutes = getDowntimeMinutes(reportedAt, repairedAt);
-    element.textContent = minutes == null ? "Down time: —" : `Down time: ${minutes} min`;
+    element.textContent = minutes == null ? t("repairInfo.edit.downtimeNone") : t("repairInfo.edit.downtime", { minutes });
   };
 
   const ensureEditModal = () => {
@@ -232,61 +327,61 @@
       <form class="repair-modal-dialog" id="repairEditForm">
         <header class="repair-modal-header">
           <div>
-            <span id="editRecordEyebrow">Repair record</span>
-            <h2>Fill in repair information</h2>
+            <span id="editRecordEyebrow">${t("repairInfo.edit.eyebrow")}</span>
+            <h2>${t("repairInfo.edit.title")}</h2>
           </div>
-          <button class="repair-modal-close" type="button" data-close-edit aria-label="Close">
+          <button class="repair-modal-close" type="button" data-close-edit aria-label="${t("repairInfo.edit.close")}">
             <i data-lucide="x"></i>
           </button>
         </header>
-        <p class="repair-modal-note">Current record data is loaded into the inputs. Review and update the fields below.</p>
+        <p class="repair-modal-note">${t("repairInfo.edit.note")}</p>
         <div class="repair-modal-grid">
           <label>
-            <span>Item Code</span>
+            <span>${t("repairInfo.edit.itemCode")}</span>
             <input id="editItemCode" type="text" disabled />
           </label>
           <label>
-            <span>Machine Name</span>
+            <span>${t("repairInfo.edit.machineName")}</span>
             <input id="editMachineName" type="text" disabled />
           </label>
           <label>
-            <span>Issue</span>
+            <span>${t("repairInfo.edit.issue")}</span>
             <input id="editIssue" type="text" required />
           </label>
           <label>
-            <span>Other</span>
+            <span>${t("repairInfo.edit.other")}</span>
             <input id="editOther" type="text" />
           </label>
           <label>
-            <span>Reason</span>
+            <span>${t("repairInfo.edit.reason")}</span>
             <input id="editReason" type="text" required />
           </label>
           <label>
-            <span>Solve</span>
+            <span>${t("repairInfo.edit.solve")}</span>
             <select id="editSolve" required>
-              <option>SỬA CHỮA</option>
-              <option>THAY THẾ</option>
-              <option>VỆ SINH</option>
+              <option value="SỬA CHỮA" data-i18n="bm.solve.repair">SỬA CHỮA</option>
+              <option value="THAY THẾ" data-i18n="bm.solve.replace">THAY THẾ</option>
+              <option value="VỆ SINH" data-i18n="bm.solve.clean">VỆ SINH</option>
             </select>
           </label>
           <label>
-            <span>Mechanic</span>
+            <span>${t("repairInfo.edit.mechanic")}</span>
             <input id="editTechnician" type="text" required />
           </label>
         </div>
         <div class="repair-modal-time-grid">
           <label>
-            <span>Report datetime</span>
+            <span>${t("repairInfo.edit.reportDatetime")}</span>
             <input id="editReportedDate" type="date" required />
             <input id="editReportedTime" type="time" required />
           </label>
           <label>
-            <span>Start fixing datetime</span>
+            <span>${t("repairInfo.edit.startDatetime")}</span>
             <input id="editStartedDate" type="date" />
             <input id="editStartedTime" type="time" />
           </label>
           <label>
-            <span>Done fixing datetime</span>
+            <span>${t("repairInfo.edit.doneDatetime")}</span>
             <input id="editRepairedDate" type="date" />
             <input id="editRepairedTime" type="time" />
           </label>
@@ -294,8 +389,8 @@
         <p class="repair-modal-downtime" id="editDowntime"></p>
         <footer class="repair-modal-footer">
           <p class="repair-modal-status" id="repairEditStatus" aria-live="polite"></p>
-          <button class="btn muted" type="button" data-close-edit>Cancel</button>
-          <button class="save" type="submit"><i data-lucide="save"></i>Save</button>
+          <button class="btn muted" type="button" data-close-edit>${t("repairInfo.edit.cancel")}</button>
+          <button class="save" type="submit"><i data-lucide="save"></i>${t("repairInfo.edit.save")}</button>
         </footer>
       </form>
     `;
@@ -313,20 +408,20 @@
       const status = modal.querySelector("#repairEditStatus");
 
       if (!recordId) {
-        status.textContent = "Missing record ID.";
+        status.textContent = t("repairInfo.edit.missingId");
         return;
       }
 
-      status.textContent = "Saving changes...";
+      status.textContent = t("repairInfo.edit.saving");
 
       try {
         await patchRepairInfo(recordId, buildUpdatePayload());
-        status.textContent = "Changes saved.";
+        status.textContent = t("repairInfo.edit.saved");
         window.setTimeout(() => {
           modal.classList.remove("active");
         }, 1200);
       } catch (error) {
-        status.textContent = window.SAMHO_ERRORS.message(error, "save these changes");
+        status.textContent = window.SAMHO_ERRORS.message(error, t("repairInfo.action.saveChanges"));
       }
     });
     if (window.lucide) window.lucide.createIcons();
@@ -364,7 +459,7 @@
     list.innerHTML = "";
 
     if (!records.length) {
-      list.innerHTML = `<article class="repair-empty">No records found for the selected date range.</article>`;
+      list.innerHTML = `<article class="repair-empty">${t("repairInfo.empty")}</article>`;
       return;
     }
 
@@ -379,22 +474,22 @@
       <table class="repair-table">
         <thead>
           <tr>
-            <th>No.</th>
-            <th>item code</th>
-            <th>name</th>
-            <th>Plant</th>
-            <th>section</th>
-            <th>place</th>
-            <th>Report datetime</th>
-            <th>Start fixing datetime</th>
-            <th>Done fixing datetime</th>
-            <th>downtime (Min)</th>
-            <th>issue</th>
-            <th>Other issue</th>
-            <th>reason</th>
-            <th>Solve</th>
-            <th>technician</th>
-            <th>Action</th>
+            <th>${t("repairInfo.table.no")}</th>
+            <th>${t("repairInfo.table.itemCode")}</th>
+            <th>${t("repairInfo.table.name")}</th>
+            <th>${t("repairInfo.table.plant")}</th>
+            <th>${t("repairInfo.table.section")}</th>
+            <th>${t("repairInfo.table.place")}</th>
+            <th>${t("repairInfo.table.reported")}</th>
+            <th>${t("repairInfo.table.startFixing")}</th>
+            <th>${t("repairInfo.table.doneFixing")}</th>
+            <th>${t("repairInfo.table.downtime")}</th>
+            <th>${t("repairInfo.table.issue")}</th>
+            <th>${t("repairInfo.table.otherIssue")}</th>
+            <th>${t("repairInfo.table.reason")}</th>
+            <th>${t("repairInfo.table.solve")}</th>
+            <th>${t("repairInfo.table.technician")}</th>
+            <th>${t("repairInfo.table.action")}</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -438,10 +533,10 @@
         <td>${record.technician || "-"}</td>
         <td>
           <div class="repair-row-actions">
-            <button class="repair-edit" type="button" data-record-id="${recordId || ""}" aria-label="Edit repair record" title="Edit">
+            <button class="repair-edit" type="button" data-record-id="${recordId || ""}" aria-label="${t("repairInfo.table.edit")}" title="${t("repairInfo.table.edit")}">
               <i data-lucide="square-pen"></i>
             </button>
-            <button class="repair-delete" type="button" data-record-id="${recordId || ""}" aria-label="Delete repair record" title="Delete">
+            <button class="repair-delete" type="button" data-record-id="${recordId || ""}" aria-label="${t("repairInfo.table.delete")}" title="${t("repairInfo.table.delete")}">
               <i data-lucide="trash-2"></i>
             </button>
           </div>
@@ -454,17 +549,17 @@
 
       row.querySelector(".repair-delete")?.addEventListener("click", async () => {
         const recordId = getRecordValue(record, ["id", "ID"]);
-        if (!recordId || !window.confirm("Delete this repair record?")) return;
+        if (!recordId || !window.confirm(t("repairInfo.confirmDelete"))) return;
 
         try {
           await deleteRepairInfo(recordId);
           currentRecords = currentRecords.filter((current) => String(getRecordValue(current, ["id", "ID"])) !== String(recordId));
           renderRecords(currentRecords, currentMachineMap, currentPage);
           updateExportState();
-          setStatus("Repair record deleted.", "success");
+          setStatus(t("repairInfo.deleted"), "success");
           if (window.lucide) window.lucide.createIcons();
         } catch (error) {
-          setStatus(window.SAMHO_ERRORS.message(error, "delete this repair record"), "error");
+          setStatus(window.SAMHO_ERRORS.message(error, t("repairInfo.action.delete")), "error");
         }
       });
 
@@ -476,15 +571,15 @@
     const pagination = document.createElement("div");
     pagination.className = "repair-pagination";
     pagination.innerHTML = `
-      <span>Showing ${pageStart + 1}-${Math.min(pageStart + pageSize, records.length)} of ${records.length}</span>
+      <span>${t("repairInfo.pagination.showing", { start: pageStart + 1, end: Math.min(pageStart + pageSize, records.length), total: records.length })}</span>
       <div class="repair-pagination-actions">
         <button type="button" class="repair-page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
           <i data-lucide="chevron-left"></i>
-          Previous
+          ${t("repairInfo.pagination.previous")}
         </button>
-        <strong>Page ${currentPage} / ${totalPages}</strong>
+        <strong>${t("repairInfo.pagination.page", { current: currentPage, total: totalPages })}</strong>
         <button type="button" class="repair-page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
-          Next
+          ${t("repairInfo.pagination.next")}
           <i data-lucide="chevron-right"></i>
         </button>
       </div>
@@ -503,12 +598,12 @@
 
   const exportRecords = () => {
     if (!currentRecords.length) {
-      setStatus("Search for repair records before exporting.", "warning");
+      setStatus(t("repairInfo.export.searchFirst"), "warning");
       return;
     }
 
     if (!window.XLSX) {
-      setStatus("Excel export is unavailable. Please refresh the page and try again.", "error");
+      setStatus(t("repairInfo.export.unavailable"), "error");
       return;
     }
 
@@ -520,22 +615,22 @@
       const repairedAt = getRecordValue(record, ["end_datetime"]);
 
       return {
-        "No.": idx + 1,
-        "Item Code": itemCode,
-        "Machine Name": getMachineValue(machine, "machineName"),
-        Plant: getRecordValue(record, ["plant", "PLANT"]),
-        Section: getRecordValue(record, ["section", "SECTION"]),
-        Place: getRecordValue(record, ["place", "PLACE"]),
-        "Reported At": formatDateTime(reportedAt),
-        "Repair Started At": formatDateTime(repairStartedAt),
-        "Repaired At": formatDateTime(repairedAt),
-        "Total Downtime": record.total_downtime ?? "",
-        Issue: getRecordValue(record, ["issue", "issue_nm_vn"]),
-        "Other Issue": getRecordValue(record, ["other_issue", "other_reason"]),
-        Reason: getRecordValue(record, ["reason", "reason_nm_vn"]),
-        Solve: getRecordValue(record, ["solve", "solve_nm_en"]),
-        Technician: record.technician || "",
-        Status: repairedAt ? "Completed" : "Pending"
+        [t("repairInfo.export.no")]: idx + 1,
+        [t("repairInfo.export.itemCode")]: itemCode,
+        [t("repairInfo.export.machineName")]: getMachineValue(machine, "machineName"),
+        [t("repairInfo.export.plant")]: getRecordValue(record, ["plant", "PLANT"]),
+        [t("repairInfo.export.section")]: getRecordValue(record, ["section", "SECTION"]),
+        [t("repairInfo.export.place")]: getRecordValue(record, ["place", "PLACE"]),
+        [t("repairInfo.export.reportedAt")]: formatDateTime(reportedAt),
+        [t("repairInfo.export.startedAt")]: formatDateTime(repairStartedAt),
+        [t("repairInfo.export.repairedAt")]: formatDateTime(repairedAt),
+        [t("repairInfo.export.totalDowntime")]: record.total_downtime ?? "",
+        [t("repairInfo.export.issue")]: getRecordValue(record, ["issue", "issue_nm_vn"]),
+        [t("repairInfo.export.otherIssue")]: getRecordValue(record, ["other_issue", "other_reason"]),
+        [t("repairInfo.export.reason")]: getRecordValue(record, ["reason", "reason_nm_vn"]),
+        [t("repairInfo.export.solve")]: getRecordValue(record, ["solve", "solve_nm_en"]),
+        [t("repairInfo.export.technician")]: record.technician || "",
+        [t("repairInfo.export.status")]: repairedAt ? t("repairInfo.export.completed") : t("repairInfo.export.pending")
       };
     });
 
@@ -546,7 +641,7 @@
       { wch: 24 }, { wch: 18 }, { wch: 18 }, { wch: 14 }
     ];
     const workbook = window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(workbook, worksheet, "Repair Records");
+    window.XLSX.utils.book_append_sheet(workbook, worksheet, t("repairInfo.export.sheet"));
 
     const fromDate = document.getElementById("fromDate")?.value || "records";
     const toDate = document.getElementById("toDate")?.value || "";
@@ -560,18 +655,18 @@
     const plant = document.getElementById("infoPlant")?.value || "";
 
     if (!fromDate || !toDate) {
-      setStatus("Please select both from and to dates.", "warning");
+      setStatus(t("repairInfo.search.bothDates"), "warning");
       return;
     }
 
     if (fromDate > toDate) {
-      setStatus("From date cannot be later than to date.", "warning");
+      setStatus(t("repairInfo.search.dateRange"), "warning");
       return;
     }
 
     searchButton.disabled = true;
-    setStatus("Searching...", "loading");
-    window.SAMHO_LOADING.show("Loading repair records...");
+    setStatus(t("repairInfo.search.searching"), "loading");
+    window.SAMHO_LOADING.show(t("repairInfo.search.loading"));
 
     try {
       const dateRecords = await fetchRepairRecords(fromDate, toDate);
@@ -581,13 +676,13 @@
       currentMachineMap = machines;
       renderRecords(currentRecords, currentMachineMap, 1);
       updateExportState();
-      setStatus(`Found ${records.length} repair records.`, "success");
+      setStatus(t("repairInfo.search.found", { count: records.length }), "success");
     } catch (error) {
       currentRecords = [];
       currentMachineMap = new Map();
       updateExportState();
       list.innerHTML = "";
-      setStatus(window.SAMHO_ERRORS.message(error, "load repair records"), "error");
+      setStatus(window.SAMHO_ERRORS.message(error, t("repairInfo.action.loadRecords")), "error");
     } finally {
       window.SAMHO_LOADING.hide();
       searchButton.disabled = false;
@@ -599,7 +694,7 @@
   document.getElementById("fromDate").value = today;
   document.getElementById("toDate").value = today;
   loadPlantOptions().catch((error) => {
-    setStatus(window.SAMHO_ERRORS.message(error, "load the plant list"), "warning");
+    setStatus(window.SAMHO_ERRORS.message(error, t("repairInfo.action.loadPlants")), "warning");
   });
 
   filterForm.addEventListener("submit", (event) => {
@@ -612,5 +707,11 @@
 
   document.addEventListener("click", (event) => {
     if (!event.target.closest("#infoPlantPicker")) closePlantDropdown();
+  });
+
+  document.addEventListener("samho:langchange", () => {
+    if (currentPlants.length) populatePlantOptions(currentPlants);
+    if (currentRecords.length) renderRecords(currentRecords, currentMachineMap, currentPage);
+    if (document.getElementById("repairEditModal")?.classList.contains("active")) updateDowntimePreview();
   });
 });

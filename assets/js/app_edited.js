@@ -1,7 +1,76 @@
+if (window.SAMHO_LANG) {
+  window.SAMHO_LANG.register({
+    "bm.search.prompt": { vi: "Nhập hoặc scan mã máy.", en: "Enter or scan a machine code." },
+    "bm.search.searching": { vi: "Đang tìm trong cơ sở dữ liệu...", en: "Searching database..." },
+    "bm.search.loaded": { vi: "Đã tải thông tin máy.", en: "Machine data loaded." },
+    "bm.search.noRows": { vi: "Không có dữ liệu máy. Kiểm tra dữ liệu hoặc policy RLS SELECT của Supabase.", en: "No visible machine rows. Check data or Supabase RLS SELECT policy." },
+    "bm.search.notFound": { vi: "Không tìm thấy máy với mã này.", en: "No machine found for this code." },
+    "bm.action.loadMachineDetails": { vi: "tải thông tin máy", en: "load machine details" },
+    "bm.scan.title": { vi: "Máy quét mã vạch", en: "Barcode scanner" },
+    "bm.scan.heading": { vi: "Quét mã máy", en: "Scan machine code" },
+    "bm.scan.close": { vi: "Đóng máy quét", en: "Close scanner" },
+    "bm.scan.point": { vi: "Hướng camera vào mã vạch.", en: "Point the camera at a barcode." },
+    "bm.scan.noHttps": { vi: "Camera yêu cầu HTTPS và trình duyệt hỗ trợ.", en: "Camera access requires HTTPS and a supported browser." },
+    "bm.scan.loading": { vi: "Máy quét mã vạch đang tải. Vui lòng thử lại.", en: "Barcode scanner is loading. Please try again." },
+    "bm.scan.opening": { vi: "Đang mở camera...", en: "Opening camera..." },
+    "bm.scan.scanned": { vi: "Đã quét {code}.", en: "Scanned {code}." },
+    "bm.action.useCameraScanner": { vi: "dùng máy quét camera", en: "use the camera scanner" },
+    "bm.field.brokenAt": { vi: "Báo hư", en: "Reported" },
+    "bm.field.repairStartedAt": { vi: "Bắt đầu sửa", en: "Repair started" },
+    "bm.field.repairFinishedAt": { vi: "Sửa xong", en: "Repair finished" },
+    "bm.field.itemCode": { vi: "Mã máy", en: "Item Code" },
+    "bm.field.issue": { vi: "Vấn đề", en: "Issue" },
+    "bm.field.reason": { vi: "Nguyên nhân", en: "Reason" },
+    "bm.field.solve": { vi: "Cách khắc phục", en: "Solve" },
+    "bm.field.mechanic": { vi: "Thợ sửa", en: "Mechanic" },
+    "bm.field.other": { vi: "Khác", en: "Other" },
+    "bm.save.searchFirst": { vi: "Vui lòng tìm và tải mã máy trước khi lưu.", en: "Please search and load the machine code before submitting." },
+    "bm.save.clickSearch": { vi: "Bấm Tìm kiếm để tải thông tin máy trước khi lưu.", en: "Click Search to load machine data before saving." },
+    "bm.save.fillIn": { vi: "Vui lòng điền: {fields}.", en: "Please fill in: {fields}." },
+    "bm.save.checkingCode": { vi: "Đang kiểm tra mã máy...", en: "Checking machine code..." },
+    "bm.save.saving": { vi: "Đang lưu phiếu sửa chữa...", en: "Saving repair record..." },
+    "bm.save.codeNotExist": { vi: "Mã máy {code} không tồn tại trong machine_info.", en: "Item Code {code} does not exist in machine_info." },
+    "bm.save.saved": { vi: "Đã lưu phiếu sửa chữa.", en: "Repair record saved." },
+    "bm.action.saveRepairRecord": { vi: "lưu phiếu sửa chữa", en: "save the repair record" },
+    "bm.summary.title": { vi: "Báo cáo tổng hợp", en: "Summary Report" },
+    "bm.summary.powerBiMissing": { vi: "Thêm đường dẫn Power BI trong supabase/config.js.", en: "Add your Power BI link in supabase/config.js." },
+    "bm.page.title": { vi: "Nhập máy hư", en: "Enter breakdown machine" },
+    "bm.page.tag": { vi: "BM / Breakdown", en: "BM / Breakdown" },
+    "bm.scan.srOnly": { vi: "Nhập code hoặc scan", en: "Enter code or scan" },
+    "bm.scan.placeholder": { vi: "NHẬP CODE HOẶC SCAN", en: "ENTER CODE OR SCAN" },
+    "bm.scan.button": { vi: "Quét", en: "Scan" },
+    "bm.plate.title": { vi: "Thông tin máy", en: "Machine identity" },
+    "bm.field.machineName": { vi: "Tên máy", en: "Machine Name" },
+    "bm.field.specification": { vi: "Thông số kỹ thuật", en: "Specification" },
+    "bm.field.madeBy": { vi: "Hãng sản xuất", en: "Made By" },
+    "bm.field.status": { vi: "Trạng thái", en: "Status" },
+    "bm.field.place": { vi: "Vị trí", en: "Place" },
+    "bm.field.plant": { vi: "Nhà máy", en: "Plant" },
+    "bm.field.section": { vi: "Chuyền", en: "Section" },
+    "bm.timeline.title": { vi: "Thời gian", en: "Timeline" },
+    "bm.timeline.brokenTime": { vi: "Báo hư - giờ 24h", en: "Reported - 24h time" },
+    "bm.timeline.startTime": { vi: "Bắt đầu sửa - giờ 24h", en: "Repair started - 24h time" },
+    "bm.timeline.doneTime": { vi: "Sửa xong - giờ 24h", en: "Repair finished - 24h time" },
+    "bm.detail.title": { vi: "Chi tiết sửa chữa", en: "Repair detail" },
+    "bm.issue.electric": { vi: "Điện", en: "Electric" },
+    "bm.issue.mechanical": { vi: "Cơ khí", en: "Mechanical" },
+    "bm.issue.pressure": { vi: "Áp suất", en: "Pressure" },
+    "bm.issue.other": { vi: "Khác", en: "Other" },
+    "bm.solve.repair": { vi: "SỬA CHỮA", en: "REPAIR" },
+    "bm.solve.replace": { vi: "THAY THẾ", en: "REPLACE" },
+    "bm.solve.clean": { vi: "VỆ SINH", en: "CLEAN" },
+    "bm.mechanic.placeholder": { vi: "Nhập tên thợ", en: "Type a mechanic name" },
+    "bm.mechanic.searchAria": { vi: "Tìm tên thợ", en: "Search mechanic names" },
+    "bm.mechanic.remove": { vi: "Loại bỏ", en: "Remove" },
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+
+  const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
 
   const supabaseConfig = window.SAMHO_SUPABASE;
   const db = window.SAMHO_DB;
@@ -58,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
           removeButton.className = "mechanic-remove";
           removeButton.type = "button";
           removeButton.textContent = "×";
-          removeButton.setAttribute("aria-label", `Remove ${name}`);
+          removeButton.setAttribute("aria-label", `${t("bm.mechanic.remove")} ${name}`);
           removeButton.addEventListener("click", (event) => {
             event.stopPropagation();
             renderMechanicSelection(names.filter((selected) => selected !== name));
@@ -253,19 +322,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!code) {
       searchedItemCode = "";
       setMachineData(null);
-      setSearchStatus("Enter or scan a machine code.", "warning");
+      setSearchStatus(t("bm.search.prompt"), "warning");
       return;
     }
 
     searchButton.disabled = true;
-    setSearchStatus("Searching database...", "loading");
+    setSearchStatus(t("bm.search.searching"), "loading");
 
     try {
       const machine = await fetchMachineByCode(code);
       setMachineData(machine);
       if (machine) {
         searchedItemCode = code;
-        setSearchStatus("Machine data loaded.", "success");
+        setSearchStatus(t("bm.search.loaded"), "success");
         return;
       }
 
@@ -273,13 +342,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const visibleCount = await fetchVisibleMachineCount();
       const message =
         visibleCount === "*/0"
-          ? "No visible machine rows. Check data or Supabase RLS SELECT policy."
-          : "No machine found for this code.";
+          ? t("bm.search.noRows")
+          : t("bm.search.notFound");
       setSearchStatus(message, "warning");
     } catch (error) {
       searchedItemCode = "";
       setMachineData(null);
-      setSearchStatus(window.SAMHO_ERRORS.message(error, "load machine details"), "error");
+      setSearchStatus(window.SAMHO_ERRORS.message(error, t("bm.action.loadMachineDetails")), "error");
     } finally {
       searchButton.disabled = false;
     }
@@ -306,10 +375,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <section class="scan-dialog">
         <header>
           <div>
-            <span>Barcode scanner</span>
-            <h2>Scan machine code</h2>
+            <span>${t("bm.scan.title")}</span>
+            <h2>${t("bm.scan.heading")}</h2>
           </div>
-          <button class="scan-close" type="button" data-close-scan aria-label="Close scanner">
+          <button class="scan-close" type="button" data-close-scan aria-label="${t("bm.scan.close")}">
             <i data-lucide="x"></i>
           </button>
         </header>
@@ -317,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <video id="scanVideo" autoplay playsinline muted></video>
           <div class="scan-frame"></div>
         </div>
-        <p class="scan-status" id="scanStatus">Point the camera at a barcode.</p>
+        <p class="scan-status" id="scanStatus">${t("bm.scan.point")}</p>
       </section>
     `;
 
@@ -373,22 +442,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const supportsNativeScanner = "BarcodeDetector" in window;
     const supportsZxingScanner = Boolean(window.ZXingBrowser?.BrowserMultiFormatReader);
     if (!navigator.mediaDevices?.getUserMedia) {
-      setSearchStatus("Camera access requires HTTPS and a supported browser.", "warning");
+      setSearchStatus(t("bm.scan.noHttps"), "warning");
       return;
     }
     if (!supportsNativeScanner && !supportsZxingScanner) {
-      setSearchStatus("Barcode scanner is loading. Please try again.", "warning");
+      setSearchStatus(t("bm.scan.loading"), "warning");
       return;
     }
 
     try {
       modal.classList.add("active");
-      setScanStatus("Opening camera...", "loading");
+      setScanStatus(t("bm.scan.opening"), "loading");
 
       const handleDetectedCode = (value) => {
         if (!value) return;
         codeInput.value = value.toUpperCase();
-        setSearchStatus(`Scanned ${codeInput.value}.`, "success");
+        setSearchStatus(t("bm.scan.scanned", { code: codeInput.value }), "success");
         stopScanner();
         runSearch();
       };
@@ -407,7 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
           video,
           (result) => handleDetectedCode(result?.getText()?.trim())
         );
-        setScanStatus("Point the camera at a barcode.", "idle");
+        setScanStatus(t("bm.scan.point"), "idle");
         return;
       }
 
@@ -427,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       video.srcObject = scanStream;
       await video.play();
-      setScanStatus("Point the camera at a barcode.", "idle");
+      setScanStatus(t("bm.scan.point"), "idle");
 
       scanTimer = window.setInterval(async () => {
         if (!video.videoWidth) return;
@@ -439,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 450);
     } catch (error) {
       stopScanner();
-      setSearchStatus(window.SAMHO_ERRORS.message(error, "use the camera scanner"), "error");
+      setSearchStatus(window.SAMHO_ERRORS.message(error, t("bm.action.useCameraScanner")), "error");
     }
   };
 
@@ -488,17 +557,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const validateRepairPayload = (formData) => {
     const requiredFields = [
-      ["brokenAt", "Bao hu"],
-      ["repairStartedAt", "Bat dau sua"],
-      ["repairFinishedAt", "Sua xong"],
-      ["itemCode", "Item Code"],
-      ["issue", "Issue"],
-      ["reason", "Reason"],
-      ["solve", "Solve"],
-      ["mechanic", "Mechanic"]
+      ["brokenAt", t("bm.field.brokenAt")],
+      ["repairStartedAt", t("bm.field.repairStartedAt")],
+      ["repairFinishedAt", t("bm.field.repairFinishedAt")],
+      ["itemCode", t("bm.field.itemCode")],
+      ["issue", t("bm.field.issue")],
+      ["reason", t("bm.field.reason")],
+      ["solve", t("bm.field.solve")],
+      ["mechanic", t("bm.field.mechanic")]
     ];
 
-    if (document.getElementById("other")?.required) requiredFields.push(["other", "Other"]);
+    if (document.getElementById("other")?.required) requiredFields.push(["other", t("bm.field.other")]);
 
     return requiredFields
       .filter(([field]) => !formData[field])
@@ -544,35 +613,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentCode = getValue("codeSearch").toUpperCase();
 
     if (!searchedItemCode || searchedItemCode !== currentCode) {
-      setSaveStatus("Please search and load the machine code before submitting.", "warning");
-      setSearchStatus("Click Search to load machine data before saving.", "warning");
+      setSaveStatus(t("bm.save.searchFirst"), "warning");
+      setSearchStatus(t("bm.save.clickSearch"), "warning");
       return;
     }
 
     const missingFields = validateRepairPayload(formData);
 
     if (missingFields.length) {
-      setSaveStatus(`Please fill in: ${missingFields.join(", ")}.`, "warning");
+      setSaveStatus(t("bm.save.fillIn", { fields: missingFields.join(", ") }), "warning");
       return;
     }
 
     saveButton.disabled = true;
-    setSaveStatus("Checking machine code...", "loading");
+    setSaveStatus(t("bm.save.checkingCode"), "loading");
 
     try {
-      window.SAMHO_LOADING.show("Saving repair record...");
+      window.SAMHO_LOADING.show(t("bm.save.saving"));
       const machineExists = await machineExistsByCode(formData.itemCode);
       if (!machineExists) {
-        setSaveStatus(`Item Code ${formData.itemCode} does not exist in machine_info.`, "warning");
+        setSaveStatus(t("bm.save.codeNotExist", { code: formData.itemCode }), "warning");
         return;
       }
 
-      setSaveStatus("Saving repair record...", "loading");
+      setSaveStatus(t("bm.save.saving"), "loading");
       await submitRepairRecord(mapRepairPayload(formData));
-      setSaveStatus("Repair record saved.", "success");
+      setSaveStatus(t("bm.save.saved"), "success");
       resetRepairInputs();
     } catch (error) {
-      setSaveStatus(window.SAMHO_ERRORS.message(error, "save the repair record"), "error");
+      setSaveStatus(window.SAMHO_ERRORS.message(error, t("bm.action.saveRepairRecord")), "error");
     } finally {
       window.SAMHO_LOADING.hide();
       saveButton.disabled = false;
@@ -629,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
         status.dataset.type = "idle";
       } else {
         frame.removeAttribute("src");
-        status.textContent = "Add your Power BI link in supabase/config.js.";
+        status.textContent = t("bm.summary.powerBiMissing");
         status.dataset.type = "warning";
       }
     }

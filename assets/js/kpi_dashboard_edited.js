@@ -1,4 +1,83 @@
+if (window.SAMHO_LANG) {
+  window.SAMHO_LANG.register({
+    "kpi.title": { vi: "Bảng điều khiển KPI", en: "KPI Monitoring Dashboard" },
+    "kpi.subtitle": { vi: "Phân tích thời gian dừng theo thời gian thực", en: "Real-time downtime analysis" },
+    "kpi.from": { vi: "Từ", en: "From" },
+    "kpi.to": { vi: "Đến", en: "To" },
+    "kpi.allPlants": { vi: "Tất cả nhà máy", en: "All Plants" },
+    "kpi.summaryAria": { vi: "Tóm tắt KPI", en: "KPI summary" },
+    "kpi.totalDowntime": { vi: "Tổng thời gian dừng", en: "Total Downtime" },
+    "kpi.minutes": { vi: "phút", en: "minutes" },
+    "kpi.loading": { vi: "Đang tải", en: "Loading" },
+    "kpi.avgMttr": { vi: "MTTR trung bình", en: "Avg MTTR" },
+    "kpi.min": { vi: "phút", en: "min" },
+    "kpi.meanTimeToRepair": { vi: "Thời gian sửa chữa trung bình", en: "Mean Time to Repair" },
+    "kpi.calculated": { vi: "Đã tính", en: "Calculated" },
+    "kpi.avgMtbf": { vi: "MTBF trung bình", en: "Avg MTBF" },
+    "kpi.meanTimeBetweenFailures": { vi: "Thời gian giữa các lần hỏng trung bình", en: "Mean Time Between Failures" },
+    "kpi.totalErrors": { vi: "Tổng số lỗi", en: "Total Errors" },
+    "kpi.errorEvents": { vi: "Số lần lỗi", en: "Error Events" },
+    "kpi.loadingDowntime": { vi: "Đang tải dữ liệu thời gian dừng...", en: "Loading downtime data..." },
+    "kpi.chartTotalDowntime": { vi: "Tổng thời gian dừng theo nhà máy", en: "Total Downtime by Plant" },
+    "kpi.chartPlantAria": { vi: "Tổng thời gian dừng theo nhà máy", en: "Total downtime by plant" },
+    "kpi.month.jan": { vi: "T1", en: "Jan" },
+    "kpi.month.feb": { vi: "T2", en: "Feb" },
+    "kpi.month.mar": { vi: "T3", en: "Mar" },
+    "kpi.chartTop3": { vi: "Top 3 khu vực theo thời gian dừng", en: "Top 3 Areas by Downtime" },
+    "kpi.chartTop5": { vi: "Top 5 số lần lỗi theo loại máy", en: "Top 5 Downtime Error Counts by Machine Type" },
+    "kpi.chartMachineAria": { vi: "Tổng thời gian dừng theo máy", en: "Machine downtime totals" },
+    "kpi.totalDowntimeColon": { vi: "Tổng thời gian dừng: --", en: "Total Downtime: --" },
+    "kpi.machines": { vi: "-- máy", en: "-- machines" },
+    "kpi.chartMttrMtbf": { vi: "Xu hướng MTTR & MTBF theo máy", en: "MTTR & MTBF Trends by Machine" },
+    "kpi.legendDowntime": { vi: "Thời gian dừng (phút)", en: "Downtime (min)" },
+    "kpi.legendMtbf": { vi: "MTBF (phút)", en: "MTBF (min)" },
+    "kpi.legendMttr": { vi: "MTTR (phút)", en: "MTTR (min)" },
+    "kpi.allData": { vi: "Tất cả dữ liệu", en: "All Data" },
+    "kpi.unknown": { vi: "Không xác định", en: "Unknown" },
+    "kpi.unknownMachine": { vi: "Máy không xác định", en: "Unknown machine" },
+    "kpi.unknownPlant": { vi: "Nhà máy không xác định", en: "Unknown plant" },
+    "kpi.records": { vi: "{count} bản ghi", en: "{count} records" },
+    "kpi.statusDowntimeRows": { vi: "Số dòng thời gian dừng", en: "Downtime rows" },
+    "kpi.statusNoData": { vi: "Không có dữ liệu", en: "No data" },
+    "kpi.statusMinutes": { vi: "Phút", en: "Minutes" },
+    "kpi.statusOperatingMin": { vi: "Phút vận hành", en: "Operating min" },
+    "kpi.footerTotal": { vi: "Tổng thời gian dừng: {value} phút", en: "Total Downtime: {value} min" },
+    "kpi.machinesCount": { vi: "{count} máy", en: "{count} machines" },
+    "kpi.selectedMonth": { vi: "Tháng đã chọn", en: "Selected month" },
+    "kpi.loaded": { vi: "Đã tải {count} bản ghi thời gian dừng cho {month}.", en: "Loaded {count} downtime records for {month}." },
+    "kpi.errNoConfig": { vi: "Thiếu cấu hình bảng downtime trong supabase/config.js.", en: "Add downtime table settings in supabase/config.js." },
+    "kpi.loadingDashboard": { vi: "Đang tải dữ liệu bảng KPI...", en: "Loading dashboard data..." },
+    "kpi.action.loadData": { vi: "tải dữ liệu bảng KPI", en: "load dashboard data" },
+    "kpi.action.loadMonths": { vi: "tải các tháng có sẵn", en: "load available months" },
+    "kpi.noMonths": { vi: "Không có tháng", en: "No months" },
+    "kpi.noMonthValues": { vi: "Không có giá trị tháng", en: "No month values" },
+    "kpi.noVisibleRows": { vi: "Không có dòng hiển thị", en: "No visible rows" },
+    "kpi.warnMonthEmpty": { vi: "Các dòng thời gian dừng hiển thị nhưng cột tháng đang trống.", en: "Downtime rows are visible, but the month column is empty." },
+    "kpi.warnNoRows": { vi: "Supabase không trả về dòng thời gian dừng nào. Kiểm tra dữ liệu bảng hoặc policy RLS SELECT.", en: "No visible downtime rows returned from Supabase. Check table data or RLS SELECT policy." },
+    "kpi.monthError": { vi: "Lỗi tháng", en: "Month error" },
+    "kpi.monthLoadFailed": { vi: "Tải tháng thất bại", en: "Month load failed" },
+    "kpi.hintSetFilters": { vi: "Đặt bộ lọc và bấm Tìm kiếm để tải dữ liệu.", en: "Set filters and click Search to load data." },
+    "kpi.minTooltip": { vi: "{label}: {value} phút", en: "{label}: {value} min" },
+    "kpi.legendTotalDowntime": { vi: "Tổng thời gian dừng", en: "Total downtime" },
+    "kpi.failures": { vi: "{count} sự cố", en: "{count} failures" },
+    "kpi.rank.viewPareto": { vi: "Xem Pareto nguyên nhân cho {section}", en: "View reason Pareto for {section}" },
+    "kpi.rank.empty": { vi: "Không tìm thấy bản ghi thời gian dừng nào.", en: "No downtime records found." },
+    "kpi.machine.empty": { vi: "Không có thời gian dừng máy.", en: "No machine downtime." },
+    "kpi.monthly.empty": { vi: "Không có thời gian dừng hàng tháng.", en: "No monthly downtime." },
+    "kpi.simple.empty": { vi: "Không có dữ liệu thời gian dừng.", en: "No downtime data." },
+    "kpi.trend.empty": { vi: "Không có xu hướng MTTR/MTBF.", en: "No MTTR/MTBF trend." },
+    "kpi.others": { vi: "Khác", en: "Others" },
+    "kpi.pareto.title": { vi: "{section} — Pareto nguyên nhân", en: "{section} — Reason Pareto" },
+    "kpi.pareto.subtitle": { vi: "{minutes} phút · {failures} sự cố", en: "{minutes} min · {failures} failures" },
+    "kpi.pareto.eyebrow": { vi: "Phân tích downtime", en: "Downtime analysis" },
+    "kpi.pareto.close": { vi: "Đóng", en: "Close" },
+    "kpi.pareto.empty": { vi: "Không có dữ liệu nguyên nhân.", en: "No reason data." },
+    "kpi.pareto.barTitle": { vi: "{label} · {count} sự cố", en: "{label} · {count} failures" },
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
   const config = window.SAMHO_SUPABASE;
   const downtimeConfig = config?.downtime;
 
@@ -55,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const normalizeMonth = (value) => {
-    if (!value) return { key: "all", label: "All Data", order: 99 };
+    if (!value) return { key: "all", label: t("kpi.allData"), order: 99 };
 
     const raw = String(value).trim();
 
@@ -130,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rawMonth = readField(row, "month") || row[configuredColumn("month")];
     if (rawMonth) return normalizeMonth(rawMonth);
     const dt = parseDateTime(row.start_datetime);
-    if (!dt) return { key: "all", label: "All Data", order: 99 };
+    if (!dt) return { key: "all", label: t("kpi.allData"), order: 99 };
     const index = dt.getMonth();
     return { key: monthKeyFromDate(dt), label: monthNames[index], order: index };
   };
@@ -232,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const groupSum = (rows, getKey) => {
     const groups = new Map();
     rows.forEach((row) => {
-      const key = getKey(row) || "Unknown";
+      const key = getKey(row) || t("kpi.unknown");
       const current = groups.get(key) || { label: key, total: 0, count: 0 };
       current.total += row.downtime;
       current.count += 1;
@@ -255,8 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const total = reasons.reduce((sum, bucket) => sum + bucket.total, 0);
     const count = reasons.reduce((sum, bucket) => sum + bucket.count, 0);
 
-    modal.querySelector("#paretoTitle").textContent = `${section} — Pareto nguyên nhân / Reason Pareto`;
-    modal.querySelector("#paretoSubtitle").textContent = `${formatNumber(total)} min · ${formatNumber(count)} sự cố / failures`;
+    modal.querySelector("#paretoTitle").textContent = t("kpi.pareto.title", { section });
+    modal.querySelector("#paretoSubtitle").textContent = t("kpi.pareto.subtitle", { minutes: formatNumber(total), failures: formatNumber(count) });
     renderParetoChart(modal, reasons);
     if (window.lucide) window.lucide.createIcons();
     modal.classList.add("active");
@@ -298,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!container) return;
 
     if (!buckets.length) {
-      container.innerHTML = `<p class="kpi-empty">Không có dữ liệu nguyên nhân / No reason data.</p>`;
+      container.innerHTML = `<p class="kpi-empty">${t("kpi.pareto.empty")}</p>`;
       return;
     }
 
@@ -306,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rest = buckets.slice(FULL_PARETO_BARS);
     if (rest.length) {
       top.push({
-        label: "Khác / Others",
+        label: t("kpi.others"),
         total: rest.reduce((sum, bucket) => sum + bucket.total, 0),
         count: rest.reduce((sum, bucket) => sum + bucket.count, 0),
         others: true
@@ -333,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .map(
         (bucket) => `
           <div class="pareto-bar${bucket.others ? " others" : ""}" style="--h:${bucket.height}%">
-            <b title="${escapeHtml(bucket.label)} · ${formatNumber(bucket.count)} failures"></b>
+            <b title="${escapeHtml(t("kpi.pareto.barTitle", { label: bucket.label, count: formatNumber(bucket.count) }))}"></b>
             <span class="pareto-value">${formatNumber(bucket.total)}</span>
             <label>${escapeHtml(bucket.label.length > 28 ? `${bucket.label.slice(0, 28)}…` : bucket.label)}</label>
           </div>
@@ -375,10 +454,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="repair-modal-dialog repair-modal-dialog-wide" aria-labelledby="paretoTitle">
         <header class="repair-modal-header">
           <div>
-            <span id="paretoEyebrow">Phân tích downtime / Downtime analysis</span>
+            <span id="paretoEyebrow">${t("kpi.pareto.eyebrow")}</span>
             <h2 id="paretoTitle"></h2>
           </div>
-          <button class="repair-modal-close" type="button" data-close-pareto aria-label="Close">
+          <button class="repair-modal-close" type="button" data-close-pareto aria-label="${t("kpi.pareto.close")}">
             <i data-lucide="x"></i>
           </button>
         </header>
@@ -406,19 +485,19 @@ document.addEventListener("DOMContentLoaded", () => {
       top
         .map(
           (item, index) => `
-            <div class="rank-row" data-section="${escapeHtml(item.label)}" role="button" tabindex="0" aria-label="View reason Pareto for ${escapeHtml(item.label)}">
+            <div class="rank-row" data-section="${escapeHtml(item.label)}" role="button" tabindex="0" aria-label="${escapeHtml(t("kpi.rank.viewPareto", { section: item.label }))}">
               <span>${index + 1}</span>
               <div>
                 <strong>${escapeHtml(item.label)}</strong>
-                <small>${item.count} failures</small>
+                <small>${t("kpi.failures", { count: item.count })}</small>
                 <b style="--w: ${Math.max((item.total / max) * 100, 4)}%"></b>
               </div>
-              <em>${formatNumber(item.total)} min</em>
+              <em>${formatNumber(item.total)} ${t("kpi.min")}</em>
               <i data-lucide="chevron-right" class="rank-hint"></i>
             </div>
           `
         )
-        .join("") || `<p class="kpi-empty">No downtime records found.</p>`;
+        .join("") || `<p class="kpi-empty">${t("kpi.rank.empty")}</p>`;
 
     container.querySelectorAll(".rank-row").forEach((row) => {
       row.addEventListener("click", () => openParetoModal(row.dataset.section));
@@ -446,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const barColor = index === 2 ? "#3f9b5f" : index === 3 ? "#2d75dc" : "#d9364f";
           return `<div style="--h: ${height}%; --bar: ${barColor}" data-value="${formatNumber(item.count)}"><b></b><span>${label}</span></div>`;
         })
-        .join("") || `<p class="kpi-empty">No machine downtime.</p>`;
+        .join("") || `<p class="kpi-empty">${t("kpi.machine.empty")}</p>`;
   };
 
   const renderMonthlyChart = (months, sections) => {
@@ -465,12 +544,12 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((month, index) => {
               const value = section.months.get(month.key) || 0;
               const height = Math.max((value / max) * 92, value > 0 ? 8 : 0);
-              return `<b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${month.label}: ${formatNumber(value)} min"></b>`;
+              return `<b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: month.label, value: formatNumber(value) })}"></b>`;
             })
             .join("");
-          return `<div class="cluster" data-label="${section.label}"><span class="value-badge">${formatNumber(topValue)} min</span>${bars}</div>`;
+          return `<div class="cluster" data-label="${section.label}"><span class="value-badge">${formatNumber(topValue)} ${t("kpi.min")}</span>${bars}</div>`;
         })
-        .join("") || `<p class="kpi-empty">No monthly downtime.</p>`;
+        .join("") || `<p class="kpi-empty">${t("kpi.monthly.empty")}</p>`;
 
     legend.innerHTML = months
       .map((month, index) => `<span><b style="background: ${colors[index % colors.length]}"></b>${month.label}</span>`)
@@ -488,11 +567,11 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = top
       .map((plant, index) => {
         const height = Math.max((plant.total / max) * 88, plant.total > 0 ? 8 : 0);
-        return `<div class="cluster" data-label="${plant.label}"><span class="value-badge">${formatNumber(plant.total)} min</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${plant.label}: ${formatNumber(plant.total)} min"></b></div>`;
+        return `<div class="cluster" data-label="${plant.label}"><span class="value-badge">${formatNumber(plant.total)} ${t("kpi.min")}</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: plant.label, value: formatNumber(plant.total) })}"></b></div>`;
       })
-      .join("") || `<p class="kpi-empty">No downtime data.</p>`;
+      .join("") || `<p class="kpi-empty">${t("kpi.simple.empty")}</p>`;
 
-    legend.innerHTML = `<span><b style="background:${colors[0]}"></b>Total downtime</span>`;
+    legend.innerHTML = `<span><b style="background:${colors[0]}"></b>${t("kpi.legendTotalDowntime")}</span>`;
   };
 
   const renderMetricTrend = (items, operationDays) => {
@@ -525,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
         })
-        .join("") || `<p class="kpi-empty">No MTTR/MTBF trend.</p>`;
+        .join("") || `<p class="kpi-empty">${t("kpi.trend.empty")}</p>`;
 
     if (lines && top.length > 1) {
       const xPositions = top.map((_, index) => (top.length === 1 ? 50 : 16 + index * (68 / (top.length - 1))));
@@ -561,10 +640,10 @@ document.addEventListener("DOMContentLoaded", () => {
           errorCount: toNumber(readField(row, "errorCount")),
           mttr: toNumber(readField(row, "mttr")),
           mtbf: toNumber(readField(row, "mtbf")),
-          itemCode: readField(row, "itemCode") || "Unknown machine",
-          machineName: readField(row, "machineName") || readField(row, "itemCode") || "Unknown machine",
-          section: readField(row, "section") || "Unknown",
-          plant: readField(row, "plant") || "Unknown plant",
+          itemCode: readField(row, "itemCode") || t("kpi.unknownMachine"),
+          machineName: readField(row, "machineName") || readField(row, "itemCode") || t("kpi.unknownMachine"),
+          section: readField(row, "section") || t("kpi.unknown"),
+          plant: readField(row, "plant") || t("kpi.unknownPlant"),
           month
         };
       })
@@ -617,14 +696,14 @@ document.addEventListener("DOMContentLoaded", () => {
     text("avgMttr", formatNumber(avgMttr, 1));
     text("avgMtbf", formatNumber(avgMtbf, 0));
     text("totalErrors", formatNumber(totalErrors));
-    text("downtimePeriod", `${formatNumber(rows.length)} records`);
-    text("errorStatus", rows.length ? "Downtime rows" : "No data");
-    text("mttrStatus", rows.length ? "Minutes" : "No data");
-    text("mtbfStatus", rows.length ? (configuredColumn("mtbf") ? "Minutes" : "Operating min") : "No data");
-    text("machineFooterTotal", `Total Downtime: ${formatNumber(totalDowntime)} min`);
-    text("machineFooterCount", `${formatNumber(machineGroups.length)} machines`);
-    const activeLabel = document.getElementById("monthFilterLabel")?.textContent || "Selected month";
-    text("kpiSubtitle", "Real-time downtime analysis");
+    text("downtimePeriod", t("kpi.records", { count: formatNumber(rows.length) }));
+    text("errorStatus", rows.length ? t("kpi.statusDowntimeRows") : t("kpi.statusNoData"));
+    text("mttrStatus", rows.length ? t("kpi.statusMinutes") : t("kpi.statusNoData"));
+    text("mtbfStatus", rows.length ? (configuredColumn("mtbf") ? t("kpi.statusMinutes") : t("kpi.statusOperatingMin")) : t("kpi.statusNoData"));
+    text("machineFooterTotal", t("kpi.footerTotal", { value: formatNumber(totalDowntime) }));
+    text("machineFooterCount", t("kpi.machinesCount", { count: formatNumber(machineGroups.length) }));
+    const activeLabel = document.getElementById("monthFilterLabel")?.textContent || t("kpi.selectedMonth");
+    text("kpiSubtitle", t("kpi.subtitle"));
 
     renderRankList(sectionGroups);
     renderMachineBars(machineGroups);
@@ -636,32 +715,32 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMetricTrend(machineGroups, operationDays);
 
     setStatus(
-      `Loaded ${formatNumber(rows.length)} downtime records for ${activeLabel}.`,
+      t("kpi.loaded", { count: formatNumber(rows.length), month: activeLabel }),
       rows.length ? "success" : "warning"
     );
   };
 
   const fetchAndRender = async (monthValue = activeMonth, plantValue = activePlant) => {
     if (!downtimeConfig?.table) {
-      setStatus("Add downtime table settings in supabase/config.js.", "error");
+      setStatus(t("kpi.errNoConfig"), "error");
       return;
     }
 
     try {
       closeParetoModal();
-      setStatus("Loading downtime data...", "idle");
-      window.SAMHO_LOADING.show("Loading dashboard data...");
+      setStatus(t("kpi.loadingDowntime"), "idle");
+      window.SAMHO_LOADING.show(t("kpi.loadingDashboard"));
       const rows = await getRows(monthValue, plantValue);
       const filteredRows = applyDateFilter(rows);
       renderDashboard(filteredRows);
     } catch (error) {
-      setStatus(window.SAMHO_ERRORS.message(error, "load dashboard data"), "error");
+      setStatus(window.SAMHO_ERRORS.message(error, t("kpi.action.loadData")), "error");
     } finally {
       window.SAMHO_LOADING.hide();
     }
   };
 
-  const renderMonthOptions = (months, emptyLabel = "No months") => {
+  const renderMonthOptions = (months, emptyLabel = t("kpi.noMonths")) => {
     const button = document.getElementById("monthFilterButton");
     const menu = document.getElementById("monthFilterMenu");
     const label = document.getElementById("monthFilterLabel");
@@ -751,26 +830,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (!months.length) {
-        renderMonthOptions(months, fallbackRows.length ? "No month values" : "No visible rows");
+        renderMonthOptions(months, fallbackRows.length ? t("kpi.noMonthValues") : t("kpi.noVisibleRows"));
         renderDashboard([]);
         setStatus(
           fallbackRows.length
-            ? "Downtime rows are visible, but the month column is empty."
-            : "No visible downtime rows returned from Supabase. Check table data or RLS SELECT policy.",
+            ? t("kpi.warnMonthEmpty")
+            : t("kpi.warnNoRows"),
           "warning"
         );
       } else {
         renderMonthOptions(months);
       }
     } catch (error) {
-      label.textContent = "Month error";
+      label.textContent = t("kpi.monthError");
       button.disabled = true;
-      menu.innerHTML = `<button type="button" disabled>Month load failed</button>`;
-      setStatus(window.SAMHO_ERRORS.message(error, "load available months"), "error");
+      menu.innerHTML = `<button type="button" disabled>${t("kpi.monthLoadFailed")}</button>`;
+      setStatus(window.SAMHO_ERRORS.message(error, t("kpi.action.loadMonths")), "error");
       return;
     }
 
-    setStatus("Set filters and click Search to load data.", "idle");
+    setStatus(t("kpi.hintSetFilters"), "idle");
   };
 
   const countWeekdaysMonSat = (start, end) => {
@@ -861,4 +940,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   fetchAndRender(activeMonth, activePlant);
+
+  document.addEventListener("samho:langchange", () => {
+    const plantLabel = document.getElementById("plantFilterLabel");
+    const activePlantButton = document.querySelector('#plantFilterMenu [data-plant-value].active');
+    if (plantLabel && activePlantButton) {
+      plantLabel.textContent = activePlantButton.textContent.trim();
+    }
+    renderDashboard(lastRows);
+  });
 });

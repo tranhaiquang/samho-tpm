@@ -10,5 +10,8 @@ supabase/update-display-name.js
 supabase/sync-users.mjs
 supabase/prune-users.mjs
 
+# Hallmark design-skill log (local tooling, not app code)
+.hallmark/
+
 # Added by ggshield
 .cache_ggshield

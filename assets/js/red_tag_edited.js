@@ -1,5 +1,80 @@
+if (window.SAMHO_LANG) {
+  window.SAMHO_LANG.register({
+    "redtag.title": { vi: "Red Tag", en: "Red Tag" },
+    "redtag.filterAria": { vi: "Lọc máy Red Tag", en: "Filter Red Tag machines" },
+    "redtag.listAria": { vi: "Danh sách máy Red Tag", en: "Red tag machines" },
+    "redtag.plant": { vi: "Nhà máy", en: "Plant" },
+    "redtag.plantA": { vi: "Nhà máy A", en: "Plant A" },
+    "redtag.plantB": { vi: "Nhà máy B", en: "Plant B" },
+    "redtag.plantF": { vi: "Nhà máy F", en: "Plant F" },
+    "redtag.searchPlaceholder": { vi: "Tên máy", en: "Machine name" },
+    "redtag.addRecord": { vi: "Thêm bản ghi Red Tag", en: "Add Red Tag record" },
+    "redtag.no": { vi: "STT", en: "No." },
+    "redtag.machineName": { vi: "Tên máy", en: "Machine Name" },
+    "redtag.quantity": { vi: "Số lượng", en: "Quantity" },
+    "redtag.detail": { vi: "Chi tiết", en: "Detail" },
+    "redtag.loading": { vi: "Đang tải máy...", en: "Loading machines…" },
+    "redtag.machineTypes": { vi: "Loại máy", en: "Machine Types" },
+    "redtag.close": { vi: "Đóng", en: "Close" },
+    "redtag.addTitle": { vi: "Thêm bản ghi Red Tag", en: "Add Red Tag Record" },
+    "redtag.itemCode": { vi: "Mã máy", en: "Item Code" },
+    "redtag.itemCodePlaceholder": { vi: "Quét hoặc nhập Mã máy", en: "Scan or enter Item Code" },
+    "redtag.searchItemCode": { vi: "Tìm mã máy", en: "Search Item Code" },
+    "redtag.scanBarcode": { vi: "Quét mã vạch", en: "Scan barcode" },
+    "redtag.date": { vi: "Ngày", en: "Date" },
+    "redtag.line": { vi: "Chuyền", en: "Line" },
+    "redtag.status": { vi: "Trạng thái", en: "Status" },
+    "redtag.statusStandby": { vi: "Máy Dự Phòng", en: "Standby Machine" },
+    "redtag.statusBroken": { vi: "Máy Hư Chờ Sửa", en: "Broken - Awaiting Repair" },
+    "redtag.issue": { vi: "Vấn đề", en: "Issue" },
+    "redtag.cancel": { vi: "Hủy", en: "Cancel" },
+    "redtag.scanTitle": { vi: "Máy quét mã vạch", en: "Barcode scanner" },
+    "redtag.scanHeading": { vi: "Quét mã máy", en: "Scan Item Code" },
+    "redtag.closeScanner": { vi: "Đóng máy quét", en: "Close scanner" },
+    "redtag.scanPoint": { vi: "Hướng camera vào mã vạch.", en: "Point the camera at a barcode." },
+    "redtag.warnEnterItemCode": { vi: "Quét hoặc nhập Mã máy trước.", en: "Scan or enter an Item Code first." },
+    "redtag.searchingMachine": { vi: "Đang tìm thông tin máy...", en: "Searching machine information..." },
+    "redtag.machineNotFound": { vi: "Không tìm thấy máy với mã này. Vui lòng kiểm tra mã vạch và thử lại.", en: "No machine was found for this Item Code. Please check the barcode and try again." },
+    "redtag.machineLoaded": { vi: "Đã tải thông tin máy.", en: "Machine information loaded." },
+    "redtag.action.loadMachine": { vi: "tải thông tin máy", en: "load machine information" },
+    "redtag.scanNoHttps": { vi: "Camera yêu cầu HTTPS và trình duyệt hỗ trợ.", en: "Camera access requires HTTPS and a supported browser." },
+    "redtag.scanLoading": { vi: "Máy quét mã vạch đang tải. Vui lòng thử lại trong giây lát.", en: "Barcode scanner is still loading. Please try again in a moment." },
+    "redtag.scanOpening": { vi: "Đang mở camera...", en: "Opening camera..." },
+    "redtag.action.useScanner": { vi: "dùng máy quét camera", en: "use the camera scanner" },
+    "redtag.loadingRecords": { vi: "Đang tải bản ghi Red Tag...", en: "Loading Red Tag records..." },
+    "redtag.noMachines": { vi: "Không tìm thấy máy.", en: "No machines found." },
+    "redtag.totalMachines": { vi: "Tổng số máy: {count}", en: "Total machines: {count}" },
+    "redtag.noMachinesForPlant": { vi: "Không tìm thấy máy cho nhà máy đã chọn.", en: "No machines found for the selected plant." },
+    "redtag.viewDetails": { vi: "Xem chi tiết", en: "View details" },
+    "redtag.showing": { vi: "Hiển thị {start}-{end} trên {total}", en: "Showing {start}-{end} of {total}" },
+    "redtag.previous": { vi: "Trước", en: "Previous" },
+    "redtag.page": { vi: "Trang {current} / {total}", en: "Page {current} / {total}" },
+    "redtag.next": { vi: "Sau", en: "Next" },
+    "redtag.machinesLoadedOne": { vi: "Đã tải {count} máy.", en: "{count} machine loaded." },
+    "redtag.machinesLoadedMany": { vi: "Đã tải {count} máy.", en: "{count} machines loaded." },
+    "redtag.itemCodesTitle": { vi: "{name} - Mã máy", en: "{name} - Item Codes" },
+    "redtag.remove": { vi: "Xóa", en: "Remove" },
+    "redtag.removeAria": { vi: "Xóa {itemCode}", en: "Remove {itemCode}" },
+    "redtag.removeRecord": { vi: "Xóa bản ghi", en: "Remove record" },
+    "redtag.confirmRemove": { vi: "Xóa bản ghi Red Tag {itemCode}?", en: "Remove Red Tag record {itemCode}?" },
+    "redtag.removed": { vi: "Đã xóa bản ghi Red Tag {itemCode}.", en: "Removed Red Tag record {itemCode}." },
+    "redtag.action.remove": { vi: "xóa bản ghi này", en: "remove this record" },
+    "redtag.saveSearchFirst": { vi: "Tìm Mã máy hợp lệ và tải Tên máy trước khi lưu.", en: "Search for a valid Item Code and load the Machine Name before saving." },
+    "redtag.saving": { vi: "Đang lưu...", en: "Saving..." },
+    "redtag.savingRecord": { vi: "Đang lưu bản ghi Red Tag...", en: "Saving Red Tag record..." },
+    "redtag.saved": { vi: "Đã lưu bản ghi Red Tag.", en: "Red Tag record saved." },
+    "redtag.reloading": { vi: "Đang tải lại bản ghi...", en: "Reloading records..." },
+    "redtag.savedRefresh": { vi: "Đã lưu bản ghi Red Tag. Làm mới trang sau nếu chưa thấy bản ghi.", en: "Red Tag record saved. Refresh the page later if it is not visible to other users yet." },
+    "redtag.action.save": { vi: "lưu bản ghi này", en: "save this record" },
+    "redtag.unableToLoad": { vi: "Không thể tải bản ghi Red Tag.", en: "Unable to load Red Tag records." },
+    "redtag.action.loadRecords": { vi: "tải bản ghi Red Tag", en: "load Red Tag records" },
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
+
+  const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
 
   const config = window.SAMHO_SUPABASE;
   const redTagConfig = config?.redTag || {};
@@ -31,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let displayedGroups = [];
   let currentPage = 1;
   let validatedMachineItemCode = "";
+  let lastModalGroup = null;
   const pageSize = 10;
 
   if (!config || !plantFilter || !searchInput || !list || !summary || !pagination || !status || !modal || !modalList || !modalTitle || !addButton || !addModal || !addForm || !addStatus || !addSaveButton || !addStatusSelect || !addIssueField || !addIssueInput || !addItemCodeInput || !addMachineNameInput || !machineSearchButton || !scanButton || !scanModal || !scanVideo || !scanStatus) return;
@@ -53,12 +129,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const itemCode = addItemCodeInput.value.trim().toUpperCase();
     clearMachineName();
     if (!itemCode) {
-      addStatus.textContent = "Scan or enter an Item Code first.";
+      addStatus.textContent = t("redtag.warnEnterItemCode");
       addStatus.dataset.type = "warning";
       return;
     }
     machineSearchButton.disabled = true;
-    addStatus.textContent = "Searching machine information...";
+    addStatus.textContent = t("redtag.searchingMachine");
     addStatus.dataset.type = "idle";
     try {
       const machineConfig = config.machineInfo || {};
@@ -66,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const machine = await window.SAMHO_DB.getOne(machineConfig.table || "machine_info", { where: { [codeColumn]: itemCode } });
       const machineName = String(machine?.name_en || machine?.NAME_EN || "").trim();
       if (!machineName) {
-        addStatus.textContent = "No machine was found for this Item Code. Please check the barcode and try again.";
+        addStatus.textContent = t("redtag.machineNotFound");
         addStatus.dataset.type = "warning";
         return;
       }
@@ -76,10 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
       addMachineNameInput.readOnly = true;
       validatedMachineItemCode = itemCode;
       addSaveButton.disabled = false;
-      addStatus.textContent = "Machine information loaded.";
+      addStatus.textContent = t("redtag.machineLoaded");
       addStatus.dataset.type = "success";
     } catch (error) {
-      addStatus.textContent = window.SAMHO_ERRORS.message(error, "load machine information");
+      addStatus.textContent = window.SAMHO_ERRORS.message(error, t("redtag.action.loadMachine"));
       addStatus.dataset.type = "error";
     } finally {
       machineSearchButton.disabled = false;
@@ -108,12 +184,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const supportsNativeScanner = "BarcodeDetector" in window;
     const supportsZxingScanner = Boolean(window.ZXingBrowser?.BrowserMultiFormatReader);
     if (!navigator.mediaDevices?.getUserMedia) {
-      addStatus.textContent = "Camera access requires HTTPS and a supported browser.";
+      addStatus.textContent = t("redtag.scanNoHttps");
       addStatus.dataset.type = "warning";
       return;
     }
     if (!supportsNativeScanner && !supportsZxingScanner) {
-      addStatus.textContent = "Barcode scanner is still loading. Please try again in a moment.";
+      addStatus.textContent = t("redtag.scanLoading");
       addStatus.dataset.type = "warning";
       return;
     }
@@ -121,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       scanModal.classList.add("active");
       scanModal.setAttribute("aria-hidden", "false");
-      setScanStatus("Opening camera...", "idle");
+      setScanStatus(t("redtag.scanOpening"), "idle");
       const handleDetectedCode = async (value) => {
         if (!value) return;
         addItemCodeInput.value = value.toUpperCase();
@@ -135,14 +211,14 @@ document.addEventListener("DOMContentLoaded", () => {
           scanVideo,
           (result) => handleDetectedCode(result?.getText()?.trim())
         );
-        setScanStatus("Point the camera at a barcode.", "idle");
+        setScanStatus(t("redtag.scanPoint"), "idle");
         return;
       }
       barcodeDetector = barcodeDetector || new window.BarcodeDetector({ formats: ["code_128", "code_39", "code_93", "codabar", "ean_13", "ean_8", "itf", "qr_code", "upc_a", "upc_e"] });
       scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
       scanVideo.srcObject = scanStream;
       await scanVideo.play();
-      setScanStatus("Point the camera at a barcode.", "idle");
+      setScanStatus(t("redtag.scanPoint"), "idle");
       scanTimer = window.setInterval(async () => {
         if (!scanVideo.videoWidth) return;
         const codes = await barcodeDetector.detect(scanVideo);
@@ -152,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 450);
     } catch (error) {
       stopScanner();
-      addStatus.textContent = window.SAMHO_ERRORS.message(error, "use the camera scanner");
+      addStatus.textContent = window.SAMHO_ERRORS.message(error, t("redtag.action.useScanner"));
       addStatus.dataset.type = "error";
     } finally {
       scanButton.disabled = false;
@@ -163,8 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.SAMHO_DB.select(redTagConfig.table || "redtag_records");
 
   const loadRecords = async () => {
-    setStatus("Loading Red Tag records...", "idle");
-    window.SAMHO_LOADING.show("Loading Red Tag records...");
+    setStatus(t("redtag.loadingRecords"), "idle");
+    window.SAMHO_LOADING.show(t("redtag.loadingRecords"));
     try {
       machineRows = await fetchRedTagRecords();
       renderMachines();
@@ -198,10 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     displayedGroups = [...groups.values()].sort((a, b) => a.machineName.localeCompare(b.machineName));
     if (!displayedGroups.length) {
-      list.innerHTML = '<tr><td colspan="4">No machines found.</td></tr>';
-      summary.textContent = "Total machines: 0";
+      list.innerHTML = `<tr><td colspan="4">${t("redtag.noMachines")}</td></tr>`;
+      summary.textContent = t("redtag.totalMachines", { count: 0 });
       pagination.hidden = true;
-      setStatus("No machines found for the selected plant.", "warning");
+      setStatus(t("redtag.noMachinesForPlant"), "warning");
       return;
     }
 
@@ -210,26 +286,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const pageStart = (currentPage - 1) * pageSize;
     const pageRows = displayedGroups.slice(pageStart, pageStart + pageSize);
     const totalRecords = displayedGroups.reduce((total, group) => total + group.quantity, 0);
-    list.innerHTML = pageRows.map((row, index) => `<tr><td>${pageStart + index + 1}</td><td>${escapeHtml(row.machineName)}</td><td>${row.quantity}</td><td><button class="repair-edit red-tag-view" type="button" data-index="${pageStart + index}" aria-label="View details" title="View details"><i data-lucide="eye"></i></button></td></tr>`).join("");
-    summary.textContent = `Total machines: ${totalRecords}`;
+    list.innerHTML = pageRows.map((row, index) => `<tr><td>${pageStart + index + 1}</td><td>${escapeHtml(row.machineName)}</td><td>${row.quantity}</td><td><button class="repair-edit red-tag-view" type="button" data-index="${pageStart + index}" aria-label="${t("redtag.viewDetails")}" title="${t("redtag.viewDetails")}"><i data-lucide="eye"></i></button></td></tr>`).join("");
+    summary.textContent = t("redtag.totalMachines", { count: totalRecords });
     pagination.hidden = displayedGroups.length <= pageSize;
     pagination.innerHTML = `
-      <span>Showing ${pageStart + 1}-${Math.min(pageStart + pageSize, displayedGroups.length)} of ${displayedGroups.length}</span>
+      <span>${t("redtag.showing", { start: pageStart + 1, end: Math.min(pageStart + pageSize, displayedGroups.length), total: displayedGroups.length })}</span>
       <div class="repair-pagination-actions">
-        <button class="repair-page-btn" type="button" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}><i data-lucide="chevron-left"></i>Previous</button>
-        <strong>Page ${currentPage} / ${totalPages}</strong>
-        <button class="repair-page-btn" type="button" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Next<i data-lucide="chevron-right"></i></button>
+        <button class="repair-page-btn" type="button" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}><i data-lucide="chevron-left"></i>${t("redtag.previous")}</button>
+        <strong>${t("redtag.page", { current: currentPage, total: totalPages })}</strong>
+        <button class="repair-page-btn" type="button" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>${t("redtag.next")}<i data-lucide="chevron-right"></i></button>
       </div>`;
     if (window.lucide) window.lucide.createIcons();
-    setStatus(`${displayedGroups.length} machine name${displayedGroups.length === 1 ? "" : "s"} loaded.`, "success");
+    setStatus(displayedGroups.length === 1 ? t("redtag.machinesLoadedOne", { count: 1 }) : t("redtag.machinesLoadedMany", { count: displayedGroups.length }), "success");
   };
 
   const openMachineTypes = (group) => {
+    lastModalGroup = group;
     const machines = [...group.machines].sort((a, b) => a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
-    modalTitle.textContent = `${group.machineName} - Item Codes`;
-    modalList.innerHTML = `<table class="repair-table incoming-summary-table red-tag-summary-table"><thead><tr><th>No.</th><th>Machine Name</th><th>Item Code</th><th>Date</th><th>Line</th><th>Status</th><th>Issue</th><th><span class="sr-only">Remove</span></th></tr></thead><tbody>${machines.map((machine, index) => {
+    modalTitle.textContent = t("redtag.itemCodesTitle", { name: group.machineName });
+    modalList.innerHTML = `<table class="repair-table incoming-summary-table red-tag-summary-table"><thead><tr><th>${t("redtag.no")}</th><th>${t("redtag.machineName")}</th><th>${t("redtag.itemCode")}</th><th>${t("redtag.date")}</th><th>${t("redtag.line")}</th><th>${t("redtag.status")}</th><th>${t("redtag.issue")}</th><th><span class="sr-only">${t("redtag.remove")}</span></th></tr></thead><tbody>${machines.map((machine, index) => {
       const statusClass = machine.status === "Máy Hư Chờ Sửa" ? "pending" : "done";
-      return `<tr><td>${index + 1}</td><td>${escapeHtml(group.machineName)}</td><td>${escapeHtml(machine.itemCode)}</td><td>${escapeHtml(formatDate(machine.date))}</td><td>${escapeHtml(machine.line)}</td><td><span class="repair-table-status ${statusClass}">${escapeHtml(machine.status)}</span></td><td>${escapeHtml(machine.issue)}</td><td><button class="repair-edit spare-delete red-tag-remove" type="button" data-item-code="${escapeHtml(machine.itemCode)}" aria-label="Remove ${escapeHtml(machine.itemCode)}" title="Remove record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg></button></td></tr>`;
+      return `<tr><td>${index + 1}</td><td>${escapeHtml(group.machineName)}</td><td>${escapeHtml(machine.itemCode)}</td><td>${escapeHtml(formatDate(machine.date))}</td><td>${escapeHtml(machine.line)}</td><td><span class="repair-table-status ${statusClass}">${escapeHtml(machine.status)}</span></td><td>${escapeHtml(machine.issue)}</td><td><button class="repair-edit spare-delete red-tag-remove" type="button" data-item-code="${escapeHtml(machine.itemCode)}" aria-label="${t("redtag.removeAria", { itemCode: escapeHtml(machine.itemCode) })}" title="${t("redtag.removeRecord")}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg></button></td></tr>`;
     }).join("")}</tbody></table>`;
     modal.classList.add("active");
     modal.setAttribute("aria-hidden", "false");
@@ -241,15 +318,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const button = event.target.closest(".red-tag-remove");
     if (!button) return;
     const itemCode = button.dataset.itemCode;
-    if (!itemCode || !window.confirm(`Remove Red Tag record ${itemCode}?`)) return;
+    if (!itemCode || !window.confirm(t("redtag.confirmRemove", { itemCode }))) return;
     button.disabled = true;
     try {
       await window.SAMHO_DB.remove(redTagConfig.table || "redtag_records", { [itemCodeColumn]: itemCode });
       closeModal();
       await loadRecords();
-      setStatus(`Removed Red Tag record ${itemCode}.`, "success");
+      setStatus(t("redtag.removed", { itemCode }), "success");
     } catch (error) {
-      setStatus(friendlyError(error, "remove this record"), "error");
+      setStatus(friendlyError(error, t("redtag.action.remove")), "error");
       button.disabled = false;
     }
   });
@@ -302,16 +379,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const values = { ...Object.fromEntries(new FormData(addForm)), machineName: addMachineNameInput.value.trim() };
     if (!values.machineName || validatedMachineItemCode !== String(values.itemCode || "").trim().toUpperCase()) {
       clearMachineName();
-      addStatus.textContent = "Search for a valid Item Code and load the Machine Name before saving.";
+      addStatus.textContent = t("redtag.saveSearchFirst");
       addStatus.dataset.type = "warning";
       return;
     }
     const payload = Object.fromEntries(Object.entries(redTagConfig.insertMap || {}).map(([field, column]) => [column, String(values[field] || "").trim()]));
-    addStatus.textContent = "Saving...";
+    addStatus.textContent = t("redtag.saving");
     addStatus.dataset.type = "idle";
     addSaveButton.disabled = true;
     try {
-      window.SAMHO_LOADING.show("Saving Red Tag record...");
+      window.SAMHO_LOADING.show(t("redtag.savingRecord"));
       await window.SAMHO_DB.insert(redTagConfig.table || "redtag_records", payload);
       const itemCode = String(payload[itemCodeColumn] || "").trim();
       plantFilter.value = values.plant;
@@ -319,21 +396,26 @@ document.addEventListener("DOMContentLoaded", () => {
       machineRows = [payload, ...machineRows.filter((row) => String(row?.[itemCodeColumn] || "").trim() !== itemCode)];
       renderMachines();
       closeAddModal();
-      setStatus("Red Tag record saved.", "success");
-      window.SAMHO_LOADING.show("Reloading records...");
+      setStatus(t("redtag.saved"), "success");
+      window.SAMHO_LOADING.show(t("redtag.reloading"));
       try {
         await loadRecords();
-        setStatus("Red Tag record saved.", "success");
+        setStatus(t("redtag.saved"), "success");
       } catch {
-        setStatus("Red Tag record saved. Refresh the page later if it is not visible to other users yet.", "warning");
+        setStatus(t("redtag.savedRefresh"), "warning");
       }
     } catch (error) {
-      addStatus.textContent = friendlyError(error, "save this record");
+      addStatus.textContent = friendlyError(error, t("redtag.action.save"));
       addStatus.dataset.type = "error";
     } finally {
       window.SAMHO_LOADING.hide();
       addSaveButton.disabled = false;
     }
   });
-  loadRecords().catch((error) => { list.innerHTML = '<tr><td colspan="4">Unable to load Red Tag records.</td></tr>'; summary.textContent = ''; pagination.hidden = true; setStatus(friendlyError(error, "load Red Tag records"), "error"); });
+  loadRecords().catch((error) => { list.innerHTML = `<tr><td colspan="4">${t("redtag.unableToLoad")}</td></tr>`; summary.textContent = ''; pagination.hidden = true; setStatus(friendlyError(error, t("redtag.action.loadRecords")), "error"); });
+
+  document.addEventListener("samho:langchange", () => {
+    if (machineRows.length) renderMachines();
+    if (modal.classList.contains("active") && lastModalGroup) openMachineTypes(lastModalGroup);
+  });
 });

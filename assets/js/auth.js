@@ -101,7 +101,10 @@
 
     const greeting = document.createElement("header");
     greeting.className = "app-greeting";
-    greeting.textContent = `Hello, ${displayName}`;
+    const displayNameSafe = displayName;
+    greeting.textContent = window.SAMHO_LANG
+      ? window.SAMHO_LANG.t("greeting.hello", { name: displayNameSafe })
+      : `Hello, ${displayNameSafe}`;
     content.prepend(greeting);
   };
 

@@ -7,12 +7,13 @@
     <link rel="icon" type="image/webp" href="assets/icon/samho-icon.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited.css?v=20260810-1" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js?v=20260805-1" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
+    <script src="assets/js/i18n.js" defer></script>
     <script src="assets/js/datetime.js" defer></script>
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
@@ -29,41 +30,42 @@
         <img class="brand-mark" src="assets/icon/samho-icon.webp" alt="SamHo" />
         <div>
           <strong>Vietnam Samho</strong>
-          <span>Factory System</span>
+          <span data-i18n="brand.tagline"></span>
         </div>
       </div>
 
       <nav class="nav-list">
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="wrench"></i>Maintenance<i data-lucide="chevron-down"></i>
+            <i data-lucide="wrench"></i><span data-i18n="nav.maintenance"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i>BM</a>
-          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i>KPI Dashboard</a>
+          <a href="repair_submit.html"><i data-lucide="clipboard-pen-line"></i><span data-i18n="nav.bm"></span></a>
+          <a href="repair_info.html"><i data-lucide="file-text"></i><span data-i18n="nav.repairInfo"></span></a>
+          <a href="kpi_dashboard.html"><i data-lucide="bar-chart-3"></i><span data-i18n="nav.kpi"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head selected" type="button" aria-expanded="true">
-            <i data-lucide="settings-2"></i>TPM<i data-lucide="chevron-down"></i>
+            <i data-lucide="settings-2"></i><span data-i18n="nav.tpm"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a class="current" href="pm.html"><i data-lucide="calendar-check"></i>PM</a>
+          <a class="current" href="pm.html"><i data-lucide="calendar-check"></i><span data-i18n="nav.pm"></span></a>
         </section>
 
         <section class="nav-group active">
           <button class="nav-head" type="button" aria-expanded="true">
-            <i data-lucide="package-search"></i>Spare Part Management<i data-lucide="chevron-down"></i>
+            <i data-lucide="package-search"></i><span data-i18n="nav.sparepart"></span><i data-lucide="chevron-down"></i>
           </button>
-          <a href="red_tag.html"><i data-lucide="tag"></i>Red Tag</a>
-          <a href="spare_parts.html"><i data-lucide="boxes"></i>Spare part</a>
-          <a href="incoming_stock.html"><i data-lucide="truck"></i>Incoming stock</a>
+          <a href="red_tag.html"><i data-lucide="tag"></i><span data-i18n="nav.redTag"></span></a>
+          <a href="spare_parts.html"><i data-lucide="boxes"></i><span data-i18n="nav.sparepartItem"></span></a>
+          <a href="incoming_stock.html"><i data-lucide="truck"></i><span data-i18n="nav.incoming"></span></a>
         </section>
       </nav>
 
       <div class="sidebar-footer">
         <button class="logout sidebar-logout" type="button">
-          <i data-lucide="log-out"></i>Logout
+          <i data-lucide="log-out"></i><span data-i18n="nav.logout"></span>
         </button>
-        <small class="app-copyright">&copy; 2026 LEAN Department, Vietnam Samho</small>
+        <small class="app-copyright" data-i18n="app.copyright"></small>
       </div>
     </aside>
 
@@ -73,17 +75,17 @@
           <div class="info-title" style="display:flex;align-items:center;justify-content:space-between">
             <div style="display:flex;align-items:center;gap:10px">
               <i data-lucide="calendar-check"></i>
-              <h1>Lịch Bảo Trì / PM Schedule</h1>
+              <h1 data-i18n="pm.page.title">Lịch Bảo Trì / PM Schedule</h1>
             </div>
-            <button class="btn primary" id="pmAddButton" type="button"><i data-lucide="plus"></i>New PM</button>
+            <button class="btn primary" id="pmAddButton" type="button"><i data-lucide="plus"></i><span data-i18n="pm.addButton">New PM</span></button>
           </div>
         </div>
 
         <section class="page-view active" id="pmScheduleView">
           <section class="pm-stats-row" id="pmStatsRow">
-            <article class="pm-stat-card pending"><i data-lucide="clock-alert"></i><div><strong id="pmStatPending">0</strong><span>ĐANG CHỜ</span></div></article>
-            <article class="pm-stat-card completed"><i data-lucide="check-circle"></i><div><strong id="pmStatCompleted">0</strong><span>HOÀN THÀNH</span></div></article>
-            <article class="pm-stat-card validated"><i data-lucide="badge-check"></i><div><strong id="pmStatValidated">0</strong><span>ĐÃ XÁC NHẬN</span></div></article>
+            <article class="pm-stat-card pending"><i data-lucide="clock-alert"></i><div><strong id="pmStatPending">0</strong><span data-i18n="pm.status.pending">ĐANG CHỜ</span></div></article>
+            <article class="pm-stat-card completed"><i data-lucide="check-circle"></i><div><strong id="pmStatCompleted">0</strong><span data-i18n="pm.status.completed">HOÀN THÀNH</span></div></article>
+            <article class="pm-stat-card validated"><i data-lucide="badge-check"></i><div><strong id="pmStatValidated">0</strong><span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></div></article>
           </section>
 
           <section class="pm-calendar-section">
@@ -92,29 +94,29 @@
               <h3 id="calMonthLabel">May 2026</h3>
               <button class="cal-nav" id="calNext" type="button">▶</button>
               <div class="cal-legend">
-                <span><b class="pending"></b> ĐANG CHỜ</span>
-                <span><b class="completed"></b> HOÀN THÀNH</span>
-                <span><b class="validated"></b> ĐÃ XÁC NHẬN</span>
+                <span><b class="pending"></b> <span data-i18n="pm.status.pending">ĐANG CHỜ</span></span>
+                <span><b class="completed"></b> <span data-i18n="pm.status.completed">HOÀN THÀNH</span></span>
+                <span><b class="validated"></b> <span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></span>
               </div>
             </div>
             <div class="pm-calendar-grid" id="pmCalendarGrid"></div>
           </section>
 
-          <section class="repair-list" aria-label="PM schedule list">
+          <section class="repair-list" aria-label="PM schedule list" data-i18n-title="pm.schedule.listAria">
             <div class="repair-table-wrap">
               <table class="repair-table pm-table">
                 <thead>
                     <tr>
-                      <th>No.</th>
-                      <th>ITEM CODE</th>
-                      <th>Plant</th>
-                      <th>Due Date</th>
-                      <th>PIC</th>
-                      <th>Status</th>
-                      <th>Checklist</th>
+                      <th data-i18n="pm.column.no">No.</th>
+                      <th data-i18n="pm.column.itemCode">ITEM CODE</th>
+                      <th data-i18n="pm.column.plant">Plant</th>
+                      <th data-i18n="pm.column.dueDate">Due Date</th>
+                      <th data-i18n="pm.column.pic">PIC</th>
+                      <th data-i18n="pm.column.status">Status</th>
+                      <th data-i18n="pm.column.checklist">Checklist</th>
                     </tr>
                   </thead>
-                  <tbody id="pmScheduleList"><tr><td colspan="7">Loading PM schedule...</td></tr></tbody>
+                  <tbody id="pmScheduleList"><tr><td colspan="7" data-i18n="pm.loading.schedule">Loading PM schedule...</td></tr></tbody>
               </table>
             </div>
             <p class="pm-summary" id="pmScheduleSummary"></p>
@@ -122,8 +124,8 @@
             <div class="repair-pagination" id="pmSchedulePagination">
               <span id="pmSchedulePageInfo"></span>
               <div class="repair-pagination-actions">
-                <button class="repair-page-btn" id="pmSchedulePrevPage" type="button" disabled><i data-lucide="chevron-left"></i>Prev</button>
-                <button class="repair-page-btn" id="pmScheduleNextPage" type="button">Next<i data-lucide="chevron-right"></i></button>
+                <button class="repair-page-btn" id="pmSchedulePrevPage" type="button" disabled><i data-lucide="chevron-left"></i><span data-i18n="pm.pagination.prev">Prev</span></button>
+                <button class="repair-page-btn" id="pmScheduleNextPage" type="button"><span data-i18n="pm.pagination.next">Next</span><i data-lucide="chevron-right"></i></button>
               </div>
             </div>
           </section>
@@ -136,27 +138,27 @@
       <div class="repair-modal-backdrop" data-close-pm-complete></div>
       <form class="repair-modal-dialog" id="pmCompleteForm">
         <header class="repair-modal-header">
-          <h2>Xác Nhận PM / Complete PM</h2>
-          <button class="repair-modal-close" type="button" data-close-pm-complete aria-label="Close"><i data-lucide="x"></i></button>
+          <h2 data-i18n="pm.complete.title">Xác Nhận PM / Complete PM</h2>
+          <button class="repair-modal-close" type="button" data-close-pm-complete aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
         <div class="repair-modal-grid">
-          <label><span>Machine</span><input id="pmCompleteMachine" type="text" disabled /></label>
-          <label><span>Due Date</span><input id="pmCompleteDueDate" type="text" disabled /></label>
+          <label><span data-i18n="pm.field.machine">Machine</span><input id="pmCompleteMachine" type="text" disabled /></label>
+          <label><span data-i18n="pm.field.dueDate">Due Date</span><input id="pmCompleteDueDate" type="text" disabled /></label>
           <div class="field">
-            <span>Người sửa chữa / Technician</span>
+            <span data-i18n="pm.field.technician">Người sửa chữa / Technician</span>
             <div class="mechanic-picker" id="pmCompleteMechanicPicker">
               <div class="mechanic-chip-list" id="pmCompleteChips"></div>
-              <input id="pmCompleteMechanicSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search mechanic names" />
+              <input id="pmCompleteMechanicSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search mechanic names" data-i18n-ph="pm.mechanic.placeholder" data-i18n-title="pm.mechanic.searchAria" />
               <div class="mechanic-options" id="pmCompleteOptions" role="listbox" hidden></div>
             </div>
             <input id="pmCompleteTechnician" type="hidden" required />
           </div>
-          <label><span>Notes / Ghi chú</span><textarea id="pmCompleteNotes" rows="3"></textarea></label>
+          <label><span data-i18n="pm.field.notes">Notes / Ghi chú</span><textarea id="pmCompleteNotes" rows="3"></textarea></label>
         </div>
         <footer class="repair-modal-footer">
           <p class="repair-modal-status" id="pmCompleteStatus" aria-live="polite"></p>
-          <button class="btn muted" type="button" data-close-pm-complete>Cancel</button>
-          <button class="save" id="pmCompleteSave" type="submit"><i data-lucide="check"></i>Complete</button>
+          <button class="btn muted" type="button" data-close-pm-complete data-i18n="pm.common.cancel">Cancel</button>
+          <button class="save" id="pmCompleteSave" type="submit"><i data-lucide="check"></i><span data-i18n="pm.complete.submit">Complete</span></button>
         </footer>
       </form>
     </div>
@@ -167,51 +169,51 @@
       <form class="repair-modal-dialog pm-form-dialog" id="pmForm">
         <header class="repair-modal-header pm-form-header">
           <div class="pm-form-title-wrap">
-            <span class="pm-form-eyebrow"><i data-lucide="calendar-check"></i>PM Maintenance</span>
-            <h2 id="pmFormTitle">Thêm PM / Create PM</h2>
+            <span class="pm-form-eyebrow"><i data-lucide="calendar-check"></i><span data-i18n="pm.form.eyebrow">PM Maintenance</span></span>
+            <h2 id="pmFormTitle" data-i18n="pm.form.title.create">Thêm PM / Create PM</h2>
           </div>
-          <button class="repair-modal-close" type="button" data-close-pm-form aria-label="Close"><i data-lucide="x"></i></button>
+          <button class="repair-modal-close" type="button" data-close-pm-form aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
 
         <div class="pm-form-sections">
-          <section class="pm-form-section" aria-label="Machine">
+          <section class="pm-form-section" aria-label="Machine" data-i18n-title="pm.form.section.machine">
             <div class="pm-form-section-head">
               <span class="pm-form-step"><i data-lucide="factory"></i></span>
-              <div class="pm-form-section-title"><strong>Máy móc / Machine</strong><small>Search the item code to auto-fill machine info</small></div>
+              <div class="pm-form-section-title"><strong data-i18n="pm.form.section.machineTitle">Máy móc / Machine</strong><small data-i18n="pm.form.section.machineHint">Search the item code to auto-fill machine info</small></div>
             </div>
             <div class="repair-modal-grid pm-form-grid">
-              <label class="pm-form-span2"><span>Item Code</span>
+              <label class="pm-form-span2"><span data-i18n="pm.field.itemCode">Item Code</span>
                 <div class="pm-code-search">
-                  <input id="pmFormItemCode" type="text" placeholder="Enter item code" required />
-                  <button class="btn success" id="pmFormSearchBtn" type="button"><i data-lucide="search"></i>Search</button>
+                  <input id="pmFormItemCode" type="text" placeholder="Enter item code" data-i18n-ph="pm.form.itemCodePh" required />
+                  <button class="btn success" id="pmFormSearchBtn" type="button"><i data-lucide="search"></i><span data-i18n="common.search">Search</span></button>
                 </div>
                 <p class="search-status pm-form-search-status" id="pmFormSearchStatus" aria-live="polite"></p>
               </label>
-              <label><span>Machine Name</span><input id="pmFormNameEn" type="text" disabled /></label>
-              <label><span>Plant</span><input id="pmFormPlant" type="text" disabled /></label>
+              <label><span data-i18n="pm.field.machineName">Machine Name</span><input id="pmFormNameEn" type="text" disabled /></label>
+              <label><span data-i18n="pm.field.plant">Plant</span><input id="pmFormPlant" type="text" disabled /></label>
             </div>
           </section>
 
-          <section class="pm-form-section" aria-label="Schedule">
+          <section class="pm-form-section" aria-label="Schedule" data-i18n-title="pm.form.section.schedule">
             <div class="pm-form-section-head">
               <span class="pm-form-step"><i data-lucide="calendar-days"></i></span>
-              <div class="pm-form-section-title"><strong>Lịch / Schedule</strong><small>Pick the maintenance due date</small></div>
+              <div class="pm-form-section-title"><strong data-i18n="pm.form.section.scheduleTitle">Lịch / Schedule</strong><small data-i18n="pm.form.section.scheduleHint">Pick the maintenance due date</small></div>
             </div>
             <div class="repair-modal-grid pm-form-grid">
-              <label><span>Due Date</span><input id="pmFormDueDate" type="date" required /></label>
+              <label><span data-i18n="pm.field.dueDate">Due Date</span><input id="pmFormDueDate" type="date" required /></label>
             </div>
           </section>
 
-          <section class="pm-form-section" aria-label="Team">
+          <section class="pm-form-section" aria-label="Team" data-i18n-title="pm.form.section.team">
             <div class="pm-form-section-head">
               <span class="pm-form-step"><i data-lucide="users"></i></span>
-              <div class="pm-form-section-title"><strong>Đội ngũ / Team</strong><small>Assigned PIC who will carry out the PM</small></div>
+              <div class="pm-form-section-title"><strong data-i18n="pm.form.section.teamTitle">Đội ngũ / Team</strong><small data-i18n="pm.form.section.teamHint">Assigned PIC who will carry out the PM</small></div>
             </div>
             <div class="repair-modal-grid pm-form-grid">
-              <label class="pm-form-span2"><span>PIC / Assigned Team</span>
+              <label class="pm-form-span2"><span data-i18n="pm.form.picLabel">PIC / Assigned Team</span>
                 <div class="mechanic-picker" id="pmFormTeamPicker">
                   <div class="mechanic-chip-list" id="pmFormTeamChips"></div>
-                  <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" />
+                  <input id="pmFormTeamSearch" type="text" autocomplete="off" placeholder="Type a name" aria-label="Search team names" data-i18n-ph="pm.mechanic.placeholder" data-i18n-title="pm.form.teamSearchAria" />
                   <div class="mechanic-options" id="pmFormTeamOptions" role="listbox" hidden></div>
                 </div>
                 <input id="pmFormTeam" type="hidden" />
@@ -222,8 +224,8 @@
 
         <footer class="repair-modal-footer pm-form-footer">
           <p class="repair-modal-status" id="pmFormStatus" aria-live="polite"></p>
-          <button class="btn muted" type="button" data-close-pm-form>Cancel</button>
-          <button class="save" id="pmFormSave" type="submit"><i data-lucide="save"></i>Save</button>
+          <button class="btn muted" type="button" data-close-pm-form data-i18n="pm.common.cancel">Cancel</button>
+          <button class="save" id="pmFormSave" type="submit"><i data-lucide="save"></i><span data-i18n="common.save">SAVE</span></button>
         </footer>
       </form>
     </div>
@@ -234,14 +236,14 @@
       <div class="repair-modal-dialog repair-modal-dialog-wide">
         <header class="repair-modal-header">
           <div>
-            <h2 id="pmTaskDetailTitle">Task Checklist</h2>
-            <span class="task-progress" id="pmTaskProgress">Hoàn thành: 0/0</span>
+            <h2 id="pmTaskDetailTitle" data-i18n="pm.task.title">Task Checklist</h2>
+            <span class="task-progress" id="pmTaskProgress" data-i18n="pm.task.progress">Hoàn thành: 0/0</span>
           </div>
-          <button class="repair-modal-close" type="button" data-close-pm-task aria-label="Close"><i data-lucide="x"></i></button>
+          <button class="repair-modal-close" type="button" data-close-pm-task aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
         <div class="task-checklist" id="pmTaskChecklist"></div>
         <footer class="repair-modal-footer">
-          <button class="btn primary" id="pmApproveBtn" type="button" disabled>Xác Nhận</button>
+          <button class="btn primary" id="pmApproveBtn" type="button" disabled data-i18n="pm.task.approveBtn">Xác Nhận</button>
         </footer>
       </div>
     </div>
