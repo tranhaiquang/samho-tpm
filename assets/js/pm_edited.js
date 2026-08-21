@@ -101,6 +101,9 @@
       "pm.task.checkAll": { vi: "Vui lòng đánh dấu tất cả công việc trước khi xác nhận.", en: "Check all tasks before confirming." },
       "pm.task.approveBtn": { vi: "Xác Nhận", en: "Confirm" },
       "pm.confirm.delete": { vi: "Xóa PM cho {equipment}?", en: "Delete PM for {equipment}?" },
+      "pm.deleted": { vi: "Đã xóa PM cho {equipment}.", en: "Deleted PM for {equipment}." },
+      "pm.delete.blocked": { vi: "Không thể xóa bản ghi đã hoàn thành hoặc đã xác nhận.", en: "Cannot delete a completed or validated record." },
+      "pm.delete.noRows": { vi: "Không xóa được bản ghi (0 dòng bị ảnh hưởng). Vui lòng kiểm tra quyền xóa (RLS) trên bảng pm_records.", en: "Delete affected 0 rows — please check the delete (RLS) policy on pm_records." },
     });
   }
 
@@ -116,6 +119,7 @@
   const recordsTable = recordsConfig.table || "pm_records";
   const recCol = recordsConfig.fieldMap || {};
   const col = (key, fallback) => recCol[key] || fallback;
+  const deletedCol = col("deleted", "deleted");
 
   const today = new Date();
 
@@ -146,10 +150,9 @@
 
   const apiInsert = (payload) => db.insert(recordsTable, payload);
   const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
-  const apiDelete = (id) => db.remove(recordsTable, { id });
+  const apiDelete = (id) => db.update(recordsTable, { id }, { [deletedCol]: true });
   const apiFindByCodeAndDate = (itemCode, dueDate) =>
     db.select(recordsTable, {
-      columns: "id",
       where: { [col("itemCode", "item_code")]: itemCode, [col("dueDate", "due_date")]: dueDate }
     });
 
@@ -436,8 +439,9 @@
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const last = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`;
     const monthWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
-    let rows = await db.select(recordsTable, { where: monthWhere });
-    const existing = new Set(rows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
+    let allRows = await db.select(recordsTable, { where: monthWhere });
+    const existing = new Set(allRows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
+    let rows = allRows.filter((r) => !r[deletedCol]);
     const supabaseConfig = window.SAMHO_SUPABASE || {};
     const mi = supabaseConfig.machineInfo || {};
     const generatedRows = computeGeneratedRows();
@@ -463,7 +467,10 @@
       existing.add(key);
       inserted++;
     }
-    if (inserted) rows = await db.select(recordsTable, { where: monthWhere });
+    if (inserted) {
+      allRows = await db.select(recordsTable, { where: monthWhere });
+      rows = allRows.filter((r) => !r[deletedCol]);
+    }
     for (const r of rows) {
       const code = r[col("itemCode", "item_code")] || "";
       if (code && !(r[col("nameEn", "name_en")] || "")) {
@@ -835,6 +842,19 @@
     try {
       const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length) {
+        const soft = existing.find((r) => r[deletedCol]);
+        if (soft) {
+          await apiUpdate(soft.id, {
+            [deletedCol]: false,
+            [col("nameEn", "name_en")]: searchData.nameEn || "",
+            [col("equipment", "equipment")]: searchData.nameEn || "",
+            [col("plant", "plant")]: searchData.plant || "",
+            [col("section", "section")]: "",
+            [col("pic", "pic")]: team,
+            [col("status", "status")]: "pending"
+          });
+          return true;
+        }
         setStatusMsg("pmFormStatus", t("pm.form.duplicate"), "warning");
         return false;
       }
@@ -906,10 +926,15 @@
 
   const deletePM = async (id) => {
     const rec = currentRecords.find((r) => r.id === id);
-    if (!rec || rec.status === "completed" || rec.status === "validated") return;
+    if (!rec) return;
     if (!confirm(t("pm.confirm.delete", { equipment: rec.equipment }))) return;
     try {
-      await apiDelete(id);
+      const updated = await apiDelete(id);
+      if (!Array.isArray(updated) || updated.length === 0) {
+        setStatusMsg("pmScheduleStatus", t("pm.delete.noRows"), "error");
+        return;
+      }
+      setStatusMsg("pmScheduleStatus", t("pm.deleted", { equipment: rec.equipment }), "success");
       await renderScheduleTab();
     } catch (e) {
       setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.deleteRecord")), "error");
