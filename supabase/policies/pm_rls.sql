@@ -11,6 +11,7 @@ create table if not exists public.pm_records (
   record_type text not null default 'generated' check (record_type in ('generated', 'manual')),
   task_progress text,
   task_validation text,
+  deleted boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (item_code, due_date)

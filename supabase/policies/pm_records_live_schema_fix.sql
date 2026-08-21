@@ -38,6 +38,9 @@ alter table public.pm_records add column if not exists section text;
 alter table public.pm_records add column if not exists created_at timestamptz not null default now();
 alter table public.pm_records add column if not exists updated_at timestamptz not null default now();
 
+-- 4b. deleted — soft-delete flag (see pm_records_deleted_flag.sql).
+alter table public.pm_records add column if not exists deleted boolean not null default false;
+
 -- 5. Dedupe key so re-opening a month never duplicates generated records.
 alter table public.pm_records drop constraint if exists pm_records_item_code_due_date_key;
 alter table public.pm_records add constraint pm_records_item_code_due_date_key

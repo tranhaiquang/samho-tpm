@@ -75,63 +75,6 @@
     });
   }
 
-  const POS_STORAGE_KEY = "samho.lang.pos";
-
-  function applySavedPosition(toggle) {
-    try {
-      const saved = JSON.parse(localStorage.getItem(POS_STORAGE_KEY) || "null");
-      if (!saved || typeof saved.x !== "number" || typeof saved.y !== "number") return;
-      toggle.style.left = `${saved.x}px`;
-      toggle.style.top = `${saved.y}px`;
-      toggle.style.right = "auto";
-      toggle.style.bottom = "auto";
-    } catch { /* corrupt position */ }
-  }
-
-  function makeDraggable(toggle) {
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let startLeft = 0;
-    let startTop = 0;
-    let dragging = false;
-
-    toggle.addEventListener("pointerdown", (event) => {
-      if (event.target.closest("[data-lang]")) return;
-      dragging = true;
-      dragStartX = event.clientX;
-      dragStartY = event.clientY;
-      const rect = toggle.getBoundingClientRect();
-      startLeft = rect.left;
-      startTop = rect.top;
-      toggle.classList.add("dragging");
-      toggle.setPointerCapture(event.pointerId);
-      event.preventDefault();
-    });
-
-    toggle.addEventListener("pointermove", (event) => {
-      if (!dragging) return;
-      const deltaX = event.clientX - dragStartX;
-      const deltaY = event.clientY - dragStartY;
-      toggle.style.left = `${startLeft + deltaX}px`;
-      toggle.style.top = `${startTop + deltaY}px`;
-      toggle.style.right = "auto";
-      toggle.style.bottom = "auto";
-    });
-
-    const endDrag = (event) => {
-      if (!dragging) return;
-      dragging = false;
-      toggle.classList.remove("dragging");
-      try {
-        const rect = toggle.getBoundingClientRect();
-        localStorage.setItem(POS_STORAGE_KEY, JSON.stringify({ x: rect.left, y: rect.top }));
-      } catch { /* private mode */ }
-    };
-
-    toggle.addEventListener("pointerup", endDrag);
-    toggle.addEventListener("pointercancel", endDrag);
-  }
-
   function injectToggle() {
     if (document.getElementById("langToggle")) return;
     const toggle = document.createElement("div");
@@ -148,8 +91,8 @@
       lang.set(btn.dataset.lang);
     });
     document.body.appendChild(toggle);
-    applySavedPosition(toggle);
-    makeDraggable(toggle);
+    toggle.removeAttribute("style");
+    try { localStorage.removeItem("samho.lang.pos"); } catch { /* private mode */ }
     renderToggle();
   }
 
