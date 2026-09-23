@@ -151,7 +151,7 @@
   let lastLoadOk = false;
   let calMonth = today.getMonth();
   let calYear = today.getFullYear();
-  const scheduleFilter = { plant: "", search: "", status: "" };
+  const scheduleFilter = { search: "", status: "" };
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
@@ -180,10 +180,7 @@
   };
   const recordLabel = (r) => r.nameEn || r.equipment || r.itemCode;
 
-  const getVisibleRecords = () => {
-    if (!scheduleFilter.plant) return currentRecords;
-    return currentRecords.filter((r) => r.plant === scheduleFilter.plant);
-  };
+  const getVisibleRecords = () => currentRecords;
 
   const apiInsert = (payload) => db.insert(recordsTable, payload);
   const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
@@ -267,16 +264,6 @@
     return `<span class="cal-count-badge">${t("pm.calendar.machines", { count: dayRecords.length })}</span><span class="cal-plant-badges">${parts}</span>`;
   };
 
-  const updateHiddenNotice = () => {
-    const el = document.getElementById("pmHiddenNotice");
-    if (!el) return;
-    const hiddenCount = scheduleFilter.plant
-      ? currentRecords.filter((r) => !normalizePlant(r.plant)).length
-      : 0;
-    el.hidden = !hiddenCount;
-    if (hiddenCount) el.textContent = t("pm.hiddenNotice", { count: hiddenCount });
-  };
-
   const renderCalendar = () => {
     const grid = document.getElementById("pmCalendarGrid");
     const label = document.getElementById("calMonthLabel");
@@ -306,8 +293,6 @@
     grid.querySelectorAll(".cal-day.has-records").forEach((cell) => {
       cell.addEventListener("click", () => openDayModal(cell.dataset.date));
     });
-    updateHiddenNotice();
-    renderPlantLegend();
   };
 
   const closeDayModal = () => {
@@ -318,7 +303,6 @@
     const modal = document.getElementById("pmDayModal");
     const dateEl = document.getElementById("pmDayModalDate");
     const groupsEl = document.getElementById("pmDayGroups");
-    const notice = document.getElementById("pmDayHiddenNotice");
     if (!modal || !groupsEl) return;
     const visible = getVisibleRecords().filter((r) => r.dueDate === dateStr);
     if (dateEl) dateEl.textContent = formatDate(dateStr);
@@ -355,43 +339,8 @@
         });
       });
     }
-    if (notice) {
-      const hiddenCount = scheduleFilter.plant
-        ? currentRecords.filter((r) => r.dueDate === dateStr && !normalizePlant(r.plant)).length
-        : 0;
-      notice.hidden = !hiddenCount;
-      if (hiddenCount) notice.textContent = t("pm.hiddenNotice", { count: hiddenCount });
-    }
     modal.classList.add("active");
     lucideIcons();
-  };
-
-  const setPlantFilter = (value) => {
-    scheduleFilter.plant = value || "";
-    schedulePage = 0;
-    const label = document.getElementById("pmPlantFilterLabel");
-    if (label) label.textContent = scheduleFilter.plant || t("pm.filter.allPlants");
-    document.querySelectorAll("#pmPlantFilterMenu [data-plant-value]").forEach((b) =>
-      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
-    document.querySelectorAll("#pmPlantLegend .cal-legend-plant").forEach((b) =>
-      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
-    closeDayModal();
-    renderStats(getVisibleRecords());
-    renderCalendar();
-    renderScheduleList();
-    lucideIcons();
-  };
-
-  const renderPlantLegend = () => {
-    const container = document.getElementById("pmPlantLegend");
-    if (!container) return;
-    const plants = config.plants || [];
-    container.innerHTML = plants.map((p) =>
-      `<button class="cal-legend-plant${scheduleFilter.plant === p ? " active" : ""}" type="button" data-plant-value="${p}" style="--pc:${plantColor(p)}" title="${p}">${p.replace(/^plant\s*/i, "")}</button>`
-    ).join("");
-    container.querySelectorAll(".cal-legend-plant").forEach((btn) => {
-      btn.addEventListener("click", () => setPlantFilter(btn.dataset.plantValue));
-    });
   };
 
   const renderSchedulePagination = (totalPages) => {
@@ -535,87 +484,26 @@
     };
   };
 
-  const getPMDays = () => {
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const result = [];
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dow = new Date(calYear, calMonth, d).getDay();
-      if (dow >= 2 && dow <= 5) result.push(d);
-    }
-    return result;
-  };
-
-  const computeGeneratedRows = () => {
-    const equipMap = config.equipmentMap || {};
-    const equipTasks = {};
-    for (const row of scheduleRows) {
-      const marker = row.months[calMonth];
-      if (!marker) continue;
-      if (!equipTasks[row.equipmentName]) equipTasks[row.equipmentName] = [];
-      equipTasks[row.equipmentName].push(row);
-    }
-    const pmDays = getPMDays();
-    const result = [];
-    for (const [equipName, tasks] of Object.entries(equipTasks)) {
-      const machines = equipMap[equipName];
-      if (!machines || !machines.length) continue;
-      const step = Math.max(1, Math.floor(pmDays.length / machines.length));
-      for (let i = 0; i < machines.length; i++) {
-        const code = machines[i];
-        const day = pmDays[Math.min(i * step, pmDays.length - 1)];
-        const dueDate = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-        const m = getMachineByCode(code) || {};
-        result.push({
-          itemCode: code,
-          equipment: m.equipment || code,
-          plant: m.plant || "",
-          section: m.section || "",
-          equipmentName: equipName,
-          dueDate
-        });
-      }
-    }
-    return result;
-  };
-
   const loadMonthRecords = async () => {
     const dueDateCol = col("dueDate", "due_date");
     const first = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-01`;
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const last = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`;
     const monthWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
-    let allRows = await db.select(recordsTable, { where: monthWhere });
-    const existing = new Set(allRows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
-    let rows = allRows.filter((r) => !r[deletedCol]);
+    const allRows = await db.select(recordsTable, { where: monthWhere });
+    const rows = allRows.filter((r) => !r[deletedCol]);
     const supabaseConfig = window.SAMHO_SUPABASE || {};
     const mi = supabaseConfig.machineInfo || {};
-    const generatedRows = computeGeneratedRows();
-    const miCodes = [...new Set(generatedRows.map((g) => g.itemCode))];
+    const miCodes = [...new Set(rows.map((r) => r[col("itemCode", "item_code")] || "").filter(Boolean))];
     let miRows = [];
     try {
-      miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
-    } catch (e) {}
+      if (miCodes.length) {
+        miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
+      }
+    } catch (e) {
+      console.error("machine_info lookup failed (name_en backfill skipped):", e);
+    }
     const miNameByCode = new Map(miRows.map((r) => [r[mi.codeColumn || "ITEM_CODE"], r.name_en || r.NAME_EN || ""]));
-    let inserted = 0;
-    for (const g of generatedRows) {
-      const key = `${g.itemCode}::${g.dueDate}`;
-      if (existing.has(key)) continue;
-      await apiInsert({
-        [col("itemCode", "item_code")]: g.itemCode,
-        [col("nameEn", "name_en")]: miNameByCode.get(g.itemCode) || "",
-        [col("plant", "plant")]: g.plant,
-        [col("pic", "pic")]: [...config.defaultTeam],
-        [col("status", "status")]: "pending",
-        [col("dueDate", "due_date")]: g.dueDate,
-        [col("recordType", "record_type")]: "generated"
-      });
-      existing.add(key);
-      inserted++;
-    }
-    if (inserted) {
-      allRows = await db.select(recordsTable, { where: monthWhere });
-      rows = allRows.filter((r) => !r[deletedCol]);
-    }
     for (const r of rows) {
       const code = r[col("itemCode", "item_code")] || "";
       if (code && !(r[col("nameEn", "name_en")] || "")) {
@@ -630,8 +518,36 @@
     return currentRecords;
   };
 
+  const resolveRecordNameEn = async (record) => {
+    if (!record) return "";
+    const existing = String(record.nameEn || "").trim();
+    if (existing) return existing;
+    const code = String(record.itemCode || "").trim();
+    if (!code) return "";
+    const supabaseConfig = window.SAMHO_SUPABASE || {};
+    const mi = supabaseConfig.machineInfo || {};
+    try {
+      const row = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: code } });
+      const nameEn = String(row?.name_en || row?.NAME_EN || "").trim();
+      if (nameEn) {
+        record.nameEn = nameEn;
+        if (record.id) {
+          try {
+            await apiUpdate(record.id, { [col("nameEn", "name_en")]: nameEn });
+          } catch (e) {
+            console.error("Failed to persist name_en for", code, e);
+          }
+        }
+      }
+      return nameEn;
+    } catch (e) {
+      console.error("machine_info lookup failed for", code, e);
+      return "";
+    }
+  };
+
   const openTaskModal = async (record) => {
-    const nameEn = record?.nameEn || "";
+    let nameEn = await resolveRecordNameEn(record);
     let tasks = null;
     if (nameEn) {
       try {
@@ -640,9 +556,13 @@
         console.error("fetchTasks failed:", e);
         setStatusMsg("pmScheduleStatus", t("pm.task.loadError"), "error");
       }
+    } else {
+      console.warn("No task catalog: missing name_en for item_code:", record?.itemCode || "(none)");
     }
     if (!tasks || !tasks.length) {
-      console.warn("No task catalog for name_en:", nameEn);
+      if (nameEn) {
+        console.warn("No task catalog for name_en:", nameEn, "item_code:", record?.itemCode || "");
+      }
       setStatusMsg("pmScheduleStatus", t("pm.task.noCatalog"), "warning");
       return;
     }
@@ -796,7 +716,6 @@
     const summary = document.getElementById("pmScheduleSummary");
 
     let filtered = [...currentRecords];
-    if (scheduleFilter.plant) filtered = filtered.filter((r) => r.plant === scheduleFilter.plant);
     if (scheduleFilter.search) {
       const q = normalizeSearch(scheduleFilter.search);
       filtered = filtered.filter((r) => normalizeSearch(r.equipment).includes(q) || normalizeSearch(r.itemCode).includes(q));
@@ -1165,33 +1084,6 @@
     document.querySelectorAll("[data-close-pm-day]").forEach((el) => {
       el.addEventListener("click", closeDayModal);
     });
-
-    const plantWrap = document.getElementById("pmPlantFilter");
-    const plantButton = document.getElementById("pmPlantFilterButton");
-    const plantMenu = document.getElementById("pmPlantFilterMenu");
-    if (plantWrap && plantButton && plantMenu) {
-      plantButton.addEventListener("click", () => {
-        const isOpen = plantMenu.hidden;
-        plantMenu.hidden = !isOpen;
-        plantButton.setAttribute("aria-expanded", String(isOpen));
-        plantWrap.classList.toggle("open", isOpen);
-      });
-      document.addEventListener("click", (e) => {
-        if (!plantMenu.hidden && !plantWrap.contains(e.target)) {
-          plantMenu.hidden = true;
-          plantButton.setAttribute("aria-expanded", "false");
-          plantWrap.classList.remove("open");
-        }
-      });
-      plantMenu.querySelectorAll("[data-plant-value]").forEach((item) => {
-        item.addEventListener("click", () => {
-          setPlantFilter(item.dataset.plantValue);
-          plantMenu.hidden = true;
-          plantButton.setAttribute("aria-expanded", "false");
-          plantWrap.classList.remove("open");
-        });
-      });
-    }
 
     document.getElementById("pmSchedulePrevPage")?.addEventListener("click", async () => {
       if (schedulePage > 0) { schedulePage--; await renderScheduleTab(); }

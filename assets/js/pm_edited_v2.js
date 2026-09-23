@@ -590,11 +590,18 @@
     const supabaseConfig = window.SAMHO_SUPABASE || {};
     const mi = supabaseConfig.machineInfo || {};
     const generatedRows = computeGeneratedRows();
-    const miCodes = [...new Set(generatedRows.map((g) => g.itemCode))];
+    const miCodes = [...new Set([
+      ...generatedRows.map((g) => g.itemCode),
+      ...rows.map((r) => r[col("itemCode", "item_code")] || "").filter(Boolean)
+    ])];
     let miRows = [];
     try {
-      miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
-    } catch (e) {}
+      if (miCodes.length) {
+        miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
+      }
+    } catch (e) {
+      console.error("machine_info lookup failed (name_en backfill skipped):", e);
+    }
     const miNameByCode = new Map(miRows.map((r) => [r[mi.codeColumn || "ITEM_CODE"], r.name_en || r.NAME_EN || ""]));
     let inserted = 0;
     for (const g of generatedRows) {
@@ -630,8 +637,36 @@
     return currentRecords;
   };
 
+  const resolveRecordNameEn = async (record) => {
+    if (!record) return "";
+    const existing = String(record.nameEn || "").trim();
+    if (existing) return existing;
+    const code = String(record.itemCode || "").trim();
+    if (!code) return "";
+    const supabaseConfig = window.SAMHO_SUPABASE || {};
+    const mi = supabaseConfig.machineInfo || {};
+    try {
+      const row = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: code } });
+      const nameEn = String(row?.name_en || row?.NAME_EN || "").trim();
+      if (nameEn) {
+        record.nameEn = nameEn;
+        if (record.id) {
+          try {
+            await apiUpdate(record.id, { [col("nameEn", "name_en")]: nameEn });
+          } catch (e) {
+            console.error("Failed to persist name_en for", code, e);
+          }
+        }
+      }
+      return nameEn;
+    } catch (e) {
+      console.error("machine_info lookup failed for", code, e);
+      return "";
+    }
+  };
+
   const openTaskModal = async (record) => {
-    const nameEn = record?.nameEn || "";
+    let nameEn = await resolveRecordNameEn(record);
     let tasks = null;
     if (nameEn) {
       try {
@@ -640,9 +675,13 @@
         console.error("fetchTasks failed:", e);
         setStatusMsg("pmScheduleStatus", t("pm.task.loadError"), "error");
       }
+    } else {
+      console.warn("No task catalog: missing name_en for item_code:", record?.itemCode || "(none)");
     }
     if (!tasks || !tasks.length) {
-      console.warn("No task catalog for name_en:", nameEn);
+      if (nameEn) {
+        console.warn("No task catalog for name_en:", nameEn, "item_code:", record?.itemCode || "");
+      }
       setStatusMsg("pmScheduleStatus", t("pm.task.noCatalog"), "warning");
       return;
     }

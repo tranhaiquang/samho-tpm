@@ -535,87 +535,26 @@
     };
   };
 
-  const getPMDays = () => {
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const result = [];
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dow = new Date(calYear, calMonth, d).getDay();
-      if (dow >= 2 && dow <= 5) result.push(d);
-    }
-    return result;
-  };
-
-  const computeGeneratedRows = () => {
-    const equipMap = config.equipmentMap || {};
-    const equipTasks = {};
-    for (const row of scheduleRows) {
-      const marker = row.months[calMonth];
-      if (!marker) continue;
-      if (!equipTasks[row.equipmentName]) equipTasks[row.equipmentName] = [];
-      equipTasks[row.equipmentName].push(row);
-    }
-    const pmDays = getPMDays();
-    const result = [];
-    for (const [equipName, tasks] of Object.entries(equipTasks)) {
-      const machines = equipMap[equipName];
-      if (!machines || !machines.length) continue;
-      const step = Math.max(1, Math.floor(pmDays.length / machines.length));
-      for (let i = 0; i < machines.length; i++) {
-        const code = machines[i];
-        const day = pmDays[Math.min(i * step, pmDays.length - 1)];
-        const dueDate = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-        const m = getMachineByCode(code) || {};
-        result.push({
-          itemCode: code,
-          equipment: m.equipment || code,
-          plant: m.plant || "",
-          section: m.section || "",
-          equipmentName: equipName,
-          dueDate
-        });
-      }
-    }
-    return result;
-  };
-
   const loadMonthRecords = async () => {
     const dueDateCol = col("dueDate", "due_date");
     const first = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-01`;
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const last = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(daysInMonth).padStart(2,"0")}`;
     const monthWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
-    let allRows = await db.select(recordsTable, { where: monthWhere });
-    const existing = new Set(allRows.map((r) => `${r[col("itemCode", "item_code")] || ""}::${String(r[col("dueDate", "due_date")] || "").slice(0, 10)}`));
-    let rows = allRows.filter((r) => !r[deletedCol]);
+    const allRows = await db.select(recordsTable, { where: monthWhere });
+    const rows = allRows.filter((r) => !r[deletedCol]);
     const supabaseConfig = window.SAMHO_SUPABASE || {};
     const mi = supabaseConfig.machineInfo || {};
-    const generatedRows = computeGeneratedRows();
-    const miCodes = [...new Set(generatedRows.map((g) => g.itemCode))];
+    const miCodes = [...new Set(rows.map((r) => r[col("itemCode", "item_code")] || "").filter(Boolean))];
     let miRows = [];
     try {
-      miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
-    } catch (e) {}
+      if (miCodes.length) {
+        miRows = await db.select(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: miCodes } });
+      }
+    } catch (e) {
+      console.error("machine_info lookup failed (name_en backfill skipped):", e);
+    }
     const miNameByCode = new Map(miRows.map((r) => [r[mi.codeColumn || "ITEM_CODE"], r.name_en || r.NAME_EN || ""]));
-    let inserted = 0;
-    for (const g of generatedRows) {
-      const key = `${g.itemCode}::${g.dueDate}`;
-      if (existing.has(key)) continue;
-      await apiInsert({
-        [col("itemCode", "item_code")]: g.itemCode,
-        [col("nameEn", "name_en")]: miNameByCode.get(g.itemCode) || "",
-        [col("plant", "plant")]: g.plant,
-        [col("pic", "pic")]: [...config.defaultTeam],
-        [col("status", "status")]: "pending",
-        [col("dueDate", "due_date")]: g.dueDate,
-        [col("recordType", "record_type")]: "generated"
-      });
-      existing.add(key);
-      inserted++;
-    }
-    if (inserted) {
-      allRows = await db.select(recordsTable, { where: monthWhere });
-      rows = allRows.filter((r) => !r[deletedCol]);
-    }
     for (const r of rows) {
       const code = r[col("itemCode", "item_code")] || "";
       if (code && !(r[col("nameEn", "name_en")] || "")) {
@@ -630,8 +569,36 @@
     return currentRecords;
   };
 
+  const resolveRecordNameEn = async (record) => {
+    if (!record) return "";
+    const existing = String(record.nameEn || "").trim();
+    if (existing) return existing;
+    const code = String(record.itemCode || "").trim();
+    if (!code) return "";
+    const supabaseConfig = window.SAMHO_SUPABASE || {};
+    const mi = supabaseConfig.machineInfo || {};
+    try {
+      const row = await db.getOne(mi.table || "machine_info", { where: { [mi.codeColumn || "ITEM_CODE"]: code } });
+      const nameEn = String(row?.name_en || row?.NAME_EN || "").trim();
+      if (nameEn) {
+        record.nameEn = nameEn;
+        if (record.id) {
+          try {
+            await apiUpdate(record.id, { [col("nameEn", "name_en")]: nameEn });
+          } catch (e) {
+            console.error("Failed to persist name_en for", code, e);
+          }
+        }
+      }
+      return nameEn;
+    } catch (e) {
+      console.error("machine_info lookup failed for", code, e);
+      return "";
+    }
+  };
+
   const openTaskModal = async (record) => {
-    const nameEn = record?.nameEn || "";
+    let nameEn = await resolveRecordNameEn(record);
     let tasks = null;
     if (nameEn) {
       try {
@@ -640,9 +607,13 @@
         console.error("fetchTasks failed:", e);
         setStatusMsg("pmScheduleStatus", t("pm.task.loadError"), "error");
       }
+    } else {
+      console.warn("No task catalog: missing name_en for item_code:", record?.itemCode || "(none)");
     }
     if (!tasks || !tasks.length) {
-      console.warn("No task catalog for name_en:", nameEn);
+      if (nameEn) {
+        console.warn("No task catalog for name_en:", nameEn, "item_code:", record?.itemCode || "");
+      }
       setStatusMsg("pmScheduleStatus", t("pm.task.noCatalog"), "warning");
       return;
     }

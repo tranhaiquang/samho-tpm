@@ -5799,3 +5799,14 @@ body {
     display: none;
   }
 }
+
+.info-status {
+  padding: 4px 0;
+}
+.pm-summary {
+  padding: 8px 0;
+}
+.pm-schedule-status {
+  margin: 6px 0 0;
+  padding: 6px 0;
+}
