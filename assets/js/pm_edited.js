@@ -26,6 +26,13 @@
       "pm.day.fri": { vi: "T6", en: "Fri" },
       "pm.day.sat": { vi: "T7", en: "Sat" },
       "pm.calendar.machines": { vi: "{count} máy", en: "{count} machines" },
+      "pm.filter.allPlants": { vi: "Tất cả nhà máy", en: "All Plants" },
+      "pm.filter.plantsAria": { vi: "Lọc theo nhà máy", en: "Filter by plant" },
+      "pm.calendar.unknownPlant": { vi: "Không rõ nhà máy", en: "Unknown plant" },
+      "pm.hiddenNotice": { vi: "{count} bản ghi không có nhà máy đang bị ẩn.", en: "{count} record(s) without a plant are hidden." },
+      "pm.day.title": { vi: "PM trong ngày", en: "PM for this day" },
+      "pm.day.emptyDay": { vi: "Không có bản ghi PM trong ngày này.", en: "No PM records on this day." },
+      "pm.day.viewTask": { vi: "Xem checklist", en: "View checklist" },
       "pm.column.no": { vi: "STT", en: "No." },
       "pm.column.itemCode": { vi: "MÃ MÁY", en: "ITEM CODE" },
       "pm.column.plant": { vi: "Nhà máy", en: "Plant" },
@@ -148,6 +155,36 @@
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
+  const normalizePlant = (value) => String(value || "").trim().toLowerCase();
+  const hashString = (value) => {
+    let h = 0;
+    const s = String(value || "");
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  };
+  const UNKNOWN_PLANT_COLOR = "#9ca3af";
+  const plantColor = (value) => {
+    const key = normalizePlant(value);
+    if (!key) return UNKNOWN_PLANT_COLOR;
+    const map = config.plantColors || {};
+    if (map[key]) return map[key];
+    const palette = config.plantFallbackPalette || [];
+    return palette.length ? palette[hashString(key) % palette.length] : UNKNOWN_PLANT_COLOR;
+  };
+  const plantShort = (value) => {
+    const key = normalizePlant(value);
+    if (!key) return "?";
+    const m = key.match(/plant\s*(\w+)/);
+    if (m) return m[1].toUpperCase().slice(0, 3);
+    return key.slice(0, 3).toUpperCase();
+  };
+  const recordLabel = (r) => r.nameEn || r.equipment || r.itemCode;
+
+  const getVisibleRecords = () => {
+    if (!scheduleFilter.plant) return currentRecords;
+    return currentRecords.filter((r) => r.plant === scheduleFilter.plant);
+  };
+
   const apiInsert = (payload) => db.insert(recordsTable, payload);
   const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
   const apiDelete = (id) => db.update(recordsTable, { id }, { [deletedCol]: true });
@@ -187,8 +224,8 @@
       const cell = row && row.querySelector(".pm-status-select");
       if (cell) { cell.className = `pm-status-select ${cls}`; cell.textContent = lbl; }
     }
-    renderStats(currentRecords);
-    renderCalendar(currentRecords);
+    renderStats(getVisibleRecords());
+    renderCalendar();
   };
 
   const freqLabel = (f) => {
@@ -211,10 +248,40 @@
     document.getElementById("pmStatValidated").textContent = validated;
   };
 
-  const renderCalendar = (records) => {
+  const renderDayCellLabel = (dayRecords) => {
+    if (dayRecords.length === 1) {
+      const r = dayRecords[0];
+      return `<span class="cal-chip cal-chip-single" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}"><span class="cal-chip-name">${recordLabel(r)}</span><small class="cal-chip-code">${r.itemCode}</small></span>`;
+    }
+    if (dayRecords.length <= 3) {
+      return dayRecords.map((r) => `<span class="cal-chip" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}">${recordLabel(r)}</span>`).join("");
+    }
+    const groups = new Map();
+    dayRecords.forEach((r) => {
+      const key = normalizePlant(r.plant);
+      groups.set(key, (groups.get(key) || 0) + 1);
+    });
+    const parts = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, n]) =>
+      `<span class="cal-plant-badge" style="--pc:${key ? plantColor(key) : UNKNOWN_PLANT_COLOR}">${key ? plantShort(key) : "?"}×${n}</span>`
+    ).join("");
+    return `<span class="cal-count-badge">${t("pm.calendar.machines", { count: dayRecords.length })}</span><span class="cal-plant-badges">${parts}</span>`;
+  };
+
+  const updateHiddenNotice = () => {
+    const el = document.getElementById("pmHiddenNotice");
+    if (!el) return;
+    const hiddenCount = scheduleFilter.plant
+      ? currentRecords.filter((r) => !normalizePlant(r.plant)).length
+      : 0;
+    el.hidden = !hiddenCount;
+    if (hiddenCount) el.textContent = t("pm.hiddenNotice", { count: hiddenCount });
+  };
+
+  const renderCalendar = () => {
     const grid = document.getElementById("pmCalendarGrid");
     const label = document.getElementById("calMonthLabel");
     if (!grid || !label) return;
+    const records = getVisibleRecords();
     const months = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
     label.textContent = `${t(`pm.month.${months[calMonth]}`)} ${calYear}`;
     const firstDay = new Date(calYear, calMonth, 1).getDay();
@@ -226,27 +293,105 @@
       const dateStr = `${String(calYear).padStart(4,"0")}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
       const dayRecords = records.filter((r) => r.dueDate === dateStr);
       let cls = "cal-day";
+      if (dayRecords.length) cls += " has-records";
       if (dayRecords.length) {
         const sts = dayRecords.map((r) => getStatus(r));
         if (sts.some((s) => s === "pending")) cls += " pending";
         else if (sts.some((s) => s === "validated")) cls += " validated";
         else cls += " completed";
       }
-      const count = dayRecords.length;
-      let label = "";
-      if (count === 1) {
-        label = `<span>${dayRecords[0].itemCode}</span>`;
-      } else if (count <= 3) {
-        const codes = [...new Set(dayRecords.map((r) => r.itemCode))];
-        label = codes.map((c) => `<span>${c}</span>`).join("");
-      } else {
-        const sections = [...new Set(dayRecords.map((r) => r.section))];
-        label = `<span class="cal-count-badge">${t("pm.calendar.machines", { count })}</span>`;
-        if (sections.length <= 2) label += sections.map((s) => `<small>${s}</small>`).join("");
-      }
-      html += `<div class="${cls}"><strong>${d}</strong>${label}</div>`;
+      html += `<div class="${cls}"${dayRecords.length ? ` data-date="${dateStr}" role="button" tabindex="0"` : ""}><strong>${d}</strong>${renderDayCellLabel(dayRecords)}</div>`;
     }
     grid.innerHTML = html;
+    grid.querySelectorAll(".cal-day.has-records").forEach((cell) => {
+      cell.addEventListener("click", () => openDayModal(cell.dataset.date));
+    });
+    updateHiddenNotice();
+    renderPlantLegend();
+  };
+
+  const closeDayModal = () => {
+    document.getElementById("pmDayModal")?.classList.remove("active");
+  };
+
+  const openDayModal = (dateStr) => {
+    const modal = document.getElementById("pmDayModal");
+    const dateEl = document.getElementById("pmDayModalDate");
+    const groupsEl = document.getElementById("pmDayGroups");
+    const notice = document.getElementById("pmDayHiddenNotice");
+    if (!modal || !groupsEl) return;
+    const visible = getVisibleRecords().filter((r) => r.dueDate === dateStr);
+    if (dateEl) dateEl.textContent = formatDate(dateStr);
+    if (!visible.length) {
+      groupsEl.innerHTML = `<p class="pm-day-empty">${t("pm.day.emptyDay")}</p>`;
+    } else {
+      const groups = new Map();
+      visible.forEach((r) => {
+        const key = normalizePlant(r.plant) || "__unknown__";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+      });
+      groupsEl.innerHTML = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, recs]) => {
+        const known = key !== "__unknown__";
+        const color = known ? plantColor(key) : UNKNOWN_PLANT_COLOR;
+        const name = known ? recs[0].plant : t("pm.calendar.unknownPlant");
+        return `<section class="pm-day-group">
+          <h4 class="pm-day-group-title" style="--pc:${color}">${name}<span>${recs.length}</span></h4>
+          ${recs.map((r) => {
+            const st = getStatus(r);
+            return `<button class="pm-day-row" type="button" data-id="${r.id}">
+              <span class="pm-day-row-name">${recordLabel(r)}<small>${r.itemCode}</small></span>
+              <span class="pm-status-select ${statusClass[st]}">${statusLabel(st)}</span>
+              <i data-lucide="clipboard-list"></i>
+            </button>`;
+          }).join("")}
+        </section>`;
+      }).join("");
+      groupsEl.querySelectorAll(".pm-day-row").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const rec = currentRecords.find((r) => r.id === btn.dataset.id);
+          closeDayModal();
+          if (rec) openTaskModal(rec);
+        });
+      });
+    }
+    if (notice) {
+      const hiddenCount = scheduleFilter.plant
+        ? currentRecords.filter((r) => r.dueDate === dateStr && !normalizePlant(r.plant)).length
+        : 0;
+      notice.hidden = !hiddenCount;
+      if (hiddenCount) notice.textContent = t("pm.hiddenNotice", { count: hiddenCount });
+    }
+    modal.classList.add("active");
+    lucideIcons();
+  };
+
+  const setPlantFilter = (value) => {
+    scheduleFilter.plant = value || "";
+    schedulePage = 0;
+    const label = document.getElementById("pmPlantFilterLabel");
+    if (label) label.textContent = scheduleFilter.plant || t("pm.filter.allPlants");
+    document.querySelectorAll("#pmPlantFilterMenu [data-plant-value]").forEach((b) =>
+      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
+    document.querySelectorAll("#pmPlantLegend .cal-legend-plant").forEach((b) =>
+      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
+    closeDayModal();
+    renderStats(getVisibleRecords());
+    renderCalendar();
+    renderScheduleList();
+    lucideIcons();
+  };
+
+  const renderPlantLegend = () => {
+    const container = document.getElementById("pmPlantLegend");
+    if (!container) return;
+    const plants = config.plants || [];
+    container.innerHTML = plants.map((p) =>
+      `<button class="cal-legend-plant${scheduleFilter.plant === p ? " active" : ""}" type="button" data-plant-value="${p}" style="--pc:${plantColor(p)}" title="${p}">${p.replace(/^plant\s*/i, "")}</button>`
+    ).join("");
+    container.querySelectorAll(".cal-legend-plant").forEach((btn) => {
+      btn.addEventListener("click", () => setPlantFilter(btn.dataset.plantValue));
+    });
   };
 
   const renderSchedulePagination = (totalPages) => {
@@ -711,6 +856,7 @@
   };
 
   const renderScheduleTab = async () => {
+    closeDayModal();
     window.SAMHO_LOADING?.show(t("pm.loading.schedule"));
     let allRecords = [];
     let loadError = null;
@@ -723,8 +869,8 @@
 
     lastLoadOk = !loadError;
 
-    renderStats(allRecords);
-    renderCalendar(allRecords);
+    renderStats(getVisibleRecords());
+    renderCalendar();
 
     const tbody = document.getElementById("pmScheduleList");
     const summary = document.getElementById("pmScheduleSummary");
@@ -1016,6 +1162,37 @@
       });
     });
 
+    document.querySelectorAll("[data-close-pm-day]").forEach((el) => {
+      el.addEventListener("click", closeDayModal);
+    });
+
+    const plantWrap = document.getElementById("pmPlantFilter");
+    const plantButton = document.getElementById("pmPlantFilterButton");
+    const plantMenu = document.getElementById("pmPlantFilterMenu");
+    if (plantWrap && plantButton && plantMenu) {
+      plantButton.addEventListener("click", () => {
+        const isOpen = plantMenu.hidden;
+        plantMenu.hidden = !isOpen;
+        plantButton.setAttribute("aria-expanded", String(isOpen));
+        plantWrap.classList.toggle("open", isOpen);
+      });
+      document.addEventListener("click", (e) => {
+        if (!plantMenu.hidden && !plantWrap.contains(e.target)) {
+          plantMenu.hidden = true;
+          plantButton.setAttribute("aria-expanded", "false");
+          plantWrap.classList.remove("open");
+        }
+      });
+      plantMenu.querySelectorAll("[data-plant-value]").forEach((item) => {
+        item.addEventListener("click", () => {
+          setPlantFilter(item.dataset.plantValue);
+          plantMenu.hidden = true;
+          plantButton.setAttribute("aria-expanded", "false");
+          plantWrap.classList.remove("open");
+        });
+      });
+    }
+
     document.getElementById("pmSchedulePrevPage")?.addEventListener("click", async () => {
       if (schedulePage > 0) { schedulePage--; await renderScheduleTab(); }
     });
@@ -1038,8 +1215,8 @@
 
     document.addEventListener("samho:langchange", () => {
       if (lastLoadOk) {
-        renderStats(currentRecords);
-        renderCalendar(currentRecords);
+        renderStats(getVisibleRecords());
+        renderCalendar();
         renderScheduleList();
         lucideIcons();
       }

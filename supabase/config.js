@@ -137,6 +137,16 @@ window.SAMHO_SUPABASE = {
     defaultIntervalDays: 30,
     defaultTeam: ["LEAN TECH"],
     validatorTeam: ["LEAD TECH", "25102801", "21051708"],
+    plantColors: {
+      "plant a": "#f59e0b",
+      "plant b": "#ec4899",
+      "plant d": "#2563eb",
+      "plant e": "#14b8a6",
+      "plant h": "#8b5cf6",
+      "plant i": "#16a34a"
+    },
+    plantFallbackPalette: ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#14b8a6", "#ec4899", "#0ea5e9", "#f97316"],
+    plants: ["Plant A", "Plant B", "Plant D", "Plant E", "Plant H", "Plant I"],
     tasksTable: "pm_tasks",
     taskFields: {
       equipment: "equipment",
