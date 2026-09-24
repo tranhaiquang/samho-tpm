@@ -625,31 +625,31 @@
     const prog = record?.taskProgress || [];
     const val = record?.taskValidation || [];
     title.textContent = t("pm.task.titleWith", { equipment: tasks[0].equipmentName });
-    container.innerHTML = tasks.map((t) => {
-      const doneChecked = prog.includes(t.taskNo);
-      const valChecked = val.includes(t.taskNo);
-      const steps = (t.taskDetail || "").split("\n").filter(Boolean);
+    container.innerHTML = tasks.map((task) => {
+      const doneChecked = prog.includes(task.taskNo);
+      const valChecked = val.includes(task.taskNo);
+      const steps = (task.taskDetail || "").split("\n").filter(Boolean);
       const doneCls = doneChecked ? " done" : "";
       const valCls = valChecked ? " validated" : "";
       const valCb = isValidator ? `<label class="task-val-check${valChecked ? ' checked' : ''}">
-        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${t.taskNo}" />
+        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${task.taskNo}" />
         <span>${t("pm.task.confirm")}</span>
       </label>` : "";
       return `<div class="task-card${doneCls}${valCls}">
         <label class="task-card-check">
-          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-task-no="${t.taskNo}" />
+          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-task-no="${task.taskNo}" />
           <div class="task-card-body">
             <div class="task-card-header">
               <div class="task-card-title">
-                <span class="task-card-no">${t.taskNo}</span>
-                <span class="task-card-name">${t.taskName}</span>
+                <span class="task-card-no">${task.taskNo}</span>
+                <span class="task-card-name">${task.taskName}</span>
               </div>
               <div class="task-card-meta">${valCb}
-                <span class="freq-badge freq-${t.frequency}">${freqLabel(t.frequency)}</span>
-                <span class="task-est">${t.estHours}</span>
+                <span class="freq-badge freq-${task.frequency}">${freqLabel(task.frequency)}</span>
+                <span class="task-est">${task.estHours}</span>
               </div>
             </div>
-            <div class="task-card-sub">${t.itemGroup}${t.itemTask ? " / " + t.itemTask : ""}</div>
+            <div class="task-card-sub">${task.itemGroup}${task.itemTask ? " / " + task.itemTask : ""}</div>
             <div class="task-card-steps">
               <ol>${steps.map((s) => `<li>${s.replace(/^\s*\d+[)\.、]\s*/, "")}</li>`).join("")}</ol>
             </div>
