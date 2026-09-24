@@ -18,7 +18,7 @@
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="data/pm_master_data_edited.js" defer></script>
-    <script src="assets/js/pm_edited_v3.js?v=20260923-3" defer></script>
+    <script src="assets/js/pm_edited_v3.js?v=20260923-4" defer></script>
   </head>
   <body class="dashboard-app app-standard pm-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -93,12 +93,29 @@
               <button class="cal-nav" id="calPrev" type="button">◀</button>
               <h3 id="calMonthLabel">May 2026</h3>
               <button class="cal-nav" id="calNext" type="button">▶</button>
+              <div class="plant-filter pm-plant-filter" id="pmPlantFilter">
+                <button class="quarter-pill" id="pmPlantFilterButton" type="button" aria-expanded="false" aria-controls="pmPlantFilterMenu">
+                  <i data-lucide="factory"></i>
+                  <span id="pmPlantFilterLabel" data-i18n="pm.filter.allPlants">All Plants</span>
+                </button>
+                <div class="month-filter-menu" id="pmPlantFilterMenu" hidden>
+                  <button type="button" data-plant-value="" class="active" data-i18n="pm.filter.allPlants">All Plants</button>
+                  <button type="button" data-plant-value="Plant A">Plant A</button>
+                  <button type="button" data-plant-value="Plant B">Plant B</button>
+                  <button type="button" data-plant-value="Plant D">Plant D</button>
+                  <button type="button" data-plant-value="Plant E">Plant E</button>
+                  <button type="button" data-plant-value="Plant H">Plant H</button>
+                  <button type="button" data-plant-value="Plant I">Plant I</button>
+                </div>
+              </div>
               <div class="cal-legend">
                 <span><b class="pending"></b> <span data-i18n="pm.status.pending">ĐANG CHỜ</span></span>
                 <span><b class="completed"></b> <span data-i18n="pm.status.completed">HOÀN THÀNH</span></span>
                 <span><b class="validated"></b> <span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></span>
+                <span class="cal-legend-plants" id="pmPlantLegend"></span>
               </div>
             </div>
+            <p class="pm-hidden-notice" id="pmHiddenNotice" hidden></p>
             <div class="pm-calendar-grid" id="pmCalendarGrid"></div>
           </section>
 
@@ -259,6 +276,7 @@
           <button class="repair-modal-close" type="button" data-close-pm-day aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
 
+        <p class="pm-hidden-notice" id="pmDayHiddenNotice" hidden></p>
         <div class="pm-day-groups" id="pmDayGroups"></div>
       </div>
     </div>
