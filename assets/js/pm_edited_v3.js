@@ -151,7 +151,7 @@
   let lastLoadOk = false;
   let calMonth = today.getMonth();
   let calYear = today.getFullYear();
-  const scheduleFilter = { search: "", status: "" };
+  const scheduleFilter = { plant: "", search: "", status: "" };
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
@@ -180,7 +180,10 @@
   };
   const recordLabel = (r) => r.nameEn || r.equipment || r.itemCode;
 
-  const getVisibleRecords = () => currentRecords;
+  const getVisibleRecords = () => {
+    if (!scheduleFilter.plant) return currentRecords;
+    return currentRecords.filter((r) => r.plant === scheduleFilter.plant);
+  };
 
   const apiInsert = (payload) => db.insert(recordsTable, payload);
   const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
@@ -264,6 +267,16 @@
     return `<span class="cal-count-badge">${t("pm.calendar.machines", { count: dayRecords.length })}</span><span class="cal-plant-badges">${parts}</span>`;
   };
 
+  const updateHiddenNotice = () => {
+    const el = document.getElementById("pmHiddenNotice");
+    if (!el) return;
+    const hiddenCount = scheduleFilter.plant
+      ? currentRecords.filter((r) => !normalizePlant(r.plant)).length
+      : 0;
+    el.hidden = !hiddenCount;
+    if (hiddenCount) el.textContent = t("pm.hiddenNotice", { count: hiddenCount });
+  };
+
   const renderCalendar = () => {
     const grid = document.getElementById("pmCalendarGrid");
     const label = document.getElementById("calMonthLabel");
@@ -293,6 +306,8 @@
     grid.querySelectorAll(".cal-day.has-records").forEach((cell) => {
       cell.addEventListener("click", () => openDayModal(cell.dataset.date));
     });
+    updateHiddenNotice();
+    renderPlantLegend();
   };
 
   const closeDayModal = () => {
@@ -303,6 +318,7 @@
     const modal = document.getElementById("pmDayModal");
     const dateEl = document.getElementById("pmDayModalDate");
     const groupsEl = document.getElementById("pmDayGroups");
+    const notice = document.getElementById("pmDayHiddenNotice");
     if (!modal || !groupsEl) return;
     const visible = getVisibleRecords().filter((r) => r.dueDate === dateStr);
     if (dateEl) dateEl.textContent = formatDate(dateStr);
@@ -339,8 +355,43 @@
         });
       });
     }
+    if (notice) {
+      const hiddenCount = scheduleFilter.plant
+        ? currentRecords.filter((r) => r.dueDate === dateStr && !normalizePlant(r.plant)).length
+        : 0;
+      notice.hidden = !hiddenCount;
+      if (hiddenCount) notice.textContent = t("pm.hiddenNotice", { count: hiddenCount });
+    }
     modal.classList.add("active");
     lucideIcons();
+  };
+
+  const setPlantFilter = (value) => {
+    scheduleFilter.plant = value || "";
+    schedulePage = 0;
+    const label = document.getElementById("pmPlantFilterLabel");
+    if (label) label.textContent = scheduleFilter.plant || t("pm.filter.allPlants");
+    document.querySelectorAll("#pmPlantFilterMenu [data-plant-value]").forEach((b) =>
+      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
+    document.querySelectorAll("#pmPlantLegend .cal-legend-plant").forEach((b) =>
+      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
+    closeDayModal();
+    renderStats(getVisibleRecords());
+    renderCalendar();
+    renderScheduleList();
+    lucideIcons();
+  };
+
+  const renderPlantLegend = () => {
+    const container = document.getElementById("pmPlantLegend");
+    if (!container) return;
+    const plants = config.plants || [];
+    container.innerHTML = plants.map((p) =>
+      `<button class="cal-legend-plant${scheduleFilter.plant === p ? " active" : ""}" type="button" data-plant-value="${p}" style="--pc:${plantColor(p)}" title="${p}">${p.replace(/^plant\s*/i, "")}</button>`
+    ).join("");
+    container.querySelectorAll(".cal-legend-plant").forEach((btn) => {
+      btn.addEventListener("click", () => setPlantFilter(btn.dataset.plantValue));
+    });
   };
 
   const renderSchedulePagination = (totalPages) => {
@@ -716,6 +767,7 @@
     const summary = document.getElementById("pmScheduleSummary");
 
     let filtered = [...currentRecords];
+    if (scheduleFilter.plant) filtered = filtered.filter((r) => r.plant === scheduleFilter.plant);
     if (scheduleFilter.search) {
       const q = normalizeSearch(scheduleFilter.search);
       filtered = filtered.filter((r) => normalizeSearch(r.equipment).includes(q) || normalizeSearch(r.itemCode).includes(q));
@@ -1084,6 +1136,33 @@
     document.querySelectorAll("[data-close-pm-day]").forEach((el) => {
       el.addEventListener("click", closeDayModal);
     });
+
+    const plantWrap = document.getElementById("pmPlantFilter");
+    const plantButton = document.getElementById("pmPlantFilterButton");
+    const plantMenu = document.getElementById("pmPlantFilterMenu");
+    if (plantWrap && plantButton && plantMenu) {
+      plantButton.addEventListener("click", () => {
+        const isOpen = plantMenu.hidden;
+        plantMenu.hidden = !isOpen;
+        plantButton.setAttribute("aria-expanded", String(isOpen));
+        plantWrap.classList.toggle("open", isOpen);
+      });
+      document.addEventListener("click", (e) => {
+        if (!plantMenu.hidden && !plantWrap.contains(e.target)) {
+          plantMenu.hidden = true;
+          plantButton.setAttribute("aria-expanded", "false");
+          plantWrap.classList.remove("open");
+        }
+      });
+      plantMenu.querySelectorAll("[data-plant-value]").forEach((item) => {
+        item.addEventListener("click", () => {
+          setPlantFilter(item.dataset.plantValue);
+          plantMenu.hidden = true;
+          plantButton.setAttribute("aria-expanded", "false");
+          plantWrap.classList.remove("open");
+        });
+      });
+    }
 
     document.getElementById("pmSchedulePrevPage")?.addEventListener("click", async () => {
       if (schedulePage > 0) { schedulePage--; await renderScheduleTab(); }
