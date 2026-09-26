@@ -173,7 +173,8 @@ window.SAMHO_SUPABASE = {
         notes: "notes",
         recordType: "record_type",
         taskProgress: "task_progress",
-        taskValidation: "task_validation"
+        taskValidation: "task_validation",
+        rescheduled: "rescheduled"
       }
     },
     equipmentMap: {

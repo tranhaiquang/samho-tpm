@@ -5810,3 +5810,100 @@ body {
   margin: 6px 0 0;
   padding: 6px 0;
 }
+
+/* --- PM statuses: OVERDUE / RESCHEDULED (derived overlays on pending, 2026-09-26) --- */
+.pm-stat-card.overdue svg { color: #dc2626; }
+.pm-stat-card.overdue strong { color: #dc2626; }
+.pm-stat-card.rescheduled svg { color: #2563eb; }
+.pm-stat-card.rescheduled strong { color: #2563eb; }
+.pm-stat-card.overdue {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-left: 4px solid #dc2626;
+}
+.pm-stat-card.rescheduled {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-left: 4px solid #2563eb;
+}
+.pm-status-select.status-overdue {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+.pm-status-select.status-rescheduled {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+.pm-status-text.status-overdue {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+.pm-status-text.status-rescheduled {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+.cal-legend .overdue { background: #fca5a5; }
+.cal-legend .rescheduled { background: #93c5fd; }
+
+/* --- Summary bar above the stat cards (2026-09-26) --- */
+.pm-summary-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border: 1px solid var(--dash-line);
+  border-radius: 16px;
+  background: var(--dash-card);
+  box-shadow: var(--dash-shadow);
+  margin-bottom: 14px;
+}
+.pm-summary-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--dash-muted);
+}
+.pm-summary-month {
+  font-size: 15px;
+  font-weight: 800;
+  color: #101828;
+}
+.pm-summary-item {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dash-muted);
+}
+.pm-summary-item b {
+  color: #101828;
+  font-weight: 800;
+}
+.pm-summary-percent {
+  font-size: 15px;
+  font-weight: 800;
+  color: #16a34a;
+}
+.pm-summary-track {
+  flex: 1;
+  min-width: 140px;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.pm-summary-fill {
+  height: 100%;
+  width: 0;
+  background: #16a34a;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+@media (max-width: 980px) {
+  .pm-summary-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .pm-summary-track {
+    flex-basis: 100%;
+    min-width: 100%;
+  }
+}
