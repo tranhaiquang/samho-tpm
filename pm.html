@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/styles_edited_v2.css?v=20260923-1" />
+    <link rel="stylesheet" href="assets/css/styles_edited_v2.css?v=20260926-2" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js?v=20260805-1" defer></script>
     <script src="assets/js/auth.js" defer></script>
@@ -18,7 +18,7 @@
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="data/pm_master_data_edited.js" defer></script>
-    <script src="assets/js/pm_edited_v3.js?v=20260923-5" defer></script>
+    <script src="assets/js/pm_edited_v3.js?v=20260926-2" defer></script>
   </head>
   <body class="dashboard-app app-standard pm-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -82,8 +82,20 @@
         </div>
 
         <section class="page-view active" id="pmScheduleView">
+          <section class="pm-summary-bar" id="pmSummaryBar">
+            <span class="pm-summary-title" data-i18n="pm.summaryBar.title">Tóm tắt</span>
+            <span class="pm-summary-month" id="pmSummaryMonth">Sep 2026</span>
+            <span class="pm-summary-item"><span data-i18n="pm.summaryBar.total">Tổng</span>: <b id="pmSummaryTotal">0</b></span>
+            <span class="pm-summary-percent" id="pmSummaryPercent">0%</span>
+            <span class="pm-summary-item">(<span data-i18n="pm.summaryBar.done">Hoàn thành</span>: <b id="pmSummaryDone">0</b>)</span>
+            <div class="pm-summary-track" id="pmSummaryTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="pm-summary-fill" id="pmSummaryBarFill" style="width:0%"></div>
+            </div>
+          </section>
           <section class="pm-stats-row" id="pmStatsRow">
             <article class="pm-stat-card pending"><i data-lucide="clock-alert"></i><div><strong id="pmStatPending">0</strong><span data-i18n="pm.status.pending">ĐANG CHỜ</span></div></article>
+            <article class="pm-stat-card overdue"><i data-lucide="calendar-x"></i><div><strong id="pmStatOverdue">0</strong><span data-i18n="pm.status.overdue">QUÁ HẠN</span></div></article>
+            <article class="pm-stat-card rescheduled"><i data-lucide="calendar-clock"></i><div><strong id="pmStatRescheduled">0</strong><span data-i18n="pm.status.rescheduled">ĐÃ DỜI LỊCH</span></div></article>
             <article class="pm-stat-card completed"><i data-lucide="check-circle"></i><div><strong id="pmStatCompleted">0</strong><span data-i18n="pm.status.completed">HOÀN THÀNH</span></div></article>
             <article class="pm-stat-card validated"><i data-lucide="badge-check"></i><div><strong id="pmStatValidated">0</strong><span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></div></article>
           </section>
@@ -110,6 +122,8 @@
               </div>
               <div class="cal-legend">
                 <span><b class="pending"></b> <span data-i18n="pm.status.pending">ĐANG CHỜ</span></span>
+                <span><b class="overdue"></b> <span data-i18n="pm.status.overdue">QUÁ HẠN</span></span>
+                <span><b class="rescheduled"></b> <span data-i18n="pm.status.rescheduled">ĐÃ DỜI LỊCH</span></span>
                 <span><b class="completed"></b> <span data-i18n="pm.status.completed">HOÀN THÀNH</span></span>
                 <span><b class="validated"></b> <span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></span>
                 <span class="cal-legend-plants" id="pmPlantLegend"></span>

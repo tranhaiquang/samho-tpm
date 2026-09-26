@@ -6,6 +6,11 @@
       "pm.status.pending": { vi: "ĐANG CHỜ", en: "PENDING" },
       "pm.status.completed": { vi: "HOÀN THÀNH", en: "COMPLETED" },
       "pm.status.validated": { vi: "ĐÃ XÁC NHẬN", en: "VALIDATED" },
+      "pm.status.overdue": { vi: "QUÁ HẠN", en: "OVERDUE" },
+      "pm.status.rescheduled": { vi: "ĐÃ DỜI LỊCH", en: "RESCHEDULED" },
+      "pm.summaryBar.title": { vi: "Tóm tắt", en: "Summary" },
+      "pm.summaryBar.total": { vi: "Tổng", en: "Total" },
+      "pm.summaryBar.done": { vi: "Hoàn thành", en: "Done" },
       "pm.month.jan": { vi: "Tháng 1", en: "Jan" },
       "pm.month.feb": { vi: "Tháng 2", en: "Feb" },
       "pm.month.mar": { vi: "Tháng 3", en: "Mar" },
@@ -130,6 +135,13 @@
 
   const today = new Date();
 
+  // Local-time yyyy-mm-dd (never toISOString — see AGENTS.md local-time rule).
+  // Built fresh per call so a page left open past midnight self-corrects on re-render.
+  const todayStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+
   const addDays = (date, days) => window.SAMHO_DATETIME.addDays(date, days);
   const formatDate = (value) => window.SAMHO_DATETIME.formatDate(value);
   const parseDate = (value) => window.SAMHO_DATETIME.parse(value);
@@ -202,17 +214,37 @@
     }
   };
 
+  // Display status: workflow is pending -> completed -> validated (DB values).
+  // OVERDUE / RESCHEDULED are derived overlays gated on pending, precedence:
+  // validated > completed > overdue > rescheduled > pending.
+  const isOverdue = (rec) =>
+    rec.status !== "completed" &&
+    rec.status !== "validated" &&
+    !!rec.dueDate &&
+    rec.dueDate < todayStr(); // strict: due today is NOT overdue
   const getStatus = (rec) => {
     if (rec.status === "validated") return "validated";
     if (rec.status === "completed") return "completed";
+    if (isOverdue(rec)) return "overdue";
+    if (rec.rescheduled) return "rescheduled";
     return "pending";
   };
   const statusLabel = (st) => {
     if (st === "validated") return t("pm.status.validated");
     if (st === "completed") return t("pm.status.completed");
+    if (st === "overdue") return t("pm.status.overdue");
+    if (st === "rescheduled") return t("pm.status.rescheduled");
     return t("pm.status.pending");
   };
-  const statusClass = { pending: "status-pending", completed: "status-completed", validated: "status-validated" };
+  const statusClass = {
+    pending: "status-pending",
+    completed: "status-completed",
+    validated: "status-validated",
+    overdue: "status-overdue",
+    rescheduled: "status-rescheduled"
+  };
+
+  const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
   const syncStatusView = (rec) => {
     const st = getStatus(rec);
@@ -241,11 +273,33 @@
       return due && due.getMonth() === calMonth && due.getFullYear() === calYear;
     });
     const pending = inMonth.filter((r) => getStatus(r) === "pending").length;
+    const overdue = inMonth.filter((r) => getStatus(r) === "overdue").length;
+    const rescheduled = inMonth.filter((r) => getStatus(r) === "rescheduled").length;
     const completed = inMonth.filter((r) => getStatus(r) === "completed").length;
     const validated = inMonth.filter((r) => getStatus(r) === "validated").length;
     document.getElementById("pmStatPending").textContent = pending;
+    document.getElementById("pmStatOverdue").textContent = overdue;
+    document.getElementById("pmStatRescheduled").textContent = rescheduled;
     document.getElementById("pmStatCompleted").textContent = completed;
     document.getElementById("pmStatValidated").textContent = validated;
+
+    // Summary bar (A+B+C): total = month's visible records (= sum of the 5 cards),
+    // done = completed + validated, percent rounded to whole numbers, 0-safe.
+    const total = inMonth.length;
+    const done = completed + validated;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const monthEl = document.getElementById("pmSummaryMonth");
+    if (monthEl) monthEl.textContent = `${t(`pm.month.${MONTH_KEYS[calMonth]}`)} ${calYear}`;
+    const totalEl = document.getElementById("pmSummaryTotal");
+    if (totalEl) totalEl.textContent = total;
+    const doneEl = document.getElementById("pmSummaryDone");
+    if (doneEl) doneEl.textContent = done;
+    const pctEl = document.getElementById("pmSummaryPercent");
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    const fillEl = document.getElementById("pmSummaryBarFill");
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    const trackEl = document.getElementById("pmSummaryTrack");
+    if (trackEl) trackEl.setAttribute("aria-valuenow", String(pct));
   };
 
   const renderDayCellLabel = (dayRecords) => {
@@ -282,7 +336,7 @@
     const label = document.getElementById("calMonthLabel");
     if (!grid || !label) return;
     const records = getVisibleRecords();
-    const months = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    const months = MONTH_KEYS;
     label.textContent = `${t(`pm.month.${months[calMonth]}`)} ${calYear}`;
     const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -296,7 +350,9 @@
       if (dayRecords.length) cls += " has-records";
       if (dayRecords.length) {
         const sts = dayRecords.map((r) => getStatus(r));
-        if (sts.some((s) => s === "pending")) cls += " pending";
+        // Overlays keep the day cell's workflow color (overdue/rescheduled = pending).
+        const isWfPending = (s) => s === "pending" || s === "overdue" || s === "rescheduled";
+        if (sts.some(isWfPending)) cls += " pending";
         else if (sts.some((s) => s === "validated")) cls += " validated";
         else cls += " completed";
       }
@@ -527,6 +583,7 @@
       equipmentName: recordType === "generated" ? (equipReverse[itemCode] || "") : "",
       dueDate: String(row[col("dueDate", "due_date")] || "").slice(0, 10),
       status: row[col("status", "status")] || "pending",
+      rescheduled: row[col("rescheduled", "rescheduled")] === true,
       technician: row[col("technician", "technician")] || [],
       notes: row[col("notes", "notes")] || "",
       assignedTeam: row[col("pic", "pic")] || [],
@@ -1027,6 +1084,8 @@
         [col("dueDate", "due_date")]: dueDate,
         [col("pic", "pic")]: team
       };
+      // Reschedule flag: set (never cleared) when the due date actually moves.
+      if (dueDate !== rec.dueDate) payload[col("rescheduled", "rescheduled")] = true;
       if (code && searchData.itemCode) {
         payload[col("itemCode", "item_code")] = code;
         payload[col("nameEn", "name_en")] = searchData.nameEn || "";
