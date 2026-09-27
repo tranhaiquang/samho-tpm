@@ -30,7 +30,7 @@
       "pm.day.thu": { vi: "T5", en: "Thu" },
       "pm.day.fri": { vi: "T6", en: "Fri" },
       "pm.day.sat": { vi: "T7", en: "Sat" },
-      "pm.calendar.machines": { vi: "{count} máy", en: "{count} machines" },
+      "pm.calendar.more": { vi: "+{count} máy khác", en: "+{count} more" },
       "pm.filter.allPlants": { vi: "Tất cả nhà máy", en: "All Plants" },
       "pm.filter.plantsAria": { vi: "Lọc theo nhà máy", en: "Filter by plant" },
       "pm.calendar.unknownPlant": { vi: "Không rõ nhà máy", en: "Unknown plant" },
@@ -168,6 +168,16 @@
   const SCHEDULE_PAGE_SIZE = 10;
 
   const normalizePlant = (value) => String(value || "").trim().toLowerCase();
+  // Plant matching is case/whitespace-insensitive: pm_records.plant holds values
+  // like "plant D" while the filter menu offers canonical "Plant D".
+  const samePlant = (a, b) => normalizePlant(a) === normalizePlant(b);
+  // Display-only canonical label ("plant d" → "Plant D"); never used for writes.
+  const plantDisplay = (value) => {
+    const key = normalizePlant(value);
+    if (!key) return "";
+    const canonical = (config.plants || []).find((p) => normalizePlant(p) === key);
+    return canonical || key.replace(/\b\w/g, (c) => c.toUpperCase());
+  };
   const hashString = (value) => {
     let h = 0;
     const s = String(value || "");
@@ -183,18 +193,11 @@
     const palette = config.plantFallbackPalette || [];
     return palette.length ? palette[hashString(key) % palette.length] : UNKNOWN_PLANT_COLOR;
   };
-  const plantShort = (value) => {
-    const key = normalizePlant(value);
-    if (!key) return "?";
-    const m = key.match(/plant\s*(\w+)/);
-    if (m) return m[1].toUpperCase().slice(0, 3);
-    return key.slice(0, 3).toUpperCase();
-  };
   const recordLabel = (r) => r.nameEn || r.equipment || r.itemCode;
 
   const getVisibleRecords = () => {
     if (!scheduleFilter.plant) return currentRecords;
-    return currentRecords.filter((r) => r.plant === scheduleFilter.plant);
+    return currentRecords.filter((r) => samePlant(r.plant, scheduleFilter.plant));
   };
 
   const apiInsert = (payload) => db.insert(recordsTable, payload);
@@ -302,23 +305,16 @@
     if (trackEl) trackEl.setAttribute("aria-valuenow", String(pct));
   };
 
+  const CAL_CHIP_LIMIT = 3;
+
   const renderDayCellLabel = (dayRecords) => {
-    if (dayRecords.length === 1) {
-      const r = dayRecords[0];
-      return `<span class="cal-chip cal-chip-single" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}"><span class="cal-chip-name">${recordLabel(r)}</span><small class="cal-chip-code">${r.itemCode}</small></span>`;
-    }
-    if (dayRecords.length <= 3) {
-      return dayRecords.map((r) => `<span class="cal-chip" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}">${recordLabel(r)}</span>`).join("");
-    }
-    const groups = new Map();
-    dayRecords.forEach((r) => {
-      const key = normalizePlant(r.plant);
-      groups.set(key, (groups.get(key) || 0) + 1);
-    });
-    const parts = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, n]) =>
-      `<span class="cal-plant-badge" style="--pc:${key ? plantColor(key) : UNKNOWN_PLANT_COLOR}">${key ? plantShort(key) : "?"}×${n}</span>`
-    ).join("");
-    return `<span class="cal-count-badge">${t("pm.calendar.machines", { count: dayRecords.length })}</span><span class="cal-plant-badges">${parts}</span>`;
+    const chip = (r) => `<span class="cal-chip" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}">${recordLabel(r)}</span>`;
+    const shown = dayRecords.slice(0, CAL_CHIP_LIMIT);
+    const rest = dayRecords.length - shown.length;
+    const more = rest > 0
+      ? `<span class="cal-chip cal-chip-more">${t("pm.calendar.more", { count: rest })}</span>`
+      : "";
+    return shown.map(chip).join("") + more;
   };
 
   const updateHiddenNotice = () => {
@@ -363,7 +359,6 @@
       cell.addEventListener("click", () => openDayModal(cell.dataset.date));
     });
     updateHiddenNotice();
-    renderPlantLegend();
   };
 
   const closeDayModal = () => {
@@ -390,7 +385,7 @@
       groupsEl.innerHTML = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([key, recs]) => {
         const known = key !== "__unknown__";
         const color = known ? plantColor(key) : UNKNOWN_PLANT_COLOR;
-        const name = known ? recs[0].plant : t("pm.calendar.unknownPlant");
+        const name = known ? plantDisplay(recs[0].plant) : t("pm.calendar.unknownPlant");
         return `<section class="pm-day-group">
           <h4 class="pm-day-group-title" style="--pc:${color}">${name}<span>${recs.length}</span></h4>
           ${recs.map((r) => {
@@ -428,26 +423,12 @@
     const label = document.getElementById("pmPlantFilterLabel");
     if (label) label.textContent = scheduleFilter.plant || t("pm.filter.allPlants");
     document.querySelectorAll("#pmPlantFilterMenu [data-plant-value]").forEach((b) =>
-      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
-    document.querySelectorAll("#pmPlantLegend .cal-legend-plant").forEach((b) =>
-      b.classList.toggle("active", b.dataset.plantValue === scheduleFilter.plant));
+      b.classList.toggle("active", samePlant(b.dataset.plantValue, scheduleFilter.plant)));
     closeDayModal();
     renderStats(getVisibleRecords());
     renderCalendar();
     renderScheduleList();
     lucideIcons();
-  };
-
-  const renderPlantLegend = () => {
-    const container = document.getElementById("pmPlantLegend");
-    if (!container) return;
-    const plants = config.plants || [];
-    container.innerHTML = plants.map((p) =>
-      `<button class="cal-legend-plant${scheduleFilter.plant === p ? " active" : ""}" type="button" data-plant-value="${p}" style="--pc:${plantColor(p)}" title="${p}">${p.replace(/^plant\s*/i, "")}</button>`
-    ).join("");
-    container.querySelectorAll(".cal-legend-plant").forEach((btn) => {
-      btn.addEventListener("click", () => setPlantFilter(btn.dataset.plantValue));
-    });
   };
 
   const renderSchedulePagination = (totalPages) => {
@@ -824,7 +805,7 @@
     const summary = document.getElementById("pmScheduleSummary");
 
     let filtered = [...currentRecords];
-    if (scheduleFilter.plant) filtered = filtered.filter((r) => r.plant === scheduleFilter.plant);
+    if (scheduleFilter.plant) filtered = filtered.filter((r) => samePlant(r.plant, scheduleFilter.plant));
     if (scheduleFilter.search) {
       const q = normalizeSearch(scheduleFilter.search);
       filtered = filtered.filter((r) => normalizeSearch(r.equipment).includes(q) || normalizeSearch(r.itemCode).includes(q));
@@ -854,7 +835,7 @@
       return `<tr class="${cls}">
         <td>${start + i + 1}</td>
         <td><strong>${r.itemCode}</strong><br />${r.nameEn || ""}<br /><small>${r.section}</small></td>
-        <td>${r.plant}</td>
+        <td>${plantDisplay(r.plant)}</td>
         <td>${formatDate(r.dueDate)}</td>
         <td>${r.assignedTeam?.join(", ") || ""}</td>
         <td><span class="pm-status-select ${cls}">${lbl}</span></td>
@@ -1000,7 +981,7 @@
         plant: row.plant || row.PLANT || ""
       });
       setValue("pmFormNameEn", row.name_en || row.NAME_EN || "");
-      setValue("pmFormPlant", row.plant || row.PLANT || "");
+      setValue("pmFormPlant", plantDisplay(row.plant || row.PLANT));
       setStatusMsg("pmFormSearchStatus", t("pm.search.loaded"), "success");
     } catch (e) {
       setStatusMsg("pmFormSearchStatus", db.friendly(e, t("pm.action.searchCode")), "error");
@@ -1061,7 +1042,7 @@
       plant: rec.plant || ""
     });
     setValue("pmFormNameEn", rec.nameEn || "");
-    setValue("pmFormPlant", rec.plant || "");
+    setValue("pmFormPlant", plantDisplay(rec.plant));
     setStatusMsg("pmFormSearchStatus", t("pm.search.loaded"), "success");
     setValue("pmFormDueDate", rec.dueDate);
     renderMechanicSelection("pmFormTeam", "pmFormTeamChips", rec.assignedTeam || []);
