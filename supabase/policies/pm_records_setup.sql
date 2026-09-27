@@ -38,4 +38,4 @@ create policy "All authenticated users can update pm_records" on public.pm_recor
 create policy "All authenticated users can delete pm_records" on public.pm_records
   for delete to authenticated using (true);
 
-grant select, insert, update, delete on public.pm_records to anon, authenticated;
+grant select, insert, update, delete on public.pm_records to authenticated;
