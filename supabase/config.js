@@ -1,7 +1,7 @@
 window.SAMHO_SUPABASE = {
   url: "https://tdbuvnzwrakywtvnnewl.supabase.co/rest/v1",
   anonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkYnV2bnp3cmFreXd0dm5uZXdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NzUzMDMsImV4cCI6MjA5ODU1MTMwM30.bPOwUhNdDWyij1-mDe3uxvvQaSlAQ3_qr8f4OUQklss",
+    "sb_publishable_pkx8h24mGo7OWBYb8unhwA_wohbaqpF",
   table: "repair_records",
   codeColumn: "item_code",
   selectColumns: ["*"],
