@@ -12,14 +12,14 @@ select c.relname                                              as table_name,
        c.relrowsecurity                                       as rls_enabled,
        c.relforcerowsecurity                                  as force_rls,
        coalesce(
-         (select string_agg(p.polname || ' {' || p.polcmd || ' ' ||
-                            coalesce(array_to_string(p.polroles, ','), 'public') || '}', ', ')
+         (select string_agg(p.policyname || ' {' || p.cmd || ' ' ||
+                            coalesce(array_to_string(p.roles, ','), 'public') || '}', ', ')
             from pg_policies p
            where p.schemaname = 'public' and p.tablename = c.relname),
          '(no policies)')                                     as policies,
        coalesce(
          (select string_agg(g.grantee || ':' ||
-                            array_to_string(g.privilege_type, ','), '  ')
+                            g.privilege_type, '  ')
             from information_schema.role_table_grants g
            where g.table_schema = 'public' and g.table_name = c.relname),
          '(no grants)')                                       as grants
@@ -35,7 +35,7 @@ select c.relname                                              as table_name,
 -- ───────────────────────────────────────────────────────────────────────────
 select grantee,
        table_name,
-       array_to_string(array_agg(privilege_type order by privilege_type), ', ') as privileges
+       array_to_string(array_agg(privilege_type::text order by privilege_type), ', ') as privileges
   from information_schema.role_table_grants
  where table_schema = 'public'
    and grantee in ('anon', 'authenticated', 'service_role')
