@@ -73,6 +73,13 @@ if (window.SAMHO_LANG) {
     "kpi.pareto.close": { vi: "Đóng", en: "Close" },
     "kpi.pareto.empty": { vi: "Không có dữ liệu nguyên nhân.", en: "No reason data." },
     "kpi.pareto.barTitle": { vi: "{label} · {count} sự cố", en: "{label} · {count} failures" },
+    "kpi.plantTrend.title": { vi: "Downtime theo tháng", en: "Downtime by month" },
+    "kpi.plantTrend.subtitle": {
+      vi: "{minutes} phút · {range}",
+      en: "{minutes} min · {range}"
+    },
+    "kpi.plantTrend.empty": { vi: "Không có dữ liệu trong năm {year}.", en: "No data in {year}." },
+    "kpi.plantTrend.point": { vi: "{month} {year}: {value} phút", en: "{month} {year}: {value} min" },
   });
 }
 
@@ -89,6 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeFromDate = "";
   let activeToDate = "";
   let lastRows = [];
+  let trendRows = []; // plant-filtered rows BEFORE the month/date filter — the
+  // hover trend needs the whole Jan→current-month span, not just the visible slice.
   const plantFilterMap = { C2B: ["PLANT A", "PLANT B"], OS: ["PLANT H"], SF: ["PLANT E"], Treatment: ["PLANT D", "PLANT I"] };
 
   const text = (id, value) => {
@@ -547,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
               return `<b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: month.label, value: formatNumber(value) })}"></b>`;
             })
             .join("");
-          return `<div class="cluster" data-label="${section.label}"><span class="value-badge">${formatNumber(topValue)} ${t("kpi.min")}</span>${bars}</div>`;
+          return `<div class="cluster" data-label="${section.label}" data-plant="${escapeHtml(section.label)}"><span class="value-badge">${formatNumber(topValue)} ${t("kpi.min")}</span>${bars}</div>`;
         })
         .join("") || `<p class="kpi-empty">${t("kpi.monthly.empty")}</p>`;
 
@@ -567,11 +576,158 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = top
       .map((plant, index) => {
         const height = Math.max((plant.total / max) * 88, plant.total > 0 ? 8 : 0);
-        return `<div class="cluster" data-label="${plant.label}"><span class="value-badge">${formatNumber(plant.total)} ${t("kpi.min")}</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: plant.label, value: formatNumber(plant.total) })}"></b></div>`;
+        return `<div class="cluster" data-label="${plant.label}" data-plant="${escapeHtml(plant.label)}"><span class="value-badge">${formatNumber(plant.total)} ${t("kpi.min")}</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: plant.label, value: formatNumber(plant.total) })}"></b></div>`;
       })
       .join("") || `<p class="kpi-empty">${t("kpi.simple.empty")}</p>`;
 
     legend.innerHTML = `<span><b style="background:${colors[0]}"></b>${t("kpi.legendTotalDowntime")}</span>`;
+  };
+
+  // ── Plant hover trend card: line chart of one plant's downtime,
+  //    January → current month of the current year ────────────────────────────
+  const TREND_CARD_ID = "kpiPlantTrendCard";
+  const TREND_HOVER_DELAY = 120;
+  let trendHoverTimer = 0;
+
+  const buildPlantTrend = (plantLabel) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const lastMonthIndex = now.getMonth(); // 0-based, so the current month is included
+    const plantRows = trendRows.filter((row) => row.plant === plantLabel);
+    const points = [];
+    for (let index = 0; index <= lastMonthIndex; index += 1) {
+      const key = `${year}-${String(index + 1).padStart(2, "0")}`;
+      const value = plantRows
+        .filter((row) => row.month.key === key)
+        .reduce((sum, row) => sum + row.downtime, 0);
+      points.push({ key, label: monthNames[index], value });
+    }
+    return { year, points, total: points.reduce((sum, point) => sum + point.value, 0) };
+  };
+
+  const buildTrendLine = (points, year) => {
+    const width = 264;
+    const height = 92;
+    const padX = 12;
+    const padTop = 14;
+    const padBottom = 18;
+    const max = Math.max(...points.map((point) => point.value), 1);
+    const innerWidth = width - padX * 2;
+    const innerHeight = height - padTop - padBottom;
+    const step = points.length > 1 ? innerWidth / (points.length - 1) : 0;
+    const baseline = padTop + innerHeight;
+    const coords = points.map((point, index) => ({
+      ...point,
+      x: padX + step * index,
+      y: baseline - (point.value / max) * innerHeight
+    }));
+    const line = coords.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+    const area = `${padX},${baseline.toFixed(1)} ${line} ${(width - padX).toFixed(1)},${baseline.toFixed(1)}`;
+    const dots = coords
+      .map(
+        (point) =>
+          `<circle class="kpi-trend-dot" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="2.6"><title>${escapeHtml(
+            t("kpi.plantTrend.point", { month: point.label, year, value: formatNumber(point.value) })
+          )}</title></circle>`
+      )
+      .join("");
+    const labels = coords
+      .map(
+        (point) =>
+          `<text class="kpi-trend-x" x="${point.x.toFixed(1)}" y="${height - 5}" text-anchor="middle">${escapeHtml(point.label)}</text>`
+      )
+      .join("");
+    const peak = coords.reduce((best, point) => (point.value > best.value ? point : best), coords[0]);
+    const peakLabel =
+      peak && peak.value > 0
+        ? `<text class="kpi-trend-peak" x="${Math.min(Math.max(peak.x, 18), width - 18).toFixed(
+            1
+          )}" y="${Math.max(peak.y - 6, 9).toFixed(1)}" text-anchor="middle">${escapeHtml(formatNumber(peak.value))}</text>`
+        : "";
+    return `<svg class="kpi-trend-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(
+      t("kpi.plantTrend.title")
+    )}">
+      <polygon class="kpi-trend-area" points="${area}"></polygon>
+      <polyline class="kpi-trend-line" points="${line}"></polyline>
+      ${dots}${peakLabel}${labels}
+    </svg>`;
+  };
+
+  const ensureTrendCard = () => {
+    let card = document.getElementById(TREND_CARD_ID);
+    if (card) return card;
+    card = document.createElement("div");
+    card.id = TREND_CARD_ID;
+    card.className = "kpi-trend-card";
+    card.setAttribute("aria-hidden", "true");
+    document.body.appendChild(card);
+    return card;
+  };
+
+  const hideTrendCard = () => {
+    window.clearTimeout(trendHoverTimer);
+    trendHoverTimer = 0;
+    const card = document.getElementById(TREND_CARD_ID);
+    if (card) card.classList.remove("active");
+  };
+
+  const positionTrendCard = (x, y) => {
+    const card = document.getElementById(TREND_CARD_ID);
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const offset = 16;
+    let left = x + offset;
+    let top = y + offset;
+    if (left + rect.width > window.innerWidth - 8) left = Math.max(8, x - rect.width - offset);
+    if (top + rect.height > window.innerHeight - 8) top = Math.max(8, y - rect.height - offset);
+    card.style.left = `${Math.round(left)}px`;
+    card.style.top = `${Math.round(top)}px`;
+  };
+
+  const showTrendCard = (plantLabel, x, y) => {
+    const card = ensureTrendCard();
+    const trend = buildPlantTrend(plantLabel);
+    const now = new Date();
+    const range = `${monthNames[0]} – ${monthNames[now.getMonth()]} ${trend.year}`;
+    card.innerHTML = `
+      <header class="kpi-trend-head">
+        <strong>${escapeHtml(plantLabel)}</strong>
+        <span>${escapeHtml(t("kpi.plantTrend.subtitle", { minutes: formatNumber(trend.total), range }))}</span>
+      </header>
+      ${
+        trend.total > 0
+          ? buildTrendLine(trend.points, trend.year)
+          : `<p class="kpi-trend-empty">${escapeHtml(t("kpi.plantTrend.empty", { year: trend.year }))}</p>`
+      }`;
+    card.classList.add("active");
+    card.setAttribute("aria-hidden", "false");
+    positionTrendCard(x, y);
+  };
+
+  const initPlantTrendHover = () => {
+    const container = document.getElementById("monthlyDowntimeChart");
+    if (!container) return;
+    container.addEventListener("mouseover", (event) => {
+      const cluster = event.target.closest?.(".cluster");
+      if (!cluster || !container.contains(cluster)) return;
+      const plant = cluster.dataset.plant || cluster.dataset.label || "";
+      if (!plant) return;
+      window.clearTimeout(trendHoverTimer);
+      trendHoverTimer = window.setTimeout(
+        () => showTrendCard(plant, event.clientX, event.clientY),
+        TREND_HOVER_DELAY
+      );
+    });
+    container.addEventListener("mousemove", (event) => {
+      const card = document.getElementById(TREND_CARD_ID);
+      if (card?.classList.contains("active")) positionTrendCard(event.clientX, event.clientY);
+    });
+    container.addEventListener("mouseleave", hideTrendCard);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") hideTrendCard();
+    });
+    window.addEventListener("scroll", hideTrendCard, true);
+    window.addEventListener("resize", hideTrendCard);
   };
 
   const renderMetricTrend = (items, operationDays) => {
@@ -630,8 +786,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const renderDashboard = (sourceRows) => {
-    const rows = sourceRows
+  const normalizeRows = (sourceRows) =>
+    sourceRows
       .map((row) => {
         const month = rowMonth(row);
         return {
@@ -648,6 +804,10 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       })
       .sort((a, b) => a.month.order - b.month.order || b.downtime - a.downtime);
+
+  const renderDashboard = (sourceRows) => {
+    hideTrendCard();
+    const rows = normalizeRows(sourceRows);
 
     lastRows = rows;
 
@@ -731,6 +891,9 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus(t("kpi.loadingDowntime"), "idle");
       window.SAMHO_LOADING.show(t("kpi.loadingDashboard"));
       const rows = await getRows(monthValue, plantValue);
+      // Keep the full (plant-filtered) year for the plant hover trend; the visible
+      // dashboard still uses the month/date-filtered slice.
+      trendRows = normalizeRows(rows);
       const filteredRows = applyDateFilter(rows);
       renderDashboard(filteredRows);
     } catch (error) {
@@ -933,9 +1096,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initDateFilter();
   initPlantFilter();
   initMonthFilter();
+  initPlantTrendHover();
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    hideTrendCard();
     closeParetoModal();
   });
 

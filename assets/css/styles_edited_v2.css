@@ -5819,3 +5819,90 @@ body {
     min-width: 100%;
   }
 }
+
+/* --- KPI: plant hover trend card (Jan → current month line chart, 2026-10-06) --- */
+.cluster-bars .cluster:hover {
+  cursor: pointer;
+}
+.cluster-bars .cluster:hover b {
+  filter: brightness(1.08) saturate(1.1);
+}
+.kpi-trend-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 288px;
+  padding: 12px 12px 8px;
+  border: 1px solid var(--dash-line, #e4e7ec);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.18);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 4px;
+  transition: opacity 0.14s ease, translate 0.14s ease, visibility 0.14s;
+}
+.kpi-trend-card.active {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+}
+.kpi-trend-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 2px 8px;
+}
+.kpi-trend-head strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #101828;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kpi-trend-head span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #667085;
+}
+.kpi-trend-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.kpi-trend-area {
+  fill: rgba(45, 117, 220, 0.12);
+}
+.kpi-trend-line {
+  fill: none;
+  stroke: #2d75dc;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.kpi-trend-dot {
+  fill: #ffffff;
+  stroke: #2d75dc;
+  stroke-width: 1.8;
+}
+.kpi-trend-peak {
+  font-size: 9px;
+  font-weight: 800;
+  fill: #2d75dc;
+}
+.kpi-trend-x {
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: #98a2b3;
+}
+.kpi-trend-empty {
+  margin: 0;
+  padding: 18px 4px 14px;
+  text-align: center;
+  font-size: 12px;
+  color: #667085;
+}
