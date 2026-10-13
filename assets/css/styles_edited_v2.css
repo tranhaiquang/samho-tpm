@@ -198,6 +198,16 @@ button {
   padding: 12px 15px 28px;
 }
 
+/* Injected by auth.js initGreeting() via createElement + className — the
+ * dead-CSS audit on 2026-10-07 wrongly removed this rule because it only
+ * scanned class="…" attributes. Restored 2026-10-13. */
+.app-greeting {
+  margin-bottom: 14px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
 .mechanic-picker {
   position: relative;
   display: flex;

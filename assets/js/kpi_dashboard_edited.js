@@ -532,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const height = Math.max((item.count / max) * 88, 12);
           const label = item.label.length > 22 ? `${item.label.slice(0, 22)}...` : item.label;
           const barColor = index === 2 ? "#3f9b5f" : index === 3 ? "#2d75dc" : "#d9364f";
-          return `<div style="--h: ${height}%; --bar: ${barColor}" data-value="${formatNumber(item.count)}"><b></b><span>${label}</span></div>`;
+          return `<div style="--h: ${height}%; --bar: ${barColor}" data-value="${formatNumber(item.count)}"><b></b><span>${escapeHtml(label)}</span></div>`;
         })
         .join("") || `<p class="kpi-empty">${t("kpi.machine.empty")}</p>`;
   };
@@ -553,10 +553,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((month, index) => {
               const value = section.months.get(month.key) || 0;
               const height = Math.max((value / max) * 92, value > 0 ? 8 : 0);
-              return `<b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: month.label, value: formatNumber(value) })}"></b>`;
+              return `<b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${escapeHtml(t("kpi.minTooltip", { label: month.label, value: formatNumber(value) }))}"></b>`;
             })
             .join("");
-          return `<div class="cluster" data-label="${section.label}" data-plant="${escapeHtml(section.label)}"><span class="value-badge">${formatNumber(topValue)} ${t("kpi.min")}</span>${bars}</div>`;
+          return `<div class="cluster" data-label="${escapeHtml(section.label)}" data-plant="${escapeHtml(section.label)}"><span class="value-badge">${formatNumber(topValue)} ${t("kpi.min")}</span>${bars}</div>`;
         })
         .join("") || `<p class="kpi-empty">${t("kpi.monthly.empty")}</p>`;
 
@@ -576,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = top
       .map((plant, index) => {
         const height = Math.max((plant.total / max) * 88, plant.total > 0 ? 8 : 0);
-        return `<div class="cluster" data-label="${plant.label}" data-plant="${escapeHtml(plant.label)}"><span class="value-badge">${formatNumber(plant.total)} ${t("kpi.min")}</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${t("kpi.minTooltip", { label: plant.label, value: formatNumber(plant.total) })}"></b></div>`;
+        return `<div class="cluster" data-label="${escapeHtml(plant.label)}" data-plant="${escapeHtml(plant.label)}"><span class="value-badge">${formatNumber(plant.total)} ${t("kpi.min")}</span><b style="--h: ${height}%; background: ${colors[index % colors.length]}" title="${escapeHtml(t("kpi.minTooltip", { label: plant.label, value: formatNumber(plant.total) }))}"></b></div>`;
       })
       .join("") || `<p class="kpi-empty">${t("kpi.simple.empty")}</p>`;
 
@@ -753,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const mtbfY = getMetricY(mtbf);
           const label = item.label.length > 18 ? `${item.label.slice(0, 18)}...` : item.label;
           return `
-            <div data-label="${label}" data-top="${formatNumber(item.total)}">
+            <div data-label="${escapeHtml(label)}" data-top="${formatNumber(item.total)}">
               <b style="--h: ${height}%"></b>
               <span class="mtbf-point" style="--y: ${mtbfY}%">${formatNumber(mtbf, 0)}</span>
               <span class="mttr-point" style="--y: ${mttrY}%">${formatNumber(mttr, 0)}</span>

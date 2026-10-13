@@ -1,6 +1,9 @@
 (function () {
   const SESSION_KEY = "samho.auth.session";
-  const LOGIN_PAGE = "login.html";
+  // "." resolves to the site root (index.html -> login.html), which is the
+  // canonical entry point. The login page rewrites its own URL to the same
+  // place, so the filename never shows in the address bar.
+  const LOGIN_PAGE = "./";
   const HOME_PAGE = "repair_submit.html";
 
   const getAuthBaseUrl = () => window.SAMHO_SUPABASE.url.replace("/rest/v1", "/auth/v1");
@@ -25,10 +28,15 @@
     return !!session?.access_token && Date.now() < (session.expires_at || 0);
   };
 
-  const currentPage = () => location.pathname.split("/").pop() || "index.html";
+  // Detect the login page from the DOM, not the URL: login.html rewrites the
+  // address bar to the site root, so the pathname no longer says "login.html".
+  // A pathname check here would treat the login page as protected and loop.
+  const isLoginDocument = () =>
+    document.documentElement?.dataset?.page === "login" ||
+    document.body?.classList.contains("login-page") === true;
 
   const requireAuth = () => {
-    if (currentPage() === LOGIN_PAGE) return;
+    if (isLoginDocument()) return;
 
     const session = getSession();
     if (!isSessionValid(session)) {
