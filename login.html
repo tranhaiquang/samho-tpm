@@ -8,14 +8,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/styles_edited_v2.css?v=20260923-1" />
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <link rel="stylesheet" href="assets/css/styles_edited_v2.css?v=20261013-1" />
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
     <script src="supabase/config.js" defer></script>
-    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/auth.js?v=20261013-1" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
     <script src="assets/js/i18n.js?v=20260820-1" defer></script>
   </head>
-  <body class="login-page app-standard">
+  <body class="login-page app-standard" data-page="login">
+    <script>
+      // Hide the filename from the address bar: /login.html -> ./ (the site root).
+      // Uses "./" rather than "/" so the app keeps working when hosted in a
+      // subdirectory (e.g. a GitHub Pages project site). Runs before the
+      // deferred scripts so no request or asset ever sees the old path.
+      (function () {
+        try {
+          if (!/(^|\/)login\.html$/i.test(location.pathname)) return;
+          if (!window.history || !window.history.replaceState) return;
+          window.history.replaceState(null, "", "./" + location.search + location.hash);
+        } catch (error) {
+          /* cosmetic only — the page works fine without it */
+        }
+      })();
+    </script>
     <main class="login-shell">
       <section class="login-card">
         <div class="login-logo">

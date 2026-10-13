@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
 
   const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character]);
 
   const config = window.SAMHO_SUPABASE;
   const filterForm = document.getElementById("repairInfoFilter");
@@ -517,26 +518,26 @@ document.addEventListener("DOMContentLoaded", () => {
       row.dataset.recordId = recordId || "";
       row.innerHTML = `
         <td>${rowNumber}</td>
-        <td><strong>${itemCode || "-"}</strong></td>
-        <td>${getMachineValue(machine, "machineName") || "-"}</td>
-        <td>${plant || "-"}</td>
-        <td>${section || "-"}</td>
-        <td>${place || "-"}</td>
-        <td>${formatDateTime(reportedAt) || "-"}</td>
-        <td>${formatDateTime(repairStartedAt) || "-"}</td>
-        <td>${formatDateTime(repairedAt) || "-"}</td>
-        <td>${record.total_downtime ?? "-"}</td>
-        <td>${issueValue || "-"}</td>
-        <td>${otherIssueValue || "-"}</td>
-        <td>${reasonValue || "-"}</td>
-        <td>${solveValue || "-"}</td>
-        <td>${record.technician || "-"}</td>
+        <td><strong>${escapeHtml(itemCode || "-")}</strong></td>
+        <td>${escapeHtml(getMachineValue(machine, "machineName") || "-")}</td>
+        <td>${escapeHtml(plant || "-")}</td>
+        <td>${escapeHtml(section || "-")}</td>
+        <td>${escapeHtml(place || "-")}</td>
+        <td>${escapeHtml(formatDateTime(reportedAt) || "-")}</td>
+        <td>${escapeHtml(formatDateTime(repairStartedAt) || "-")}</td>
+        <td>${escapeHtml(formatDateTime(repairedAt) || "-")}</td>
+        <td>${escapeHtml(record.total_downtime ?? "-")}</td>
+        <td>${escapeHtml(issueValue || "-")}</td>
+        <td>${escapeHtml(otherIssueValue || "-")}</td>
+        <td>${escapeHtml(reasonValue || "-")}</td>
+        <td>${escapeHtml(solveValue || "-")}</td>
+        <td>${escapeHtml(record.technician || "-")}</td>
         <td>
           <div class="repair-row-actions">
-            <button class="repair-edit" type="button" data-record-id="${recordId || ""}" aria-label="${t("repairInfo.table.edit")}" title="${t("repairInfo.table.edit")}">
+            <button class="repair-edit" type="button" data-record-id="${escapeHtml(recordId || "")}" aria-label="${t("repairInfo.table.edit")}" title="${t("repairInfo.table.edit")}">
               <i data-lucide="square-pen"></i>
             </button>
-            <button class="repair-delete" type="button" data-record-id="${recordId || ""}" aria-label="${t("repairInfo.table.delete")}" title="${t("repairInfo.table.delete")}">
+            <button class="repair-delete" type="button" data-record-id="${escapeHtml(recordId || "")}" aria-label="${t("repairInfo.table.delete")}" title="${t("repairInfo.table.delete")}">
               <i data-lucide="trash-2"></i>
             </button>
           </div>

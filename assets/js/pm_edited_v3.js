@@ -120,6 +120,7 @@
   }
 
   const t = (id, vars) => (window.SAMHO_LANG ? window.SAMHO_LANG.t(id, vars) : "");
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character]);
 
   const config = window.SAMHO_SUPABASE.pm;
   if (!config) return;
@@ -308,7 +309,7 @@
   const CAL_CHIP_LIMIT = 3;
 
   const renderDayCellLabel = (dayRecords) => {
-    const chip = (r) => `<span class="cal-chip" style="--pc:${plantColor(r.plant)}" title="${recordLabel(r)}">${recordLabel(r)}</span>`;
+    const chip = (r) => `<span class="cal-chip" style="--pc:${plantColor(r.plant)}" title="${escapeHtml(recordLabel(r))}">${escapeHtml(recordLabel(r))}</span>`;
     const shown = dayRecords.slice(0, CAL_CHIP_LIMIT);
     const rest = dayRecords.length - shown.length;
     const more = rest > 0
@@ -387,11 +388,11 @@
         const color = known ? plantColor(key) : UNKNOWN_PLANT_COLOR;
         const name = known ? plantDisplay(recs[0].plant) : t("pm.calendar.unknownPlant");
         return `<section class="pm-day-group">
-          <h4 class="pm-day-group-title" style="--pc:${color}">${name}<span>${recs.length}</span></h4>
+          <h4 class="pm-day-group-title" style="--pc:${color}">${escapeHtml(name)}<span>${recs.length}</span></h4>
           ${recs.map((r) => {
             const st = getStatus(r);
-            return `<button class="pm-day-row" type="button" data-id="${r.id}">
-              <span class="pm-day-row-name">${recordLabel(r)}<small>${r.itemCode}</small></span>
+            return `<button class="pm-day-row" type="button" data-id="${escapeHtml(r.id)}">
+              <span class="pm-day-row-name">${escapeHtml(recordLabel(r))}<small>${escapeHtml(r.itemCode)}</small></span>
               <span class="pm-status-select ${statusClass[st]}">${statusLabel(st)}</span>
               <i data-lucide="clipboard-list"></i>
             </button>`;
@@ -666,28 +667,28 @@
     container.innerHTML = tasks.map((task) => {
       const doneChecked = prog.includes(task.taskNo);
       const valChecked = val.includes(task.taskNo);
-      const steps = (task.taskDetail || "").split("\n").filter(Boolean);
+      const steps = (task.taskDetail || "").split("\n").filter(Boolean).map(escapeHtml);
       const doneCls = doneChecked ? " done" : "";
       const valCls = valChecked ? " validated" : "";
       const valCb = isValidator ? `<label class="task-val-check${valChecked ? ' checked' : ''}">
-        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${task.taskNo}" />
+        <input type="checkbox" class="val-cb" ${valChecked ? "checked" : ""} data-task-no="${escapeHtml(task.taskNo)}" />
         <span>${t("pm.task.confirm")}</span>
       </label>` : "";
       return `<div class="task-card${doneCls}${valCls}">
         <label class="task-card-check">
-          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-task-no="${task.taskNo}" />
+          <input type="checkbox" class="done-cb" ${doneChecked ? "checked" : ""} data-task-no="${escapeHtml(task.taskNo)}" />
           <div class="task-card-body">
             <div class="task-card-header">
               <div class="task-card-title">
-                <span class="task-card-no">${task.taskNo}</span>
-                <span class="task-card-name">${task.taskName}</span>
+                <span class="task-card-no">${escapeHtml(task.taskNo)}</span>
+                <span class="task-card-name">${escapeHtml(task.taskName)}</span>
               </div>
               <div class="task-card-meta">${valCb}
-                <span class="freq-badge freq-${task.frequency}">${freqLabel(task.frequency)}</span>
-                <span class="task-est">${task.estHours}</span>
+                <span class="freq-badge freq-${escapeHtml(task.frequency)}">${escapeHtml(freqLabel(task.frequency))}</span>
+                <span class="task-est">${escapeHtml(task.estHours)}</span>
               </div>
             </div>
-            <div class="task-card-sub">${task.itemGroup}${task.itemTask ? " / " + task.itemTask : ""}</div>
+            <div class="task-card-sub">${escapeHtml(task.itemGroup)}${task.itemTask ? ` / ${escapeHtml(task.itemTask)}` : ""}</div>
             <div class="task-card-steps">
               <ol>${steps.map((s) => `<li>${s.replace(/^\s*\d+[)\.、]\s*/, "")}</li>`).join("")}</ol>
             </div>
@@ -834,15 +835,15 @@
       const lbl = statusLabel(st);
       return `<tr class="${cls}">
         <td>${start + i + 1}</td>
-        <td><strong>${r.itemCode}</strong><br />${r.nameEn || ""}<br /><small>${r.section}</small></td>
-        <td>${plantDisplay(r.plant)}</td>
-        <td>${formatDate(r.dueDate)}</td>
-        <td>${r.assignedTeam?.join(", ") || ""}</td>
+        <td><strong>${escapeHtml(r.itemCode)}</strong><br />${escapeHtml(r.nameEn || "")}<br /><small>${escapeHtml(r.section)}</small></td>
+        <td>${escapeHtml(plantDisplay(r.plant))}</td>
+        <td>${escapeHtml(formatDate(r.dueDate))}</td>
+        <td>${escapeHtml(r.assignedTeam?.join(", ") || "")}</td>
         <td><span class="pm-status-select ${cls}">${lbl}</span></td>
         <td class="pm-actions">
-          <button class="info-search control-icon-button pm-viewtask-btn" data-id="${r.id}" type="button" title="${t("pm.action.viewTask")}"><i data-lucide="clipboard-list"></i></button>
-          <button class="info-search control-icon-button pm-delete-btn" data-id="${r.id}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>
-          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${r.id}" type="button" title="${t("pm.action.edit")}"><i data-lucide="pencil"></i></button>` : ""}
+          <button class="info-search control-icon-button pm-viewtask-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.viewTask")}"><i data-lucide="clipboard-list"></i></button>
+          ${isPid ? `<button class="info-search control-icon-button pm-delete-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>` : ""}
+          ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.edit")}"><i data-lucide="pencil"></i></button>` : ""}
         </td>
       </tr>`;
     }).join("");
@@ -1102,8 +1103,19 @@
     const user = window.SAMHO_AUTH?.currentUser();
     if (!user) return;
     const userId = String(user.email || "").split("@")[0];
-    if (config.defaultTeam.includes(userId)) currentUserRole = "pid";
-    if (config.validatorTeam && config.validatorTeam.includes(userId)) isValidator = true;
+    try {
+      const roles = await window.SAMHO_DB.select("user_roles", {
+        columns: "role",
+        where: { user_id: userId },
+        limit: 1
+      });
+      currentUserRole = roles?.[0]?.role === "pid" ? "pid" : "viewer";
+      isValidator = ["pid", "validator"].includes(roles?.[0]?.role);
+    } catch (error) {
+      currentUserRole = "viewer";
+      isValidator = false;
+      console.warn("Unable to load PM role; using viewer permissions in the interface.", error);
+    }
   };
 
   document.addEventListener("DOMContentLoaded", async () => {

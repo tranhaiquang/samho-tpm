@@ -138,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const result = String(value ?? "").trim();
     return result || fallback;
   };
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character]);
 
   const normalizeUserValue = (value) => String(value || "").trim().toLowerCase();
 
@@ -715,12 +716,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tr.innerHTML = `
         <td>${rowNumber}</td>
-        <td><strong>${text(itemCode)}</strong></td>
-        <td>${text(readField(row, "nameVietnamese"))}</td>
+        <td><strong>${escapeHtml(text(itemCode))}</strong></td>
+        <td>${escapeHtml(text(readField(row, "nameVietnamese")))}</td>
         <td>${safetyStock.toLocaleString()}</td>
         <td>${onHand.toLocaleString()}</td>
         <td><strong class="spare-stock-difference ${difference < 0 ? "negative" : difference > 0 ? "positive" : "neutral"}">${difference.toLocaleString()}</strong></td>
-        <td>${text(readField(row, "location"))}</td>
+        <td>${escapeHtml(text(readField(row, "location")))}</td>
         <td><span class="repair-table-status ${status.className}">${status.label}</span></td>
         ${userCanEdit
           ? `<td>
