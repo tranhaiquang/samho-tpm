@@ -237,11 +237,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
+  // Older repair rows can carry an empty string where the machine name should
+  // be. Treat blank as "no value" so a populated master column still wins
+  // instead of blanking the plate.
+  const hasMachineValue = (value) => value != null && String(value).trim() !== "";
+
   const setMachineData = (machine) => {
     Object.keys(supabaseConfig.fieldMap).forEach((field) => {
       const input = document.getElementById(field);
       const mappedColumns = [].concat(supabaseConfig.fieldMap[field] || []);
-      const matchedColumn = mappedColumns.find((column) => machine?.[column] != null);
+      const matchedColumn = mappedColumns.find((column) => hasMachineValue(machine?.[column]));
       if (input) input.value = matchedColumn ? machine[matchedColumn] : "";
     });
   };

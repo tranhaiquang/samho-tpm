@@ -123,15 +123,19 @@ window.SAMHO_SUPABASE = {
       issue: "issue"
     }
   },
+  // Master data (machine_info, UPPER_SNAKE columns) is listed first so a
+  // rename in machine_info is reflected immediately; repair_records holds a
+  // copy taken at submit time and is only a fallback for machines the master
+  // table does not contain.
   fieldMap: {
-    itemCode: ["item_code", "ITEM_CODE"],
-    machineName: ["name_en", "NAME_EN"],
+    itemCode: ["ITEM_CODE", "item_code"],
+    machineName: ["NAME_EN", "name_en"],
     specification: "SPECIFICATION",
     madeBy: "MADE_BY",
     machineStatus: "STATUS",
-    machinePlant: ["plant", "PLANT"],
-    machineSection: ["section", "SECTION"],
-    machinePlace: ["place", "PLACE"]
+    machinePlant: ["PLANT", "plant"],
+    machineSection: ["SECTION", "section"],
+    machinePlace: ["PLACE", "place"]
   },
   pm: {
     defaultIntervalDays: 30,
