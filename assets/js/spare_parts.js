@@ -286,9 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
       limit: spareConfig.pageSize || 1000
     });
     activeSpareTable = table;
-    if (rows.length) {
-      console.log("spare_parts columns:", Object.keys(rows[0]));
-    }
     return rows.filter((row) => readField(row, "itemCode") && readField(row, "plant"));
   };
 
