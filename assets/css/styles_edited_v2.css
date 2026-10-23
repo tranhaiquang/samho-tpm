@@ -3455,9 +3455,12 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   background: var(--dash-blue-soft);
   color: var(--dash-blue);
 }
+/* minmax(0, 1fr) — not 1fr: a `1fr` track has an auto minimum, so a long
+   nowrap machine name inside a day cell forces that column wider than its
+   1/7 share. minmax(0, …) lets the track shrink and the chip ellipsize. */
 .pm-calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
 }
 .cal-day-header {
@@ -3470,6 +3473,8 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 }
 .cal-day {
   min-height: 64px;
+  min-width: 0;
+  overflow: hidden;
   padding: 4px 6px;
   border-radius: 10px;
   font-size: 12px;
