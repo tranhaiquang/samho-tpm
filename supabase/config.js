@@ -140,7 +140,6 @@ window.SAMHO_SUPABASE = {
   pm: {
     defaultIntervalDays: 30,
     defaultTeam: ["LEAN TECH"],
-    validatorTeam: ["LEAD TECH", "25102801", "21051708"],
     plantColors: {
       "plant a": "#f59e0b",
       "plant b": "#ec4899",

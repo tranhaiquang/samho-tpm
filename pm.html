@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/styles_edited_v2.css?v=20261023-1" />
     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
     <script src="supabase/config.js?v=20260805-1" defer></script>
     <script src="assets/js/auth.js?v=20261013-1" defer></script>
     <script src="assets/js/errors_edited.js" defer></script>
@@ -98,6 +99,15 @@
             <article class="pm-stat-card rescheduled"><i data-lucide="calendar-clock"></i><div><strong id="pmStatRescheduled">0</strong><span data-i18n="pm.status.rescheduled">ĐÃ DỜI LỊCH</span></div></article>
             <article class="pm-stat-card completed"><i data-lucide="check-circle"></i><div><strong id="pmStatCompleted">0</strong><span data-i18n="pm.status.completed">HOÀN THÀNH</span></div></article>
             <article class="pm-stat-card validated"><i data-lucide="badge-check"></i><div><strong id="pmStatValidated">0</strong><span data-i18n="pm.status.validated">ĐÃ XÁC NHẬN</span></div></article>
+          </section>
+
+          <section class="pm-chart-section" id="pmChartSection">
+            <div class="pm-chart-header">
+              <h3 data-i18n="pm.chart.title">Monthly PM Completion</h3>
+            </div>
+            <div class="pm-chart-wrap">
+              <canvas id="pmMonthlyChart" aria-label="Monthly completed vs total PM" data-i18n-title="pm.chart.title"></canvas>
+            </div>
           </section>
 
           <section class="pm-calendar-section">
@@ -268,6 +278,7 @@
           <div>
             <h2 id="pmTaskDetailTitle" data-i18n="pm.task.title">Task Checklist</h2>
             <span class="task-progress" id="pmTaskProgress" data-i18n="pm.task.progress">Hoàn thành: 0/0</span>
+            <span class="pm-validator-badge" id="pmValidatorBadge" hidden></span>
           </div>
           <button class="repair-modal-close" type="button" data-close-pm-task aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
