@@ -3654,6 +3654,34 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   }
 }
 
+/* ── PM Monthly Chart ── */
+.pm-chart-section {
+  padding: 22px;
+  border: 1px solid var(--dash-line);
+  border-radius: 16px;
+  background: var(--dash-card);
+  box-shadow: var(--dash-shadow);
+  margin-bottom: 20px;
+}
+.pm-chart-header {
+  margin-bottom: 14px;
+}
+.pm-chart-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dash-ink);
+}
+.pm-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+.pm-chart-wrap canvas {
+  width: 100% !important;
+  height: 220px !important;
+}
+
 /* ── Task Checklist Modal (card layout) ── */
 .repair-modal-dialog-wide {
   max-width: 780px !important;
@@ -3668,6 +3696,17 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   text-transform: none !important;
   font-weight: 500 !important;
   letter-spacing: normal;
+}
+.pm-validator-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f5f3ff;
+  color: #5b21b6;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid #ddd6fe;
 }
 
 .task-checklist {

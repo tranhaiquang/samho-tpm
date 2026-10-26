@@ -3,6 +3,7 @@
     window.SAMHO_LANG.register({
       "pm.page.title": { vi: "Lịch Bảo Trì", en: "PM Schedule" },
       "pm.addButton": { vi: "Thêm PM", en: "New PM" },
+      "pm.chart.title": { vi: "Tiến độ PM theo tháng", en: "Monthly PM Completion" },
       "pm.status.pending": { vi: "ĐANG CHỜ", en: "PENDING" },
       "pm.status.completed": { vi: "HOÀN THÀNH", en: "COMPLETED" },
       "pm.status.validated": { vi: "ĐÃ XÁC NHẬN", en: "VALIDATED" },
@@ -159,6 +160,8 @@
   let scheduleRows = [];
   let taskCatalog = {};
   let currentRecords = [];
+  let yearRecordsCache = [];
+  let yearRecordsCacheYear = null;
   let isValidator = false;
   let currentUserRole = "viewer";
   let lastLoadOk = false;
@@ -306,6 +309,131 @@
     if (trackEl) trackEl.setAttribute("aria-valuenow", String(pct));
   };
 
+  const renderMonthlyChart = (yearRecords) => {
+    const canvas = document.getElementById("pmMonthlyChart");
+    if (!canvas || typeof window.Chart === "undefined") return;
+    const ctx = canvas.getContext("2d");
+
+    // Constrain to the selected year and show months Jan → current viewed month.
+    const viewedMonth = calMonth + 1;
+    const monthMap = new Map();
+    for (let m = 1; m <= viewedMonth; m++) {
+      monthMap.set(`${calYear}-${String(m).padStart(2, "0")}`, { total: 0, completed: 0 });
+    }
+    yearRecords.forEach((r) => {
+      if (!r.dueDate) return;
+      const key = String(r.dueDate).slice(0, 7);
+      if (!monthMap.has(key)) return;
+      const bucket = monthMap.get(key);
+      bucket.total += 1;
+      const st = getStatus(r);
+      if (st === "completed" || st === "validated") bucket.completed += 1;
+    });
+
+    const sortedKeys = [...monthMap.keys()].sort();
+    const labels = sortedKeys.map((k) => {
+      const idx = Number(k.split("-")[1]) - 1;
+      return `${t(`pm.month.${MONTH_KEYS[idx]}`)} ${k.split("-")[0]}`;
+    });
+    const totalData = sortedKeys.map((k) => monthMap.get(k).total);
+    const completedData = sortedKeys.map((k) => monthMap.get(k).completed);
+    const remainingData = sortedKeys.map((k, i) => totalData[i] - completedData[i]);
+
+    if (window.pmMonthlyChartInstance) {
+      window.pmMonthlyChartInstance.destroy();
+      window.pmMonthlyChartInstance = null;
+    }
+
+    const gridColor = "#e7edf6";
+    const textColor = "#344054";
+
+    window.pmMonthlyChartInstance = new window.Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: t("pm.status.completed"),
+            data: completedData,
+            backgroundColor: "#16a34a",
+            borderRadius: 4,
+            borderSkipped: false
+          },
+          {
+            label: t("pm.status.pending"),
+            data: remainingData,
+            backgroundColor: "#f6ba12",
+            borderRadius: 4,
+            borderSkipped: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: { top: 8, right: 12, bottom: 4, left: 4 }
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: { display: false },
+            border: { display: false },
+            ticks: {
+              color: textColor,
+              font: { family: "Be Vietnam Pro", size: 11, weight: "700" },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 12
+            }
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            border: { display: false },
+            grid: { color: gridColor, drawTicks: false },
+            ticks: {
+              color: textColor,
+              font: { family: "Be Vietnam Pro", size: 11, weight: "700" },
+              stepSize: 1,
+              padding: 8
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: "top",
+            align: "center",
+            labels: {
+              color: textColor,
+              font: { family: "Be Vietnam Pro", size: 11, weight: "800" },
+              boxWidth: 10,
+              boxHeight: 10,
+              borderRadius: 3,
+              useBorderRadius: true,
+              padding: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: "#172538",
+            titleFont: { family: "Be Vietnam Pro", weight: "700" },
+            bodyFont: { family: "Be Vietnam Pro" },
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            boxPadding: 4,
+            callbacks: {
+              title: (items) => items[0].label,
+              label: (item) => `${item.dataset.label}: ${item.formattedValue}`
+            }
+          }
+        }
+      }
+    });
+  };
+
   const CAL_CHIP_LIMIT = 3;
 
   const renderDayCellLabel = (dayRecords) => {
@@ -428,6 +556,7 @@
     closeDayModal();
     renderStats(getVisibleRecords());
     renderCalendar();
+    renderMonthlyChart(yearRecordsCache);
     renderScheduleList();
     lucideIcons();
   };
@@ -608,6 +737,19 @@
     return currentRecords;
   };
 
+  const loadYearRecords = async () => {
+    if (yearRecordsCacheYear === calYear) return yearRecordsCache;
+    const dueDateCol = col("dueDate", "due_date");
+    const first = `${String(calYear).padStart(4,"0")}-01-01`;
+    const last = `${String(calYear).padStart(4,"0")}-12-31`;
+    const yearWhere = [[dueDateCol, "gte", first], [dueDateCol, "lte", last]];
+    const allRows = await db.select(recordsTable, { where: yearWhere });
+    const rows = allRows.filter((r) => !r[deletedCol]);
+    yearRecordsCache = rows.map(rowToRecord);
+    yearRecordsCacheYear = calYear;
+    return yearRecordsCache;
+  };
+
   const resolveRecordNameEn = async (record) => {
     if (!record) return "";
     const existing = String(record.nameEn || "").trim();
@@ -659,11 +801,21 @@
     const container = document.getElementById("pmTaskChecklist");
     const title = document.getElementById("pmTaskDetailTitle");
     const progressEl = document.getElementById("pmTaskProgress");
+    const validatorBadge = document.getElementById("pmValidatorBadge");
 
     if (!container || !title || !progressEl) return;
     const prog = record?.taskProgress || [];
     const val = record?.taskValidation || [];
     title.textContent = t("pm.task.titleWith", { equipment: tasks[0].equipmentName });
+    if (validatorBadge) {
+      if (isValidator) {
+        const vid = window.SAMHO_AUTH?.currentUserId?.() || "";
+        validatorBadge.textContent = vid ? `PID: ${vid}` : "Validator";
+        validatorBadge.hidden = false;
+      } else {
+        validatorBadge.hidden = true;
+      }
+    }
     container.innerHTML = tasks.map((task) => {
       const doneChecked = prog.includes(task.taskNo);
       const valChecked = val.includes(task.taskNo);
@@ -842,8 +994,9 @@
         <td><span class="pm-status-select ${cls}">${lbl}</span></td>
         <td class="pm-actions">
           <button class="info-search control-icon-button pm-viewtask-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.viewTask")}"><i data-lucide="clipboard-list"></i></button>
-          ${isPid ? `<button class="info-search control-icon-button pm-delete-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>` : ""}
           ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.edit")}"><i data-lucide="pencil"></i></button>` : ""}
+          ${isPid ? `<button class="info-search control-icon-button pm-reschedule-btn" data-id="${escapeHtml(r.id)}" type="button" title="Reschedule"><i data-lucide="calendar-clock"></i></button>` : ""}
+          ${isPid ? `<button class="info-search control-icon-button pm-delete-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>` : ""}
         </td>
       </tr>`;
     }).join("");
@@ -860,6 +1013,9 @@
     tbody.querySelectorAll(".pm-edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => openEditModal(btn.dataset.id));
     });
+    tbody.querySelectorAll(".pm-reschedule-btn").forEach((btn) => {
+      btn.addEventListener("click", () => openEditModal(btn.dataset.id));
+    });
     tbody.querySelectorAll(".pm-delete-btn").forEach((btn) => {
       btn.addEventListener("click", () => deletePM(btn.dataset.id));
     });
@@ -872,6 +1028,7 @@
     let loadError = null;
     try {
       allRecords = await loadMonthRecords();
+      await loadYearRecords();
     } catch (e) {
       loadError = e;
       allRecords = [];
@@ -881,6 +1038,7 @@
 
     renderStats(getVisibleRecords());
     renderCalendar();
+    renderMonthlyChart(yearRecordsCache);
 
     const tbody = document.getElementById("pmScheduleList");
     const summary = document.getElementById("pmScheduleSummary");
@@ -1102,7 +1260,7 @@
   const checkUserRole = async () => {
     const user = window.SAMHO_AUTH?.currentUser();
     if (!user) return;
-    const userId = String(user.email || "").split("@")[0];
+    const userId = window.SAMHO_AUTH?.currentUserId?.() || String(user.email || "").split("@")[0];
     try {
       const roles = await window.SAMHO_DB.select("user_roles", {
         columns: "role",
@@ -1115,6 +1273,21 @@
       currentUserRole = "viewer";
       isValidator = false;
       console.warn("Unable to load PM role; using viewer permissions in the interface.", error);
+    }
+    if (!isValidator) {
+      try {
+        const validators = await window.SAMHO_DB.select("pm_validators", {
+          columns: "user_id",
+          where: { user_id: userId },
+          limit: 1
+        });
+        if (validators.length) {
+          isValidator = true;
+          if (currentUserRole !== "pid") currentUserRole = "viewer";
+        }
+      } catch (error) {
+        console.warn("Unable to load pm_validators; validator checkbox may be hidden.", error);
+      }
     }
   };
 
@@ -1240,6 +1413,7 @@
       if (lastLoadOk) {
         renderStats(getVisibleRecords());
         renderCalendar();
+        renderMonthlyChart(yearRecordsCache);
         renderScheduleList();
         lucideIcons();
       }
