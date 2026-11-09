@@ -1,0 +1,602 @@
+[
+  {
+    "equipment": "1 Needle Flate Machine",
+    "name_en": "1 Needle Flate Machine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Monthly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Flate Machine",
+    "name_en": "1 Needle Flate Machine",
+    "task_no": "STT-PM0002",
+    "task_name": "Kiểm tra, bảo dưỡng kim và ổ kim",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Monthly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Flate Machine",
+    "name_en": "1 Needle Flate Machine",
+    "task_no": "STT-PM0003",
+    "task_name": "Kiểm tra, bảo dưỡng lao dầu và hốt chỉ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Quaterly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Flate Machine",
+    "name_en": "1 Needle Flate Machine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Monthly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Flate Machine",
+    "name_en": "1 Needle Flate Machine",
+    "task_no": "STT-PM0005",
+    "task_name": "Kiểm tra, bảo dưỡng dây curoa",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Monthly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Post Machine",
+    "name_en": "1 Needle Post Machine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Post Machine",
+    "name_en": "1 Needle Post Machine",
+    "task_no": "STT-PM0002",
+    "task_name": "Kiểm tra, bảo dưỡng kim và ổ kim",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Post Machine",
+    "name_en": "1 Needle Post Machine",
+    "task_no": "STT-PM0003",
+    "task_name": "Kiểm tra, bảo dưỡng lao dầu và hốt chỉ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Quaterly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Post Machine",
+    "name_en": "1 Needle Post Machine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Needle Post Machine",
+    "name_en": "1 Needle Post Machine",
+    "task_no": "STT-PM0005",
+    "task_name": "Kiểm tra, bảo dưỡng dây curoa",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Post Roller Machine",
+    "name_en": "1 Post Roller Machine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Post Roller Machine",
+    "name_en": "1 Post Roller Machine",
+    "task_no": "STT-PM0002",
+    "task_name": "Kiểm tra, bảo dưỡng kim và ổ kim",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Post Roller Machine",
+    "name_en": "1 Post Roller Machine",
+    "task_no": "STT-PM0003",
+    "task_name": "Kiểm tra, bảo dưỡng lao dầu và hốt chỉ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Quaterly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Post Roller Machine",
+    "name_en": "1 Post Roller Machine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "1 Post Roller Machine",
+    "name_en": "1 Post Roller Machine",
+    "task_no": "STT-PM0005",
+    "task_name": "Kiểm tra, bảo dưỡng dây curoa",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "2 Needle PostMachine",
+    "name_en": "2 Needle PostMachine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "2 Needle PostMachine",
+    "name_en": "2 Needle PostMachine",
+    "task_no": "STT-PM0002",
+    "task_name": "Kiểm tra, bảo dưỡng kim và ổ kim",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "2 Needle PostMachine",
+    "name_en": "2 Needle PostMachine",
+    "task_no": "STT-PM0003",
+    "task_name": "Kiểm tra, bảo dưỡng lao dầu và hốt chỉ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Quaterly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "2 Needle PostMachine",
+    "name_en": "2 Needle PostMachine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "2 Needle PostMachine",
+    "name_en": "2 Needle PostMachine",
+    "task_no": "STT-PM0005",
+    "task_name": "Kiểm tra, bảo dưỡng dây curoa",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "Computer Stitching Machine",
+    "name_en": "Computer Stitching Machine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "Computer Stitching Machine",
+    "name_en": "Computer Stitching Machine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "Computer Stitching Machine",
+    "name_en": "Computer Stitching Machine",
+    "task_no": "STT-PM0006",
+    "task_name": "Kiểm tra bảo dưỡng châm dầu và vệ sinh bụi máy may vi tính",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "2 Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "Computer Stitching Machine",
+    "name_en": "Computer Stitching Machine",
+    "task_no": "STT-PM0007",
+    "task_name": "Kiểm tra thùng máy (CPU) máy may vi tính",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0001",
+    "task_name": "Chụp cao su không rách, không mất hình dạng, đảm bảo che phủ tốt",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Chụp cao su (Shoes cover)",
+    "frequency": "TUẦN",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0002",
+    "task_name": "Túi không rách, không thủng, lớp vải còn vững chắc, thay mới nếu bị hư (> 1 tháng)",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Túi vải (4 lớp)",
+    "frequency": "TUẦN",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0003",
+    "task_name": "Hệ thống điện ổn định, tiếp điểm không bị ăn mòn, dây dẫn không hở/rụng",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Kiểm tra hệ thống điện điều khiển",
+    "frequency": "TUẦN",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0004",
+    "task_name": "Chụp cao su không rách, không mất hình dạng, đảm bảo che phủ tốt",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Chụp cao su (Shoes cover)",
+    "frequency": "THÁNG",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0005",
+    "task_name": "Túi không rách, không thủng, lớp vải còn vững chắc, thay mới nếu bị hư (> 1 tháng)",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Túi vải (4 lớp)",
+    "frequency": "THÁNG",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0006",
+    "task_name": "Hệ thống điện ổn định, tiếp điểm không bị ăn mòn, dây dẫn không hở/rụng",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Kiểm tra hệ thống điện điều khiển",
+    "frequency": "THÁNG",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0007",
+    "task_name": "Truyền động bôi trơn đủ, pittông di chuyển trơn tru, không có tiếng kêu",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Bôi trơn cụm truyền động & pít-tông khí nén",
+    "frequency": "THÁNG",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0008",
+    "task_name": "Đồng hồ hiển thị đúng, van xả hoạt động tốt, lưu lượng/áp suất trong ngưỡng",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Kiểm tra đồng hồ áp suất & van xả",
+    "frequency": "THÁNG",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0009",
+    "task_name": "Tube/khuôn không biến dạng, không mất độ đàn hồi, thay mới nếu cần",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Tube / Khuôn mềm",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0010",
+    "task_name": "Tương tự Tube chính, tình trạng tốt, không rạn nứt hoặc chai cứng",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Kid Tube / Khuôn mềm trẻ em",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0011",
+    "task_name": "Độ đàn hồi còn ≥ chuẩn, không khô cứng, thay mới nếu bị hư",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Elastic Ball / Hạt silicon",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0012",
+    "task_name": "Nắp đóng kín, không hở mép, bản lề & khóa hoạt động tốt",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Nắp trên (Pressure Door)",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0013",
+    "task_name": "Gối đỡ không biến dạng, không mòn quá mức, thay khi > chỉ số mòn định kỳ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Gối đỡ / Toe Pad (các loại)",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0014",
+    "task_name": "Đệm tình trạng tốt, không rách, độ dày đủ, thay khi có dấu hiệu hư",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Đệm khuôn mềm (Tube Cover)",
+    "frequency": "QUÝ",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0015",
+    "task_name": "Dầu/gel ép trong bình chứa đạt độ trong, không lẫn tạp chất, thay định kỳ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Dầu ép (Gel Fluid)",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0016",
+    "task_name": "Cảm biến đo đúng ±5% so với chuẩn, phản hồi nhanh, không bị chập/chết",
+    "item_group": "PHẦN CƠ",
+    "item_task": "Cảm biến áp lực (Pressure Sensor)",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0017",
+    "task_name": "Hoạt động chính xác, không sai lệch, không bị bẩn hoặc che khuất",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Cảm biến khoảng cách (Distance Sensor)",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0018",
+    "task_name": "Tất cả nút khẩn cấp & nút start thay mới định kỳ/kiểm tra độ nhạy",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Nút khẩn cấp / Nút Start",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0019",
+    "task_name": "Ring/ốc không rỉ sét, không lỏng, siết chặt đúng mô-men, không biến dạng",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Gọng sắt (Ring) & ốc cố định",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0020",
+    "task_name": "Hệ thống khí nén không rò, ống dẫn và van hoạt động tốt, lọc khí sạch",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "Kiểm tra tổng thể hệ thống khí nén",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "NON PAD GEL PRESS",
+    "name_en": "NON PAD GEL PRESS",
+    "task_no": "PM0021",
+    "task_name": "Máy hoạt động theo thông số chuẩn: áp suất ép, tốc độ, chất lượng sản phẩm đạt yêu cầu",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "Kiểm định hiệu suất máy",
+    "frequency": "HÀNG NĂM",
+    "task_detail": ""
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0001",
+    "task_name": "KIỂM TRA, BẢO DƯỠNG TẤM VÁN THỚT DƯỚI",
+    "item_group": "PHẦN CƠ",
+    "item_task": "TÂM VÁN THỚT DƯỚI",
+    "frequency": "THÁNG",
+    "task_detail": "1. Bật công tắc nguồn\n2. Nhấn nút khẩn cấp cho tấm thớt dưới chạy ra\n3. Dùng súng hơi và lục giác 10 tháo ốc 12 (6 cái) ra\n4. Dùng lục giác đẩy tấm thớt trên ra\n5. Kiểm tra tấm ván nếu hư hoặc bể thì thay mới\n6. Vệ sinh, Sịt chống sét vị trí ren và ốc  \n7.Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0002",
+    "task_name": "KIỂM TRA, BẢO DƯỠNG TẤM VÁN THỚT TRÊN",
+    "item_group": "PHẦN CƠ",
+    "item_task": "TÂM VÁN THỚT TRÊN",
+    "frequency": "THÁNG",
+    "task_detail": "1. Dùng lục giác 5 tháo ốc lục giác 6 (4 cái ra)\n2. Tháo tấm inox ra\n3. Dùng lúc giác 10 tháo ốc 12 phía sau tấm thớt trên \n4. Kích tay xy lanh đầu để bật thớt trên ra\n5. Dùng lục giác 8 tháo ốc 10   để tháo 2 pass bắt khuôn thớt trên \n6. Dùng tay kích xy lanh đầu để rút thớt trên lên\n7. Dùng tấm gỗ để trên thớt dưới,  sau đó nâng pittong lên chạm thớt trên để giữ tấm thớt trên \n8. Dùng lục giác 10 thá o ốc 12 để tháo tấm thớt trên ra\n9. Hạ máy xuống ở khoảng cách vừa đủ để lấy  tấm ván cũ ra\n10. Kiểm tra nếu hư hỏng thì thay mới\n11. Thay mới \n12. Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0003",
+    "task_name": "KIỂM TRA TẤM KÍNH BẢO VỆ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "TẤM KÍNH BẢO VỆ",
+    "frequency": "THÁNG",
+    "task_detail": "1.Tắt công tắc nguồn\n2. Nhấn nút chốt cửa phía trước để mở ra \n3. Kiểm tra tình trạng cửa kính, nếu hư hoặc bể thì thay mới\n4. Trường hợp hư thì\n4.1 Dùng súng hơi và lục giác 5 tháo 4 ốc cố định tấm kính bảo vệ\n4.2 Kéo tấm kính từ dưới lên (tháo ra)\n4.3 Thay tấm kính mới, khoan 4 lỗ, ta ro ren \n4.4 Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0004",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "XY LANH ÉP CHÍNH",
+    "frequency": "THÁNG",
+    "task_detail": "1. Nâng máy bằng tay hoặc bật công tắc nguồn\n2. Lấy Cây hoặc thanh gỗ lót đế thớt dưới \n3. Dúng khóa 24 để khóa ốc 16 (6 con)\n4. Mở công tắc nguồn bấm máy hạ xuống, Pittong xuống, cấy chống giữ đế thớt trên\n5. Dùng chía khóa 30 tháo ốc 20 \n6. Lấy mặt bích trên ra\n7. Lấy packing ra kiểm tra nếu hư hỏng thì thay mới\n8. Kiểm tra, dùng vài vệ sinh trong lồng\n9. Thay packing mới (4 mềm 3 cứng)\n10. Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0005",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "XY LANH ÉP PHỤ",
+    "frequency": "THÁNG",
+    "task_detail": "1. Bật công tắc nguồn\n2. Nâng pittong chính lên\n3. Dùng lục giác 4 tháo ốc pass cố định chốt  phần đầu pittoong phụ (tránh va chạm với thớt trên) và lấy  pass ra ngoài\n4. Dùng lục giác 6 tháo ốc 8 (4 cái) ra và lấy mặt bích ra\n5. Lấy vòng bạc ra\n6. Lấy packing ra kiểm traneesu hư hỏng thì thay mới\n7. Vệ sinh trong lồng\n8. Thay packing mới (2 cứng 3 mềm)\n9. Chỉnh kích thước mắt bịch lại\n10. Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0006",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "XY LANH  ĐẦU",
+    "frequency": "THÁNG",
+    "task_detail": "1. Dùng khóa 24 tháo dây dầu\n2. Dùng lục giác 10 tháo 2 ốc 12 (chân đỡ xyanh)\n3. Lấy kiềm tháo phe, rút chốt cần pittong ra\n4. Lấy xylanh đầu ra ngoài\n5. Kiểm tra packing nếu hư hỏng thì thay thế\n5.1 Dùng khóa 32 tháo con tán khớp nối đầu xylanh đầu\n5.2 Dùng khóa 19 tháo tán 12 (4 cái ra)\n5.3 Lấy khung pittong đầu ra \n5.4 Lấy packing (1 ngoài và 2 trong) ra\n5.5 Thay mới \n5.6 Thay tiếp packing (2 cái) trong cốt xy lanh\n6. Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0007",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN  CƠ",
+    "item_task": "THANH RAY DI CHUYỂN THỚT DƯỚI RA VÀO",
+    "frequency": "THÁNG",
+    "task_detail": "1. Dùng lục giác 5 tháo 4 ốc 6 ra (6 cái)\n2. Lấy tấm chắn bảo vệ ra\n3. Kích van cho tấm thớt dưới chạy ra\n4. Dùng súng hơi và lục giác 10 tháo ốc (10 cái) 2 bên thanh ray ra \n5. Lấy pass L trên ra\n6. Dùng súng hơi và lục giác 10 tháo ốc (6 cái) 2 bên ra\n7. Dùng súng hơi vệ sinh và chà phần dơ ra\n8. Dùng mỡ bò chét 2 bên thanh ray\n9. Lắp vào và kiểm tra"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0008",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ SIẾT CHẶT",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "TỦ ĐIỆN NGUỒN",
+    "frequency": "THÁNG",
+    "task_detail": "1 Tắt nguồn điện tổng \n2 Kiểm tra các dây điện mắc vào domino  và linh kiện được treo lên chắc chắn\n3 Dùng tua-vít siết chặt lại các dây bị lỏng \n4 Vệ sinh xung quanh bằng chổi quét bo \n5 Dùng súng hơi xịt các khe góc sâu trong tủ"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0009",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN CƠ",
+    "item_task": "BỒN DẦU",
+    "frequency": "THÁNG",
+    "task_detail": "1. Dùng tay kéo nắp che phía sau lên\n2. Kiểm tra phần hiển thị mức dầu (nếu nằm mức giữa thì châm dầu thêm)\n3. Tháo lọc dầu ra kiểm tra và vệ sinh, nếu hư thì thay mới\n4. Lấy dầu trong bồn đi  kiểm tra, nếu k đạt thì thay mới\n5. Vệ sinh bên trong và bên ngoài bồn dầu\n6. Kiểm tra và ghi nhận áp suất dầu\n7. Kiểm tra và ghi nhận dòng bơm \n8. Kiểm tra ống dầu, khớp nối cố định"
+  },
+  {
+    "equipment": "SDL PRESS OUTSOLE",
+    "name_en": "SDL PRESS OUTSOLE",
+    "task_no": "PM0010",
+    "task_name": "KIỂM TRA, VỆ SINH VÀ BẢO DƯỠNG",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "MOTOR ĐIỆN",
+    "frequency": "TUẦN",
+    "task_detail": "1. Dùng tay kéo nắp che phía sau lên\n2. Nhấn nút start để kiểm tra tiếng ồn motor \n3. Dùng đồng hồ kiểm tra ampe của motor điện\n4. Kiểm tra, siết chặt ốc cố định motor trên bồn dầu"
+  },
+  {
+    "equipment": "ZigZag Machine",
+    "name_en": "ZigZag Machine",
+    "task_no": "STT-PM0001",
+    "task_name": "Kiểm tra, bảo dưỡng dây điện",
+    "item_group": "PHẦN ĐIỆN",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "ZigZag Machine",
+    "name_en": "ZigZag Machine",
+    "task_no": "STT-PM0002",
+    "task_name": "Kiểm tra, bảo dưỡng kim và ổ kim",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "ZigZag Machine",
+    "name_en": "ZigZag Machine",
+    "task_no": "STT-PM0003",
+    "task_name": "Kiểm tra, bảo dưỡng lao dầu và hốt chỉ",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Quaterly",
+    "task_detail": ""
+  },
+  {
+    "equipment": "ZigZag Machine",
+    "name_en": "ZigZag Machine",
+    "task_no": "STT-PM0004",
+    "task_name": "Kiểm tra, bảo dưỡng bánh xe và bàn đạp",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  },
+  {
+    "equipment": "ZigZag Machine",
+    "name_en": "ZigZag Machine",
+    "task_no": "STT-PM0005",
+    "task_name": "Kiểm tra, bảo dưỡng dây curoa",
+    "item_group": "PHẦN CƠ",
+    "item_task": "",
+    "frequency": "Tháng",
+    "task_detail": ""
+  }
+]
