@@ -28,6 +28,33 @@
     return !!session?.access_token && Date.now() < (session.expires_at || 0);
   };
 
+  const refreshToken = async () => {
+    const session = getSession();
+    if (!session?.refresh_token) return null;
+
+    try {
+      const response = await fetch(`${getAuthBaseUrl()}/token?grant_type=refresh_token`, {
+        method: "POST",
+        headers: {
+          apikey: window.SAMHO_SUPABASE.anonKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ refresh_token: session.refresh_token })
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const updated = {
+        ...session,
+        ...data,
+        expires_at: Date.now() + (data.expires_in || 3600) * 1000
+      };
+      saveSession(updated);
+      return updated;
+    } catch {
+      return null;
+    }
+  };
+
   // Detect the login page from the DOM, not the URL: login.html rewrites the
   // address bar to the site root, so the pathname no longer says "login.html".
   // A pathname check here would treat the login page as protected and loop.
@@ -35,13 +62,18 @@
     document.documentElement?.dataset?.page === "login" ||
     document.body?.classList.contains("login-page") === true;
 
-  const requireAuth = () => {
+  const requireAuth = async () => {
     if (isLoginDocument()) return;
 
-    const session = getSession();
+    let session = getSession();
     if (!isSessionValid(session)) {
-      clearSession();
-      location.replace(LOGIN_PAGE);
+      if (session?.refresh_token) {
+        session = await refreshToken();
+      }
+      if (!isSessionValid(session)) {
+        clearSession();
+        location.replace(LOGIN_PAGE);
+      }
     }
   };
 
@@ -126,10 +158,20 @@
     isSessionValid,
     login,
     logout,
+    refreshToken,
     requireAuth
   };
 
   requireAuth();
+  // Proactively refresh session every 5 minutes if expiring within 10 minutes
+  setInterval(async () => {
+    const session = getSession();
+    if (!session?.refresh_token || !session?.expires_at) return;
+    if (session.expires_at - Date.now() < 10 * 60 * 1000) {
+      await refreshToken();
+    }
+  }, 5 * 60 * 1000);
+
   document.addEventListener("DOMContentLoaded", () => {
     initLogoutButtons();
     initGreeting();

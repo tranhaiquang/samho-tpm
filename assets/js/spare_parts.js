@@ -274,7 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const patchSparePart = async (where, payload) => {
-    await window.SAMHO_DB.update(activeSpareTable || spareConfig.table, where, payload);
+    const res = await window.SAMHO_DB.update(activeSpareTable || spareConfig.table, where, payload);
+    if (!res || !res.length) {
+      throw new Error("No record was updated (permission denied or record not found).");
+    }
+    return res;
   };
 
   const fetchSpareParts = async () => {
