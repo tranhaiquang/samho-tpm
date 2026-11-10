@@ -205,8 +205,20 @@
   };
 
   const apiInsert = (payload) => db.insert(recordsTable, payload);
-  const apiUpdate = (id, payload) => db.update(recordsTable, { id }, payload);
-  const apiDelete = (id) => db.update(recordsTable, { id }, { [deletedCol]: true });
+  const apiUpdate = async (id, payload) => {
+    const res = await db.update(recordsTable, { id }, payload);
+    if (!res || !res.length) {
+      throw new Error("No record was updated (permission denied or record not found).");
+    }
+    return res;
+  };
+  const apiDelete = async (id) => {
+    const res = await db.update(recordsTable, { id }, { [deletedCol]: true });
+    if (!res || !res.length) {
+      throw new Error("No record was deleted (permission denied or record not found).");
+    }
+    return res;
+  };
   const apiFindByCodeAndDate = (itemCode, dueDate) =>
     db.select(recordsTable, {
       where: { [col("itemCode", "item_code")]: itemCode, [col("dueDate", "due_date")]: dueDate }
@@ -1018,7 +1030,7 @@
           <button class="info-search control-icon-button pm-viewtask-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.viewTask")}"><i data-lucide="clipboard-list"></i></button>
           ${isPid && r._type === "manual" ? `<button class="info-search control-icon-button pm-edit-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.edit")}"><i data-lucide="pencil"></i></button>` : ""}
           ${isPid ? `<button class="info-search control-icon-button pm-reschedule-btn" data-id="${escapeHtml(r.id)}" type="button" title="Reschedule"><i data-lucide="calendar-clock"></i></button>` : ""}
-          ${isPid ? `<button class="info-search control-icon-button pm-delete-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>` : ""}
+          ${(isPid || isValidator) ? `<button class="info-search control-icon-button pm-delete-btn" data-id="${escapeHtml(r.id)}" type="button" title="${t("pm.action.delete")}"><i data-lucide="trash-2"></i></button>` : ""}
         </td>
       </tr>`;
     }).join("");

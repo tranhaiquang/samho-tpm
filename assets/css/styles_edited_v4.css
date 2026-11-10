@@ -5117,3 +5117,22 @@ body {
 .red-tag-table td {
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Danger icon (PM delete button, 2026-11-10) ── */
+.dashboard-app .pm-delete-btn {
+  color: #fff;
+  border: 1px solid var(--btn-danger);
+  background: var(--btn-danger);
+}
+.dashboard-app .pm-delete-btn:hover:not(:disabled) {
+  border-color: var(--btn-danger-hover);
+  background: var(--btn-danger-hover);
+}
+.dashboard-app .pm-delete-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--btn-focus-ring);
+}
+.dashboard-app .pm-delete-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
