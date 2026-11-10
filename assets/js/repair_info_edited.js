@@ -278,7 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const patchRepairInfo = async (recordId, payload) => {
     const idColumn = config.repairInfo.idColumn || "id";
-    await window.SAMHO_DB.update(config.repairInfo.table, { [idColumn]: recordId }, payload);
+    const res = await window.SAMHO_DB.update(config.repairInfo.table, { [idColumn]: recordId }, payload);
+    if (!res || !res.length) {
+      throw new Error(t("repairInfo.error.updateFailed") || "No record was updated (permission denied or record not found).");
+    }
+    return res;
   };
 
   const buildUpdatePayload = () => {

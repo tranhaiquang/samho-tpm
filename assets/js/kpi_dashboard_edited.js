@@ -99,6 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let trendRows = []; // plant-filtered rows BEFORE the month/date filter — the
   // hover trend needs the whole Jan→current-month span, not just the visible slice.
   const plantFilterMap = { C2B: ["PLANT A", "PLANT B"], OS: ["PLANT H"], SF: ["PLANT E"], Treatment: ["PLANT D", "PLANT I"] };
+  // DB `in` is exact-match, but stored plant varies in case/spacing and O/S press
+  // rows are saved as "o/s press" — normalize via the shared PM alias map and filter in JS.
+  const normalizePlantValue = (value) => {
+    const key = String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+    return window.SAMHO_SUPABASE?.pm?.plantAliases?.[key] || key;
+  };
 
   const text = (id, value) => {
     const element = document.getElementById(id);
@@ -261,22 +267,23 @@ document.addEventListener("DOMContentLoaded", () => {
       selectedColumns.push(dateColumn);
     }
 
-    const where = {};
     const plantColumn = configuredColumn("plant");
-    if (plantColumn && plantValue) {
-      const mappedPlants = plantFilterMap[plantValue];
-      where[plantColumn] = mappedPlants || plantValue;
-    }
-
+    // Plant filter runs in JS (see normalizePlantValue); the table is
+    // month-filtered in JS anyway, so no rows are saved by a DB-level `in`.
     const allRows = await window.SAMHO_DB.select(downtimeConfig.table, {
       columns: selectedColumns.join(",") || "*",
-      where
+      where: {}
     });
+    let filtered = allRows;
+    if (plantColumn && plantValue) {
+      const wanted = new Set((plantFilterMap[plantValue] || [plantValue]).map(normalizePlantValue));
+      filtered = allRows.filter((row) => wanted.has(normalizePlantValue(readField(row, "plant"))));
+    }
     const dateRangeActive = Boolean(activeFromDate || activeToDate);
     if (monthColumn && monthValue && !dateRangeActive) {
-      return allRows.filter((row) => rowMonth(row).key === monthValue);
+      return filtered.filter((row) => rowMonth(row).key === monthValue);
     }
-    return allRows;
+    return filtered;
   };
 
   const getAvailableMonths = async () => {
@@ -859,7 +866,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const avgMttr = totalErrors ? totalDowntime / totalErrors : 0;
     const avgMtbf =
       configuredColumn("mtbf") && rows.some((row) => row.mtbf)
-        ? rows.reduce((sum, row) => sum + row.mtbf, 0) / rows.filter((row) => row.mtbf).length
+        ? rows.reduce((sum, row) => sum + (Number(row.mtbf) || 0), 0) / (rows.filter((row) => row.mtbf).length || 1)
         : totalErrors
           ? operatingMinutes / totalErrors
           : 0;

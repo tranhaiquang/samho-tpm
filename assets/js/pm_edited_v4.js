@@ -339,13 +339,17 @@
     if (!canvas || typeof window.Chart === "undefined") return;
     const ctx = canvas.getContext("2d");
 
-    // Constrain to the selected year and show months Jan → current viewed month.
+    // Constrain to the selected year and show months Jan → current viewed month,
+    // honoring the plant filter (same rule as the calendar/stats/list).
     const viewedMonth = calMonth + 1;
+    const chartRecords = scheduleFilter.plant
+      ? yearRecords.filter((r) => samePlant(r.plant, scheduleFilter.plant))
+      : yearRecords;
     const monthMap = new Map();
     for (let m = 1; m <= viewedMonth; m++) {
       monthMap.set(`${calYear}-${String(m).padStart(2, "0")}`, { total: 0, completed: 0 });
     }
-    yearRecords.forEach((r) => {
+    chartRecords.forEach((r) => {
       if (!r.dueDate) return;
       const key = String(r.dueDate).slice(0, 7);
       if (!monthMap.has(key)) return;
