@@ -171,7 +171,11 @@
   let schedulePage = 0;
   const SCHEDULE_PAGE_SIZE = 10;
 
-  const normalizePlant = (value) => String(value || "").trim().toLowerCase();
+  const normalizePlant = (value) => {
+    const key = String(value || "").trim().toLowerCase();
+    const aliases = config.plantAliases || {};
+    return aliases[key] || key;
+  };
   // Plant matching is case/whitespace-insensitive: pm_records.plant holds values
   // like "plant D" while the filter menu offers canonical "Plant D".
   const samePlant = (a, b) => normalizePlant(a) === normalizePlant(b);
