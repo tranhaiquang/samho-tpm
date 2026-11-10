@@ -148,6 +148,9 @@ window.SAMHO_SUPABASE = {
       "plant h": "#8b5cf6",
       "plant i": "#16a34a"
     },
+    plantAliases: {
+      "o/s press": "plant h"
+    },
     plantFallbackPalette: ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#14b8a6", "#ec4899", "#0ea5e9", "#f97316"],
     plants: ["Plant A", "Plant B", "Plant D", "Plant E", "Plant H", "Plant I"],
     tasksTable: "pm_tasks",
