@@ -15,3 +15,6 @@ supabase/prune-users.mjs
 
 # Added by ggshield
 .cache_ggshield
+
+# Taste skill QA artifacts
+.taste-skill/
