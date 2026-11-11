@@ -356,9 +356,9 @@ button {
 
 .panel {
   padding: 8px 8px 11px;
+  border: 1px solid var(--line);
   border-radius: 7px;
   background: #fff;
-  box-shadow: var(--shadow);
 }
 
 .page-view {
@@ -1841,7 +1841,7 @@ body.sidebar-collapsed .nav-group a {
   --dash-muted: #667085;
   --dash-blue: #1769ff;
   --dash-blue-soft: #eaf2ff;
-  --dash-shadow: 0 14px 38px rgba(31, 42, 68, 0.08);
+  --dash-shadow: none;
   background: var(--dash-bg);
   color: var(--dash-ink);
   font-size: 13px;
@@ -1855,7 +1855,7 @@ body.sidebar-collapsed .nav-group a {
   background: #ffffff;
   color: var(--dash-ink);
   border-right: 1px solid var(--dash-line);
-  box-shadow: 8px 0 24px rgba(31, 42, 68, 0.04);
+  border-right: 1px solid var(--dash-line, #e5ebf3);
 }
 
 .dashboard-app .shell {
@@ -2146,7 +2146,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   width: min(100%, 42px);
   height: var(--h);
   border-radius: 10px 10px 4px 4px;
-  background: linear-gradient(180deg, #1769ff, #8ec2ff);
+  background: #1769ff;
   transition: transform 160ms ease, filter 160ms ease;
 }
 
@@ -2326,9 +2326,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 
 .login-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(23, 105, 255, 0.12), transparent 28%),
-    linear-gradient(135deg, #f7faff 0%, #eef4fb 100%);
+  background: #edf2f8;
 }
 
 /* Shared application layout for every non-KPI page. */
@@ -2380,13 +2378,12 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   --dash-ink: #172033;
   --dash-muted: #667085;
   --dash-blue: #1769ff;
-  --dash-shadow: 0 14px 38px rgba(31, 42, 68, 0.08);
-  background:
-    radial-gradient(circle at 18% 20%, rgba(23, 105, 255, 0.12), transparent 28%),
-    var(--dash-bg);
+  --dash-shadow: none;
+  background: var(--dash-bg);
 }
 
 .login-page.app-standard .login-card {
+  border: 1px solid var(--dash-line);
   border-radius: 16px;
   background: var(--dash-card);
   box-shadow: var(--dash-shadow);
@@ -2551,9 +2548,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 
 /* KPI monitoring dashboard */
 .kpi-page {
-  background:
-    radial-gradient(circle at 20% 0%, rgba(23, 105, 255, 0.08), transparent 24%),
-    linear-gradient(180deg, #f7f9ff 0%, #f4f7fb 100%);
+  background: #f4f7fb;
 }
 
 .kpi-content {
@@ -2566,6 +2561,8 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  /* room for the page-anchored VI|EN toggle (top-right) */
+  padding-right: 96px;
 }
 
 .kpi-monitor-head h1 {
@@ -2789,40 +2786,38 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 .kpi-panel{
   border: 1px solid var(--dash-line);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   box-shadow: var(--dash-shadow);
 }
 
 .monitor-kpi-card {
   display: grid;
-  grid-template-columns: 44px 1fr;
+  grid-template-columns: 34px 1fr;
   gap: 12px;
   min-height: 116px;
   padding: 16px;
 }
 
 .monitor-kpi-card > svg {
-  width: 42px;
-  height: 42px;
-  padding: 10px;
-  border-radius: 12px;
-  color: #fff;
+  width: 30px;
+  height: 30px;
+  color: #2f80ed;
 }
 
 .monitor-kpi-card.blue > svg {
-  background: #2f80ed;
+  color: #2f80ed;
 }
 
 .monitor-kpi-card.green > svg {
-  background: #34a853;
+  color: #34a853;
 }
 
 .monitor-kpi-card.purple > svg {
-  background: #6d35f2;
+  color: #6d35f2;
 }
 
 .monitor-kpi-card.orange > svg {
-  background: #ff6b21;
+  color: #ff6b21;
 }
 
 .monitor-kpi-card div > span {
@@ -2956,7 +2951,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   align-items: end;
   gap: 14px;
   padding: 12px 8px 22px;
-  background-image: linear-gradient(to right, transparent 0, transparent 100%), repeating-linear-gradient(to bottom, #e7edf6 0 1px, transparent 1px 31px);
+  background-image: repeating-linear-gradient(to bottom, #e7edf6 0 1px, transparent 1px 31px);
 }
 
 .cluster {
@@ -3118,7 +3113,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   height: 7px;
   margin-top: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1769ff, #9bc7ff);
+  background: #1769ff;
 }
 
 .rank-row em {
@@ -3227,7 +3222,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   align-self: end;
   width: 46px;
   height: var(--h);
-  background: linear-gradient(180deg, #2d75dc, #65a4ff);
+  background: #2d75dc;
   border-radius: 7px 7px 3px 3px;
 }
 
@@ -3591,7 +3586,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
 }
 
 .pm-stat-card.validated {
-  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  background: #f5f3ff;
   border-color: #ddd6fe;
 }
 
@@ -3723,7 +3718,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 10px;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  transition: border-color 0.15s;
 }
 
 .task-card.done {
@@ -3918,7 +3913,7 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   --btn-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
   --btn-focus-ring: 0 0 0 3px rgba(23, 105, 255, 0.28);
   --btn-transition: background-color 160ms ease, border-color 160ms ease,
-    color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+    color 160ms ease, transform 80ms ease;
 }
 
 /* ── Base geometry shared by every action button ── */
@@ -4336,12 +4331,12 @@ body.sidebar-collapsed.dashboard-app .nav-head {
   width: min(36px, 70%);
   height: var(--h);
   min-height: 4px;
-  background: linear-gradient(180deg, #1769ff, #9bc7ff);
+  background: #1769ff;
   border-radius: 6px 6px 2px 2px;
 }
 
 .pareto-bar.others b {
-  background: linear-gradient(180deg, #98a2b3, #cbd5e1);
+  background: #98a2b3;
 }
 
 .pareto-value {
@@ -4892,11 +4887,11 @@ body {
 .pm-stat-card.rescheduled svg { color: #2563eb; }
 .pm-stat-card.rescheduled strong { color: #2563eb; }
 .pm-stat-card.overdue {
-  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  background: #fef2f2;
   border-color: #fecaca;
 }
 .pm-stat-card.rescheduled {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  background: #eff6ff;
   border-color: #bfdbfe;
 }
 .pm-status-select.status-overdue {
