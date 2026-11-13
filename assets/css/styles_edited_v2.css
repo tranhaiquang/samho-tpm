@@ -5079,3 +5079,6 @@ body {
 .red-tag-table td {
   font-variant-numeric: tabular-nums;
 }
+
+/* Spare Part page: display-only uppercase for the Name Vietnamese column (2026-11-13) */
+.spare-table .spare-name { text-transform: uppercase; }
