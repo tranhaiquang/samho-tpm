@@ -174,6 +174,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(aValue).localeCompare(String(bValue), undefined, { numeric: true });
   };
 
+  const compareLocations = (a, b) => {
+    const aLocation = text(readField(a, "location"), "");
+    const bLocation = text(readField(b, "location"), "");
+    return aLocation.localeCompare(bLocation, undefined, { numeric: true, sensitivity: "base" }) || compareIds(a, b);
+  };
+
   const stockStatus = (safetyStock, onHand) => {
     const safety = toNumber(safetyStock);
     const onHandQuantity = toNumber(onHand);
@@ -664,7 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const renderRows = (page = 1) => {
-    const rows = getFilteredRows().sort(compareIds);
+    const rows = getFilteredRows().sort(compareLocations);
     renderStats(rows);
     list.innerHTML = "";
 
