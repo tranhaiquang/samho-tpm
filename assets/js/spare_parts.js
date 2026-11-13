@@ -724,7 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tr.innerHTML = `
         <td>${rowNumber}</td>
         <td><strong>${escapeHtml(text(itemCode))}</strong></td>
-        <td>${escapeHtml(text(readField(row, "nameVietnamese")))}</td>
+        <td class="spare-name">${escapeHtml(text(readField(row, "nameVietnamese")))}</td>
         <td>${safetyStock.toLocaleString()}</td>
         <td>${onHand.toLocaleString()}</td>
         <td><strong class="spare-stock-difference ${difference < 0 ? "negative" : difference > 0 ? "positive" : "neutral"}">${difference.toLocaleString()}</strong></td>
