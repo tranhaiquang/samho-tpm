@@ -19,7 +19,7 @@
     <script src="assets/js/db_client.js" defer></script>
     <script src="assets/js/sidebar.js" defer></script>
     <script src="data/pm_master_data_edited.js" defer></script>
-    <script src="assets/js/pm_edited_v4.js?v=20261114-1" defer></script>
+    <script src="assets/js/pm_edited_v4.js?v=20261114-2" defer></script>
   </head>
   <body class="dashboard-app app-standard pm-page">
     <button class="icon-button sidebar-toggle" id="menuToggle" aria-label="Toggle sidebar" type="button">
@@ -283,6 +283,7 @@
           <button class="repair-modal-close" type="button" data-close-pm-task aria-label="Close" data-i18n-title="pm.common.close"><i data-lucide="x"></i></button>
         </header>
         <div class="task-checklist" id="pmTaskChecklist"></div>
+        <p class="repair-modal-status" id="pmTaskStatus" aria-live="polite"></p>
         <footer class="repair-modal-footer">
           <button class="btn primary" id="pmApproveBtn" type="button" disabled data-i18n="pm.task.approveBtn">Xác Nhận</button>
         </footer>
