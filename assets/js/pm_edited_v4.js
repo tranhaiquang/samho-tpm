@@ -919,6 +919,12 @@
       });
     });
 
+    // Keep clicks inside the meta row (Confirm checkbox, freq badge) from
+    // bubbling to the outer .task-card-check label, which would toggle done-cb.
+    container.querySelectorAll(".task-card-meta").forEach((meta) => {
+      meta.addEventListener("click", (e) => e.stopPropagation());
+    });
+
     container.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-steps-toggle]");
       if (!btn) return;
