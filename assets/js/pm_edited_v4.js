@@ -878,11 +878,22 @@
       </div>`;
     }).join("");
 
+    // Enabled exactly when every task is confirmed — recomputed on each tick,
+    // not at open time, so an already-validated record can still close the modal.
+    const approveBtn = document.getElementById("pmApproveBtn");
+    const updateApproveBtn = () => {
+      if (!approveBtn) return;
+      const all = container.querySelectorAll(".val-cb").length;
+      const checked = container.querySelectorAll(".val-cb:checked").length;
+      approveBtn.disabled = !(isValidator && all > 0 && checked === all);
+    };
+
     const updateProgress = () => {
       const total = tasks.length;
       const done = container.querySelectorAll(".done-cb:checked").length;
       const validated = container.querySelectorAll(".val-cb:checked").length;
       progressEl.textContent = t("pm.task.progressFull", { done, total, validated });
+      updateApproveBtn();
     };
 
     container.querySelectorAll(".done-cb").forEach((cb) => {
@@ -975,16 +986,14 @@
     updateProgress();
     const modal = document.getElementById("pmTaskModal");
     modal.dataset.activeRecordId = record?.id || "";
-    const approveBtn = document.getElementById("pmApproveBtn");
     if (approveBtn) {
-      const st = record ? getStatus(record) : "pending";
-      approveBtn.disabled = !(isValidator && st !== "validated");
+      updateApproveBtn();
       approveBtn.onclick = async () => {
         try {
           const allVal = container.querySelectorAll(".val-cb");
           const checkedVal = container.querySelectorAll(".val-cb:checked");
           if (!allVal.length || checkedVal.length !== allVal.length) {
-            setStatusMsg("pmScheduleStatus", t("pm.task.checkAll"), "warning");
+            setStatusMsg("pmTaskStatus", t("pm.task.checkAll"), "warning");
             return;
           }
           await apiUpdate(record.id, { [col("status", "status")]: "validated" });
@@ -992,7 +1001,7 @@
           modal.classList.remove("active");
           await renderScheduleTab();
         } catch (e) {
-          setStatusMsg("pmScheduleStatus", friendlyError(e, t("pm.action.validate")), "error");
+          setStatusMsg("pmTaskStatus", friendlyError(e, t("pm.action.validate")), "error");
         }
       };
     }
