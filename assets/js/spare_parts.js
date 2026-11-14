@@ -26,6 +26,8 @@
     "spare.no": { vi: "STT", en: "No." },
     "spare.itemCode": { vi: "Mã phụ tùng", en: "Item Code" },
     "spare.image": { vi: "Ảnh", en: "Image" },
+    "spare.imageZoom": { vi: "Bấm để phóng to ảnh", en: "Click to zoom image" },
+    "spare.closeImage": { vi: "Đóng ảnh", en: "Close image" },
     "spare.nameVn": { vi: "Tên tiếng Việt", en: "Name Vietnamese" },
     "spare.safetyStock": { vi: "Tồn kho an toàn", en: "Safety Stock" },
     "spare.onHand": { vi: "Tồn kho", en: "On Hand" },
@@ -205,6 +207,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const openImageZoom = (src, alt) => {
+    let lightbox = document.getElementById("spareImageLightbox");
+    if (!lightbox) {
+      lightbox = document.createElement("div");
+      lightbox.id = "spareImageLightbox";
+      lightbox.className = "spare-lightbox";
+      lightbox.setAttribute("role", "dialog");
+      lightbox.setAttribute("aria-modal", "true");
+      lightbox.innerHTML = `<img alt="" />`;
+      lightbox.addEventListener("click", closeImageZoom);
+      document.body.appendChild(lightbox);
+    }
+    const zoomed = lightbox.querySelector("img");
+    zoomed.src = src;
+    zoomed.alt = alt;
+    lightbox.classList.add("active");
+    document.body.classList.add("spare-lightbox-open");
+  };
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeImageZoom();
+  });
+
+  const closeImageZoom = () => {
+    const lightbox = document.getElementById("spareImageLightbox");
+    if (!lightbox) return;
+    lightbox.classList.remove("active");
+    document.body.classList.remove("spare-lightbox-open");
+  };
+
   const createImageCell = (itemCode) => {
     const cell = document.createElement("td");
     cell.className = "spare-image-cell";
@@ -219,6 +251,18 @@ document.addEventListener("DOMContentLoaded", () => {
     image.className = "spare-part-image";
     image.alt = t("spare.imageAlt", { code: text(itemCode, "image") });
     image.loading = "lazy";
+    image.tabIndex = 0;
+    image.setAttribute("role", "button");
+    image.title = t("spare.imageZoom");
+    image.setAttribute("aria-label", t("spare.imageZoom"));
+    const zoomIn = () => openImageZoom(image.currentSrc || image.src, image.alt);
+    image.addEventListener("click", zoomIn);
+    image.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        zoomIn();
+      }
+    });
     let imageIndex = 0;
     image.src = urls[imageIndex];
     image.addEventListener("error", () => {
