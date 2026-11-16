@@ -683,13 +683,26 @@
     });
   };
 
+  // Exact match fails on names like "NON -PAD GEL PRESS MACHINE (BGO-800S)"
+  // vs catalog "NON PAD GEL PRESS MACHINE" — compare alphanumerics only.
+  const normMachineName = (s) =>
+    String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/[^a-z0-9]+/gi, "");
+
   const fetchTasks = async (nameEn) => {
     const pmConfig = window.SAMHO_SUPABASE?.pm || {};
     const table = pmConfig.tasksTable || "pm_tasks";
     const fields = pmConfig.taskFields || {};
     const filterCol = fields.filterColumn || fields.nameEn || "name_en";
     if (!db || !nameEn) return null;
-    const rows = await db.select(table, { where: { [filterCol]: nameEn }, order: fields.taskNo || "task_no" });
+    let rows = await db.select(table, { where: { [filterCol]: nameEn }, order: fields.taskNo || "task_no" });
+    if (!rows || !rows.length) {
+      const target = normMachineName(nameEn);
+      const catalog = await db.select(table, { columns: filterCol });
+      const hit = (catalog || []).find((r) => normMachineName(r[filterCol]) === target);
+      if (hit) {
+        rows = await db.select(table, { where: { [filterCol]: hit[filterCol] }, order: fields.taskNo || "task_no" });
+      }
+    }
     if (!rows || !rows.length) return null;
     return rows.map((row) => ({
       taskNo: row[fields.taskNo] || row.task_no,
@@ -813,6 +826,15 @@
     if (nameEn) {
       try {
         tasks = await fetchTasks(nameEn);
+        // Self-heal: store the catalog spelling so the next open is an exact match.
+        const canonical = tasks && tasks.length ? tasks[0].equipmentName : "";
+        if (canonical && record && canonical !== record.nameEn) {
+          record.nameEn = canonical;
+          if (record.id) {
+            apiUpdate(record.id, { [col("nameEn", "name_en")]: canonical }).catch((e) =>
+              console.error("Failed to persist canonical name_en for", record.itemCode, e));
+          }
+        }
       } catch (e) {
         console.error("fetchTasks failed:", e);
         setStatusMsg("pmScheduleStatus", t("pm.task.loadError"), "error");
