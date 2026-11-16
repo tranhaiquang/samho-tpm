@@ -767,11 +767,13 @@
     const miNameByCode = new Map(miRows.map((r) => [r[mi.codeColumn || "ITEM_CODE"], r.name_en || r.NAME_EN || ""]));
     for (const r of rows) {
       const code = r[col("itemCode", "item_code")] || "";
-      if (code && !(r[col("nameEn", "name_en")] || "")) {
-        const nameEn = miNameByCode.get(code) || "";
-        if (nameEn) {
-          await apiUpdate(r[col("id", "id")], { [col("nameEn", "name_en")]: nameEn });
-          r[col("nameEn", "name_en")] = nameEn;
+      const miName = miNameByCode.get(code) || "";
+      if (miName && (r[col("nameEn", "name_en")] || "") !== miName) {
+        try {
+          await apiUpdate(r[col("id", "id")], { [col("nameEn", "name_en")]: miName });
+          r[col("nameEn", "name_en")] = miName;
+        } catch (e) {
+          console.error("name_en master sync failed for", code, e);
         }
       }
     }
