@@ -18,3 +18,6 @@ supabase/prune-users.mjs
 
 # Taste skill QA artifacts
 .taste-skill/
+
+# Supabase CLI local state
+supabase/.temp/

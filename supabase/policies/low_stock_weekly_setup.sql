@@ -13,8 +13,14 @@ revoke all on public.zalo_oa_tokens from anon, authenticated;
 
 -- 2) pg_cron job: weekly, Monday 08:00 ICT (= 01:00 UTC).
 --    Replace <CRON_SECRET> with the same value you set as the CRON_SECRET secret (step 3).
---    Idempotent: unschedules the old job first if re-running.
-select cron.unschedule('low-stock-weekly');
+--    Idempotent: unschedules the old job first if re-running (cron.unschedule
+--    throws XX000 when the job is absent, so guard it).
+do $$
+begin
+  if exists (select 1 from cron.job where jobname = 'low-stock-weekly') then
+    perform cron.unschedule('low-stock-weekly');
+  end if;
+end $$;
 select cron.schedule(
   'low-stock-weekly',
   '0 1 * * 1',
