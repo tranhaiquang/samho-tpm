@@ -1630,6 +1630,20 @@ fieldset input {
   flex: 0 0 auto;
   height: 34px;
   white-space: nowrap;
+  color: #fff;
+}
+.pm-code-search .btn.success,
+.pm-code-search .btn.primary {
+  color: #fff;
+}
+.pm-code-search .btn span,
+#pmAddButton span {
+  color: #fff;
+}
+.pm-code-search .btn svg,
+#pmAddButton svg {
+  color: #fff;
+  stroke: #fff;
 }
 .pm-form-search-status {
   min-height: 16px;

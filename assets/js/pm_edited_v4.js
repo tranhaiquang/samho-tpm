@@ -72,6 +72,16 @@
       "pm.mechanic.placeholder": { vi: "Nhập tên", en: "Type a name" },
       "pm.mechanic.searchAria": { vi: "Tìm tên thợ", en: "Search mechanic names" },
       "pm.mechanic.remove": { vi: "Loại bỏ {name}", en: "Remove {name}" },
+      "pm.scan.srOnly": { vi: "Nhập code hoặc scan", en: "Enter code or scan" },
+      "pm.scan.placeholder": { vi: "NHẬP CODE HOẶC SCAN", en: "ENTER CODE OR SCAN" },
+      "pm.scan.button": { vi: "Quét", en: "Scan" },
+      "pm.scan.title": { vi: "Máy quét mã vạch", en: "Barcode scanner" },
+      "pm.scan.heading": { vi: "Quét mã máy", en: "Scan machine code" },
+      "pm.scan.close": { vi: "Đóng máy quét", en: "Close scanner" },
+      "pm.scan.point": { vi: "Hướng camera vào mã vạch.", en: "Point the camera at a barcode." },
+      "pm.scan.opening": { vi: "Đang mở camera...", en: "Opening camera..." },
+      "pm.scan.scanned": { vi: "Đã quét {code}.", en: "Scanned {code}." },
+      "pm.scan.error": { vi: "Không thể mở máy quét. {detail}", en: "Could not open scanner. {detail}" },
       "pm.form.eyebrow": { vi: "Bảo Trì PM", en: "PM Maintenance" },
       "pm.form.title.create": { vi: "Thêm PM", en: "Create PM" },
       "pm.form.title.edit": { vi: "Sửa PM", en: "Edit PM" },
@@ -1198,6 +1208,103 @@
     setStatusMsg("pmFormSearchStatus", "", "idle");
   };
 
+  // Barcode scanner for the PM create/edit form (same modal/CSS as the BM page).
+  let pmScanModal = null;
+  let pmScanStream = null;
+  let pmScanTimer = null;
+  let pmBarcodeDetector = null;
+  let pmZxingControls = null;
+
+  const closePmScanner = () => {
+    pmScanModal?.classList.remove("active");
+    if (pmScanTimer) { window.clearInterval(pmScanTimer); pmScanTimer = null; }
+    pmZxingControls?.stop();
+    pmZxingControls = null;
+    pmScanStream?.getTracks().forEach((track) => track.stop());
+    pmScanStream = null;
+    const video = pmScanModal?.querySelector("video");
+    if (video) { video.pause(); video.srcObject = null; }
+  };
+
+  const pmScanStatus = (message, type = "idle") => {
+    const el = pmScanModal?.querySelector(".scan-status");
+    if (el) { el.textContent = message; el.dataset.type = type; }
+  };
+
+  const openPmScanner = async () => {
+    if (!pmScanModal) {
+      pmScanModal = document.createElement("div");
+      pmScanModal.className = "scan-modal";
+      pmScanModal.id = "pmScanModal";
+      pmScanModal.innerHTML = `
+        <div class="scan-backdrop" data-close-pm-scan></div>
+        <section class="scan-dialog">
+          <header>
+            <div>
+              <span>${t("pm.scan.title")}</span>
+              <h2>${t("pm.scan.heading")}</h2>
+            </div>
+            <button class="scan-close" type="button" data-close-pm-scan aria-label="${t("pm.scan.close")}">
+              <i data-lucide="x"></i>
+            </button>
+          </header>
+          <div class="scan-video-wrap">
+            <video autoplay playsinline muted></video>
+            <div class="scan-frame"></div>
+          </div>
+          <p class="scan-status">${t("pm.scan.point")}</p>
+        </section>`;
+      document.body.appendChild(pmScanModal);
+      pmScanModal.querySelectorAll("[data-close-pm-scan]").forEach((btn) => btn.addEventListener("click", closePmScanner));
+      window.lucide?.createIcons();
+    }
+    const video = pmScanModal.querySelector("video");
+    const useCode = (value) => {
+      if (!value) return;
+      const code = value.toUpperCase();
+      setValue("pmFormItemCode", code);
+      closePmScanner();
+      setStatusMsg("pmFormSearchStatus", t("pm.scan.scanned", { code }), "success");
+      searchPmCode();
+    };
+
+    pmScanModal.classList.add("active");
+    pmScanStatus(t("pm.scan.opening"), "loading");
+    try {
+      if (!("BarcodeDetector" in window) && !window.ZXingBrowser?.BrowserMultiFormatReader) {
+        throw new Error(t("pm.scan.error", { detail: "BarcodeDetector / ZXing unavailable" }));
+      }
+      if (!("BarcodeDetector" in window)) {
+        const reader = new window.ZXingBrowser.BrowserMultiFormatReader();
+        pmZxingControls = await reader.decodeFromConstraints(
+          { audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } },
+          video,
+          (result) => useCode(result?.getText()?.trim())
+        );
+        pmScanStatus(t("pm.scan.point"));
+        return;
+      }
+      pmBarcodeDetector = pmBarcodeDetector || new window.BarcodeDetector({
+        formats: ["code_128", "code_39", "code_93", "codabar", "ean_13", "ean_8", "itf", "qr_code", "upc_a", "upc_e"]
+      });
+      pmScanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false
+      });
+      video.srcObject = pmScanStream;
+      await video.play();
+      pmScanStatus(t("pm.scan.point"));
+      pmScanTimer = window.setInterval(async () => {
+        if (!video.videoWidth) return;
+        const codes = await pmBarcodeDetector.detect(video);
+        if (codes.length) useCode(codes[0].rawValue?.trim());
+      }, 450);
+    } catch (error) {
+      closePmScanner();
+      setStatusMsg("pmFormSearchStatus", t("pm.scan.error", { detail: String(error?.message || error) }), "error");
+    }
+  };
+
   const searchPmCode = async () => {
     const code = getValue("pmFormItemCode").toUpperCase();
     const btn = document.getElementById("pmFormSearchBtn");
@@ -1398,6 +1505,7 @@
     document.getElementById("pmAddButton")?.addEventListener("click", openCreateModal);
 
     document.getElementById("pmFormSearchBtn")?.addEventListener("click", searchPmCode);
+    document.getElementById("pmFormScanBtn")?.addEventListener("click", openPmScanner);
     document.getElementById("pmFormItemCode")?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); searchPmCode(); }
     });
