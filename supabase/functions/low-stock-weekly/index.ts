@@ -10,6 +10,19 @@ const GROUP_CHAT_ID = Deno.env.get("ZALO_GROUP_CHAT_ID");
 const BOT_API = Deno.env.get("ZALO_BOT_API") ?? "https://bot-api.zaloplatforms.com/bot";
 const MAX_TEXT = 2000; // Zalo Bot text limit
 
+// Constant-time-ish comparison of two secrets (hash both, compare all digest bytes).
+const safeEqual = async (a: string, b: string) => {
+  const enc = new TextEncoder();
+  const [ha, hb] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(a)),
+    crypto.subtle.digest("SHA-256", enc.encode(b)),
+  ]);
+  const x = new Uint8Array(ha), y = new Uint8Array(hb);
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x[i] ^ y[i];
+  return diff === 0 && a.length === b.length;
+};
+
 const normPlant = (v: unknown) => String(v ?? "").trim().toLowerCase().replace(/\s+/g, " ");
 const db = (path: string, init: RequestInit = {}) =>
   fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -32,7 +45,7 @@ async function lowStockPlantD() {
 }
 
 Deno.serve(async (req) => {
-  if (!CRON_SECRET || req.headers.get("X-Cron-Secret") !== CRON_SECRET) {
+  if (!CRON_SECRET || !(await safeEqual(req.headers.get("X-Cron-Secret") ?? "", CRON_SECRET))) {
     return new Response("unauthorized", { status: 401 });
   }
   const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ZALO_BOT_TOKEN", "ZALO_GROUP_CHAT_ID"]

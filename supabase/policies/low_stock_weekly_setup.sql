@@ -11,7 +11,7 @@ create table if not exists public.zalo_oa_tokens (
 alter table public.zalo_oa_tokens enable row level security;
 revoke all on public.zalo_oa_tokens from anon, authenticated;
 
--- 2) pg_cron job: twice weekly, Monday & Thursday 08:00 ICT (= 01:00 UTC).
+-- 2) pg_cron job: three times weekly, Mon/Tue/Thu 08:00 ICT (= 01:00 UTC).
 --    Replace <CRON_SECRET> with the same value you set as the CRON_SECRET secret (step 3).
 --    Idempotent: unschedules the old job first if re-running (cron.unschedule
 --    throws XX000 when the job is absent, so guard it).
@@ -23,7 +23,7 @@ begin
 end $$;
 select cron.schedule(
   'low-stock-weekly',
-  '0 1 * * 1,4',
+  '0 1 * * 1,2,4',
   $$
   select net.http_post(
     url := 'https://tdbuvnzwrakywtvnnewl.supabase.co/functions/v1/low-stock-weekly',
