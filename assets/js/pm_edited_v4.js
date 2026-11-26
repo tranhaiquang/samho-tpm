@@ -235,7 +235,11 @@
   };
   const apiFindByCodeAndDate = (itemCode, dueDate) =>
     db.select(recordsTable, {
-      where: { [col("itemCode", "item_code")]: itemCode, [col("dueDate", "due_date")]: dueDate }
+      where: {
+        [col("itemCode", "item_code")]: itemCode,
+        [col("dueDate", "due_date")]: dueDate,
+        [deletedCol]: false
+      }
     });
 
   const friendlyError = (error, action) => db.friendly(error, action);
@@ -1344,19 +1348,6 @@
     try {
       const existing = await apiFindByCodeAndDate(code, dueDate);
       if (existing && existing.length) {
-        const soft = existing.find((r) => r[deletedCol]);
-        if (soft) {
-          await apiUpdate(soft.id, {
-            [deletedCol]: false,
-            [col("nameEn", "name_en")]: searchData.nameEn || "",
-            [col("equipment", "equipment")]: searchData.nameEn || "",
-            [col("plant", "plant")]: searchData.plant || "",
-            [col("section", "section")]: "",
-            [col("pic", "pic")]: team,
-            [col("status", "status")]: "pending"
-          });
-          return true;
-        }
         setStatusMsg("pmFormStatus", t("pm.form.duplicate"), "warning");
         return false;
       }
