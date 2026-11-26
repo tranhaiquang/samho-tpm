@@ -11,6 +11,18 @@ const BOT_API = Deno.env.get("ZALO_BOT_API") ?? "https://bot-api.zaloplatforms.c
 const MAX_TEXT = 2000;
 
 const normPlant = (v: unknown) => String(v ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+const normPic = (v: unknown) => {
+  if (Array.isArray(v)) return v.join(", ");
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+  try {
+    const parsed = JSON.parse(s);
+    return Array.isArray(parsed) ? parsed.join(", ") : s;
+  } catch {
+    return s;
+  }
+};
+
 const todayICT = () => new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 const db = (path: string, init: RequestInit = {}) =>
@@ -38,7 +50,7 @@ const safeEqual = async (a: string, b: string) => {
 };
 
 async function dueTodayPlantA(date: string) {
-  const res = await db(`pm_records?select=item_code,name_en,plant,due_date,status,deleted&due_date=eq.${date}`);
+  const res = await db(`pm_records?select=item_code,name_en,plant,due_date,status,pic,deleted&due_date=eq.${date}`);
   if (!res.ok) throw new Error(`pm_records read failed: HTTP ${res.status} ${await res.text()}`);
   const rows = await res.json();
   return (rows ?? [])
@@ -63,7 +75,7 @@ Deno.serve(async (req) => {
     const text = items.length === 0
       ? `✅ PM hôm nay (${date}) - Plant A: không có máy nào đến hạn.`
       : `⚠️ PM hôm nay (${date}) - Plant A (${items.length} máy)\n` +
-        items.map((i: any) => `- ${i.item_code} | ${i.name_en || i.item_code} | ${i.status || "pending"}`).join("\n");
+        items.map((i: any) => `- ${i.item_code} | ${i.name_en || i.item_code} | PIC: ${normPic(i.pic) || "—"} | ${i.status || "pending"}`).join("\n");
     const body = text.length > MAX_TEXT ? `${text.slice(0, MAX_TEXT - 3)}...` : text;
 
     const zres = await fetch(`${BOT_API}${BOT_TOKEN}/sendMessage`, {
